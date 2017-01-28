@@ -8,9 +8,14 @@
 # -D_REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
 FLAGS := -O3
 CXX := g++ -std=c++11
+BIN_DIR := bin
 OUT_FILE := aixi
+MKDIR_P = mkdir -p
 
-all: mcAixiCtw
+all: mk_bin mcAixiCtw
+
+mk_bin:
+	$(MKDIR_P) $(BIN_DIR)
 
 mcAixiCtw: bin/agent.o bin/util.o bin/predict.o bin/environment.o bin/search.o bin/main.o
 	$(CXX) $(FLAGS) bin/agent.o bin/util.o bin/predict.o bin/environment.o bin/search.o bin/main.o -o $(OUT_FILE)
