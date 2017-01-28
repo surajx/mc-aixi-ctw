@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "util.hpp"
+#include "../common/util.hpp"
 
 CoinFlip::CoinFlip(options_t &options) {
 	// Determine the probability of the coin landing on heads

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-#include "main.hpp"
+#include "../common/types.hpp"
 
 // Return a number uniformly between [0, 1]
 double rand01();

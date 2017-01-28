@@ -3,7 +3,7 @@
 
 #include <deque>
 
-#include "main.hpp"
+#include "../common/types.hpp"
 
 // stores symbol occurrence counts
 typedef unsigned int count_t;
