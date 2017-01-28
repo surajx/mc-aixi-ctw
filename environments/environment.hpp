@@ -1,7 +1,7 @@
 #ifndef __ENVIRONMENT_HPP__
 #define __ENVIRONMENT_HPP__
 
-#include "main.hpp"
+#include "../common/types.hpp"
 
 class Environment {
 

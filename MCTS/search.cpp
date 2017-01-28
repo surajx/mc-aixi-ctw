@@ -1,6 +1,6 @@
 #include "search.hpp"
 
-#include "agent.hpp"
+#include "../AIXI/agent.hpp"
 
 typedef unsigned long long visits_t;
 

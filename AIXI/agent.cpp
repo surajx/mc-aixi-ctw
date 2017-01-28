@@ -1,10 +1,10 @@
-#include "agent.hpp"
-
 #include <cassert>
 
-#include "predict.hpp"
-#include "search.hpp"
-#include "util.hpp"
+#include "../CTW/predict.hpp"
+#include "../MCTS/search.hpp"
+#include "../common/util.hpp"
+
+#include "agent.hpp"
 
 
 // construct a learning agent from the command line arguments

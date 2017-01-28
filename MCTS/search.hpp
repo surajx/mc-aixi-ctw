@@ -1,9 +1,9 @@
 #ifndef __SEARCH_HPP__
 #define __SEARCH_HPP__
 
-#include "main.hpp"
+#include "../AIXI/agent.hpp"
 
-class Agent;
+#include "../common/types.hpp"
 
 // determine the best action by searching ahead
 extern action_t search(Agent &agent);

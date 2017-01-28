@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "main.hpp"
+#include "../common/types.hpp"
 
 class ContextTree;
 

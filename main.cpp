@@ -6,10 +6,11 @@
 #include <string>
 
 
-#include "agent.hpp"
-#include "environment.hpp"
-#include "search.hpp"
-#include "util.hpp"
+#include "AIXI/agent.hpp"
+#include "environments/environment.hpp"
+#include "MCTS/search.hpp"
+#include "common/util.hpp"
+#include "common/types.hpp"
 
 // Streams for logging
 std::ofstream log;        // A verbose human-readable log
