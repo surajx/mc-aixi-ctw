@@ -1,6 +1,7 @@
 #include "search.hpp"
-
 #include "../AIXI/agent.hpp"
+
+#include <iostream>
 
 typedef unsigned long long visits_t;
 
@@ -33,6 +34,7 @@ public:
 private:
 
 	bool m_chance_node; // true if this node is a chance node, false otherwise
+	unsigned int m_children; // chance (action) nodes have |X| (|A|) children
 	double m_mean;      // the expected reward of this node
 	visits_t m_visits;  // number of times the search node has been visited
 
@@ -48,6 +50,8 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 
 // determine the best action by searching ahead using MCTS
 extern action_t search(Agent &agent) {
+	unsigned int num_simulations = agent.numSimulations();
+	unsigned int num_actions = agent.numActions();
+	std::cout << "num_actions: " << num_actions << std::endl;
 	return agent.genRandomAction(); // TODO: implement
 }
-

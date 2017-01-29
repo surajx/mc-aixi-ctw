@@ -37,6 +37,9 @@ public:
 	// number of distinct actions
 	unsigned int numActions(void) const;
 
+	// number of simulations per planning cycle
+	unsigned int numSimulations(void) const;
+
 	// the length of the stored history for an agent
 	size_t historySize(void) const;
 
@@ -88,6 +91,7 @@ private:
 
 
 	// agent properties
+	unsigned int m_num_simulations; // number of simulations per planning cycle
 	unsigned int m_actions;      // number of actions
 	unsigned int m_actions_bits; // number of bits to represent an action
 	unsigned int m_obs_bits;     // number of bits to represent an observation

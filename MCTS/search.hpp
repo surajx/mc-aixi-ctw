@@ -8,6 +8,4 @@
 // determine the best action by searching ahead
 extern action_t search(Agent &agent);
 
-// comment for git testing
-
 #endif // __SEARCH_HPP__
