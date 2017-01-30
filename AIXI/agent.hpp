@@ -34,6 +34,12 @@ public:
 	// minimum reward in a single time instant
 	reward_t minReward(void) const;
 
+	// number of distinct observations based on observation bits
+	unsigned int numObservations(void) const;
+
+	// number of distinct rewards based on reward bits
+	unsigned int numRewards(void) const;
+
 	// number of distinct actions
 	unsigned int numActions(void) const;
 

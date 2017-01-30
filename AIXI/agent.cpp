@@ -62,6 +62,17 @@ reward_t Agent::minReward(void) const {
 	return 0.0;
 }
 
+// number of distinct observations based on observation bits
+unsigned int Agent::numObservations(void) const {
+	unsigned int x = (1 << m_obs_bits);
+	return x;
+}
+
+// number of distinct rewards based on reward bits
+unsigned int Agent::numRewards(void) const {
+	unsigned int x = (1 << m_rew_bits);
+	return x;
+}
 
 // number of distinct actions
 unsigned int Agent::numActions(void) const {

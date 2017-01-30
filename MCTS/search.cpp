@@ -38,6 +38,7 @@ private:
 	double m_mean;      // the expected reward of this node
 	visits_t m_visits;  // number of times the search node has been visited
 
+
 	// TODO: decide how to reference child nodes
 	//  e.g. a fixed-size array
 };
@@ -53,7 +54,10 @@ extern action_t search(Agent &agent) {
 	unsigned int num_simulations = agent.numSimulations();
 	unsigned int num_actions = agent.numActions();
 	double C = agent.exploreExploitRatio();
-	std::cout << "num_actions: " << num_actions << std::endl;
-	std::cout << "C: " << C << std::endl;
+	size_t m = agent.horizon();
+	unsigned int num_obs = agent.numObservations();
+	unsigned int num_rew = agent.numRewards();
+	//SearchNode root(false);
+	//std::cout << "num_obs & num_rew: " << num_obs << " " << num_rew << std::endl;
 	return agent.genRandomAction(); // TODO: implement
 }
