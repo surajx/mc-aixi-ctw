@@ -15,6 +15,7 @@ Agent::Agent(options_t & options) {
 	strExtract(options["agent-horizon"], m_horizon);
 	strExtract(options["observation-bits"], m_obs_bits);
 	strExtract(options["num-simulations"], m_num_simulations);
+	strExtract(options["exploration-exploitation-ratio"], m_explore_exploit_ratio);
 	strExtract<unsigned int>(options["reward-bits"], m_rew_bits);
 
 	// calculate the number of bits needed to represent the action
@@ -70,6 +71,11 @@ unsigned int Agent::numActions(void) const {
 // number of simulations per planning cycle
 unsigned int Agent::numSimulations(void) const {
 	return m_num_simulations;
+}
+
+// The C parameter of the UCB algorithm
+unsigned int Agent::exploreExploitRatio(void) const {
+	return m_explore_exploit_ratio;
 }
 
 // the length of the stored history for an agent

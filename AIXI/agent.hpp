@@ -40,6 +40,9 @@ public:
 	// number of simulations per planning cycle
 	unsigned int numSimulations(void) const;
 
+	// The C parameter of the UCB algorithm
+	unsigned int exploreExploitRatio(void) const;
+
 	// the length of the stored history for an agent
 	size_t historySize(void) const;
 
@@ -92,6 +95,7 @@ private:
 
 	// agent properties
 	unsigned int m_num_simulations; // number of simulations per planning cycle
+	double m_explore_exploit_ratio; // parameter C in the UCB algorithm
 	unsigned int m_actions;      // number of actions
 	unsigned int m_actions_bits; // number of bits to represent an action
 	unsigned int m_obs_bits;     // number of bits to represent an observation

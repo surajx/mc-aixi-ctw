@@ -52,6 +52,8 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 extern action_t search(Agent &agent) {
 	unsigned int num_simulations = agent.numSimulations();
 	unsigned int num_actions = agent.numActions();
+	double C = agent.exploreExploitRatio();
 	std::cout << "num_actions: " << num_actions << std::endl;
+	std::cout << "C: " << C << std::endl;
 	return agent.genRandomAction(); // TODO: implement
 }
