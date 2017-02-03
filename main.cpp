@@ -29,7 +29,6 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		assert(0.0 <= explore_decay && explore_decay <= 1.0);
 	}
 
-
 	// Determine termination lifetime
 	bool terminate_check = options.count("terminate-lifetime") > 0;
 	lifetime_t terminate_lifetime;
@@ -173,6 +172,8 @@ int main(int argc, char *argv[]) {
 	// Default configuration values
 	options["ct-depth"] = "3";
 	options["agent-horizon"] = "16";
+	options["exploration-exploitation-ratio"] = "1";
+	options["num-simulations"] = "500";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
