@@ -57,7 +57,12 @@ extern action_t search(Agent &agent) {
 	size_t m = agent.horizon();
 	unsigned int num_obs = agent.numObservations();
 	unsigned int num_rew = agent.numRewards();
-	//SearchNode root(false);
-	//std::cout << "num_obs & num_rew: " << num_obs << " " << num_rew << std::endl;
+	SearchNode root(false); // create root (decision) node
+	// manual initialize?
+	// for i in range(num_simulations)
+	// 	prune
+	// 	sample(root, m)
+	// return bestAction(root)
 	return agent.genRandomAction(); // TODO: implement
+	//std::cout << "num_obs & num_rew: " << num_obs << " " << num_rew << std::endl;
 }
