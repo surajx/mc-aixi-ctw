@@ -9,11 +9,12 @@ class SearchNode;
 
 // MCTS constants
 static unsigned int numActions; // number of actions
+static unsigned int numPercepts; // number of percepts
 static unsigned int obsBits; // number of observation bits
 static unsigned int rewBits; // number of reward bits
 static double C; // exploration-exploitation constant C
 static unsigned int m; // also known as horizon, or max tree depth.
-SearchNode *root_ptr;
+static SearchNode*  root_ptr; // pointer to the root node
 
 // determine the best action by searching ahead
 extern action_t search(Agent &agent);

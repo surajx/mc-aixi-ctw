@@ -61,7 +61,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			action = ai.genRandomAction();
 		}
 		else {
-			action = search(ai);
+	action = search(ai);
 		}
 
 		// Send an action to the environment
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 	options["ct-depth"] = "3";
 	options["agent-horizon"] = "16";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "4";
+	options["num-simulations"] = "1";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 

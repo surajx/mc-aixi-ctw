@@ -2,6 +2,8 @@
 #include "../AIXI/agent.hpp"
 
 #include <iostream>
+#include <math.h>
+#include <random>
 
 typedef unsigned long long visits_t;
 
@@ -21,11 +23,41 @@ public:
 			m_mean = 0;
 			m_children = num_children;
 			children.resize(m_children);
+			for (int i=0;i<m_children;i++) {
+				children[i] = NULL;
+			}
 			std::cout << "creating search node" << std::endl;
 	}
 
-	// determine the next action to play
-	action_t selectAction(Agent &agent) const; // TODO: implement
+	// return unif random one of the best actions
+	action_t selectAction(Agent &agent) const {
+		// collect set of best children and return unif randomly one action from set
+		std::vector<int> best_children;
+		best_children.push_back(0);
+		unsigned int best_mean = children[0]->expectation();
+		unsigned int num_best_children = 1;
+		for (int i = 1; i < m_children;i++) {
+			if (children[i] != NULL) {
+				if (children[i]->expectation() > children[best_children[0]]->expectation()) { // new best
+					best_children = {i};
+					best_mean = children[i]->expectation();
+					num_best_children = 1;
+				} else if (children[i]->expectation() == children[best_children[0]]->expectation()) { // more than one best child
+					best_children.push_back(i);
+					num_best_children++;
+				}
+				// if current child is worse, do nothing
+			}
+		}
+		// four lines below (from <random>) generate unif random number between
+		// 0 and num_best_children-1 (where the boundary values may be generated as
+		// well)
+		std::random_device                  rand_dev;
+		std::mt19937                        generator(rand_dev());
+		std::uniform_int_distribution<int>  distr(0, num_best_children-1);
+		int random_number = distr(generator);
+		return best_children[random_number];
+	}
 
 	// determine the expected reward from this node
 	reward_t expectation(void) const { return m_mean; }
@@ -34,8 +66,16 @@ public:
 	// returning the accumulated reward from this sample run
 	reward_t sample(Agent &agent, unsigned int dfr) {
 		std::cout << "entering sample function call " << std::endl;
-		SearchNode child(false, 2);
-		children[2] = &child;
+		SearchNode child0(true, 2);
+		SearchNode child1(true, 2);
+		SearchNode child2(true, 2);
+		children[0] = &child0;
+		children[1] = &child1;
+		children[2] = &child2;
+		children[0]->m_mean = 4;
+		children[1]->m_mean = 4;
+		children[2]->m_mean = 4;
+		std::cout << "children[1]->expectation(): " << children[1]->expectation() << std::endl;
 		std::cout << "children[2]: " << children[2] << std::endl;
 		return 0;
 	}
@@ -58,11 +98,18 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 	return 0; // TODO: implement
 }
 
-// initialize the tree by initializing a root node or pruning an existing tree
+// number of distinct percepts (size of the percept space)
+unsigned int countPercepts(unsigned int num_obs, unsigned num_rew) {
+	return (unsigned int) pow(2,num_obs) + pow(2,num_rew);
+}
+
+// initialize the tree by setting the constants and creating a root node
 void initializeTree(Agent &agent) {
 	std::cout << "initializing" << std::endl;
 	// initialize values
-	numActions = agent.numActions();
+	// numActions = agent.numActions(); // set number of actions
+	numActions = 3; // test
+	numPercepts = countPercepts(2,2);
 	C = agent.exploreExploitRatio();
 	m = agent.horizon();
 	obsBits = agent.numObservations();
@@ -70,9 +117,10 @@ void initializeTree(Agent &agent) {
 	root_ptr = new SearchNode(false,numActions);
 }
 
+// Prune the tree by updating the root node and pruning dead branches
 void pruneTree(Agent &agent) {
 	std::cout << "pruning" << std::endl;
-	SearchNode* root_ptr = new SearchNode(false,numActions);
+	//root_ptr = new SearchNode(false,numActions);
 }
 
 // determine the best action by searching ahead using MCTS
@@ -84,11 +132,11 @@ extern action_t search(Agent &agent) {
 		pruneTree(agent);
 	}
 	SearchNode root = *root_ptr;
-	std::cout << "root.visits(): " << root.visits() << std::endl;
+	std::cout << "root.expectation(): " << root.expectation() << std::endl;
 	for (unsigned int sim = 1;sim <= agent.numSimulations(); sim++) {
 		std::cout << "sim: " << sim << std::endl;
 		reward_t r = root.sample(agent, 3); // test statement
 	}
-	// return bestAction(root)
-	return agent.genRandomAction(); // test statement
+	return root.selectAction(agent);
+	//return agent.genRandomAction(); // test statement
 }
