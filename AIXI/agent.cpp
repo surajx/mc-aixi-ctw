@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "../CTW/predict.hpp"
+#include "../CTW/ContextTree.hpp"
 #include "../MCTS/search.hpp"
 #include "../common/util.hpp"
 
