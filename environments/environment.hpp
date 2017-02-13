@@ -162,7 +162,12 @@ public:
 	virtual void performAction(action_t action);
 
 private:
-
+	int opponent_card;
+	int agent_card;
+	int agent_chips_put_in;
+	int chips_in_play;
+	double alpha;
+	int opponent_action;
 	//more stuff
 };
 

@@ -351,12 +351,95 @@ void ExtendedTiger::performAction(action_t action) {
 KuhnPoker::KuhnPoker(options_t &options) {
 	//Also stuff
 
-	// Set up the initial observation
-	//Stuff
+	m_reward = 0;
+	// Players are delt cards
+	// 2 is king, 1 is queen, 0 is jack
+	// First opponent is delt a card
+	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
+
+	// agent is delt card
+	agent_card  = rand01() < 0.5 ? ((opponent_card + 1 )%3) : ((opponent_card + 2 )%3);
+	
+
+	// Both parties bet
+	agent_chips_put_in = 1;
+	chips_in_play = 2;
+
+
+	// Opponent takes action, pass or bet, using a nash stratergy
+	// 1 is to bet, 0 is to pass
+	// for the nash stratergy, first choose any alpha between 0 and 1/3
+	// this is the probability the opponent bets on a jack
+	// the opponent will always pass on a queen
+	// and bet with a probabiliy of 3alpha with a king
+	alpha = rand01() / 3.0;
+	if (opponent_card == 0) {
+		if (rand01() < alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+		} else {
+			opponent_action = 0;
+		}
+	} else if (opponent_card == 1) {
+		opponent_action = 0;
+	} else {
+		if (rand01() < 3*alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+		} else {
+			opponent_action = 0;
+		}
+	}
+
+	// observations are current card, and opponents choice (to bet or pass)
+	// 3 bits on agent card?, 1 bit on opponent actions
+	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,1): pow(2,0)) : pow(2,2));
 }
 
 
 void KuhnPoker::performAction(action_t action) {
-	//Observations
+
+	// Agent takes action, 1 to bet or 0 to pass
+
+	// amount of chips put in, and amoutn of chips in play both increase if agent bets
+	agent_chips_put_in += action;
+	chips_in_play += action;
+
+
+	// if actions are equal showdown occurs, 
+	//else if opponents bets he wins, 
+	//else opponent has choice to bet and showdown occurs or pass and let agent win
+
+	if (opponent_action == action) {
+		//showdown
+		if (agent_card > opponent_card) {
+			//agent wins
+			m_reward = chips_in_play;
+		} else {
+			//opponent wins
+			m_reward = -agent_chips_put_in; 
+		}
+
+	} else if (opponent_action == 1) {
+		//opponent wins
+		m_reward = -agent_chips_put_in; 
+	} else {
+		if (rand01() < alpha + 1/3.0) {
+			// opponent calls then showdown
+			chips_in_play += 1;
+			if (agent_card > opponent_card) {
+				//agent wins
+				m_reward = chips_in_play;
+			} else {
+				//opponent wins
+				m_reward = -agent_chips_put_in; 
+			}
+
+		} else {
+			//opponent folds and agent wins
+			m_reward = chips_in_play;
+		}
+	}
+	
 }
 
