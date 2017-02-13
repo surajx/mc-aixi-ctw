@@ -1,6 +1,7 @@
 .vscode
 bin/
 aixi
+ctwTest
 scrapsheet
 *.csv
 *.log

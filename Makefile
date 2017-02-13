@@ -17,8 +17,8 @@ all: mk_bin mcAixiCtw
 mk_bin:
 	$(MKDIR_P) $(BIN_DIR)
 
-mcAixiCtw: bin/agent.o bin/util.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o
-	$(CXX) $(FLAGS) bin/agent.o bin/util.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o -o $(OUT_FILE)
+mcAixiCtw: bin/agent.o bin/util.o bin/CTNode.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o
+	$(CXX) $(FLAGS) bin/agent.o bin/util.o bin/CTNode.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o -o $(OUT_FILE)
 
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
@@ -28,6 +28,9 @@ bin/util.o: common/util.cpp
 
 bin/ContextTree.o: CTW/ContextTree.cpp
 	$(CXX) $(FLAGS) -c CTW/ContextTree.cpp -o bin/ContextTree.o
+
+bin/CTNode.o: CTW/CTNode.cpp
+	$(CXX) $(FLAGS) -c CTW/CTNode.cpp -o bin/CTNode.o
 
 bin/agent.o: AIXI/agent.cpp
 	$(CXX) $(FLAGS) -c AIXI/agent.cpp -o bin/agent.o

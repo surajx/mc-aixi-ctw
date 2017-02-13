@@ -5,68 +5,17 @@
 *******************************************************************************/
 
 #include <cassert>
+#include <iostream>
 
-#include "ContextTree.hpp"
 #include "../common/types.hpp"
-#include "../common/constants.hpp"
 
-/**
-* Context Tree Node implementation.
-*/
-
-CTNode::CTNode(){
-  logProbEstimated = 0.0;
-  logProbWeighted = 0.0;
-  symbolCount[SYMBOL_0] = 0;
-  symbolCount[SYMBOL_1] = 0;
-}
-
-CTNode::~CTNode() {
-  for (CTNode* child : children) {
-    delete child;
-  }
-}
-
-void CTNode::addChild(symbol_t sym, CTNode* child, CTNode* parent) {
-  children[sym] = child;
-  child->parent = parent;
-}
-
-uint_t CTNode::descendentsCount() {
-  uint_t numDescendants = 1;  // Including current Node?
-  numDescendants += child(SYMBOL_0) ? child(SYMBOL_0)->descendentsCount() : 0;
-  numDescendants += child(SYMBOL_1) ? child(SYMBOL_1)->descendentsCount() : 0;
-  return numDescendants;
-}
-
-// compute the logarithm of the KT-estimator update multiplier
-double CTNode::logKTMul(symbol_t sym) {
-  return NULL;  // TODO: implement
-}
-
-// Calculate the logarithm of the weighted block probability.
-void CTNode::updateLogProbability(void) {
-  // TODO : implement
-}
-
-// Update the node after having observed a new symbol.
-void CTNode::update(const symbol_t symbol) {
-  // TODO : implement
-}
-
-// Revert after MCTS look-ahead simulation is done.
-void CTNode::revert(const symbol_t symbol) {
-  // TODO : implement
-}
-
-
-/**
-* Context Tree implementation.
-*/
+#include "CTNode.hpp"
+#include "ContextTree.hpp"
 
 // create a context tree of specified maximum depth
-ContextTree::ContextTree(uint_t depth){
+ContextTree::ContextTree(uint_t depth) {
   rootNode = new CTNode();
+  maxTreeDepth = depth;
 }
 
 ContextTree::~ContextTree() {
@@ -82,23 +31,40 @@ void ContextTree::clear() {
   rootNode = new CTNode();
 }
 
+void ContextTree::update(const symbol_list_t& symbol_list) {
+  for (symbol_t symbol : symbol_list)
+    update(symbol);
+}
+
 void ContextTree::update(const symbol_t sym) {
-  // TODO: implement the actual update of context tree.
+  if (sequenceHistory.size() >= maxTreeDepth) {
+    update(sym, 0, rootNode);
+  }
   sequenceHistory.push_back(sym);
 }
 
-void ContextTree::update(const symbol_list_t& symbol_list) {
-  for(symbol_t symbol : symbol_list)
-    update(symbol);
+void ContextTree::update(const symbol_t sym, uint_t depth, CTNode* node) {
+  if (depth == maxTreeDepth) {
+    node->updateLeaf(sym);
+    return;
+  }
+  symbol_t childSym = sequenceHistory[sequenceHistory.size()-1-depth];
+  if (!node->child(childSym)) {
+    CTNode* child = new CTNode();
+    node->addChild(childSym, child, node);
+  }
+  update(sym, depth + 1, node->child(childSym));
+  node->update(sym);
 }
 
 // updates the history statistics, without touching the context tree
 // use it to update the history of those percept bits that predict an action
 // bit.
 void ContextTree::updateHistory(const symbol_list_t& symbol_list) {
-  for (size_t i = 0; i < symbol_list.size(); i++) {
-    sequenceHistory.push_back(symbol_list[i]);
-  }
+  // for (size_t i = 0; i < symbol_list.size(); i++) {
+  //   sequenceHistory.push_back(symbol_list[i]);
+  // }
+  return;
 }
 
 // removes the most recently observed symbol from the context tree
@@ -108,9 +74,9 @@ void ContextTree::revert() {
 
 // shrinks the history down to a former size
 void ContextTree::revertHistory(uint_t newsize) {
-
-    assert(newsize <= sequenceHistory.size());
-    while (sequenceHistory.size() > newsize) sequenceHistory.pop_back();
+  assert(newsize <= sequenceHistory.size());
+  while (sequenceHistory.size() > newsize)
+    sequenceHistory.pop_back();
 }
 
 // Predict what the next symbol would be according to the context tree
