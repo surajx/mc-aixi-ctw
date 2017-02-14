@@ -1,7 +1,7 @@
 /****************************************************************************************
 ** TODO: Documentation
 **
-** Author: Suraj Narayanan Sasikumar
+** Author: Suraj Narayanan Sasikumar, Baseline code Author
 ***************************************************************************************/
 
 #ifndef __CONTEXTTREE_HPP__
@@ -35,7 +35,10 @@ class ContextTree {
   void update(const symbol_list_t& symbol_list);
 
   // recursive branch update
-  void update(const symbol_t sym, uint_t depth, CTNode* node);
+  void update(const symbol_t sym,
+              uint_t depth,
+              CTNode* node,
+              const int node_action);
 
   // add a symbol to the history without updating the context tree.
   void updateHistory(const symbol_list_t& symbol_list);
@@ -59,8 +62,8 @@ class ContextTree {
   // generate a specified number of random symbols distributed according to
   // the context tree statistics and update the context tree with the newly
   // generated bits
-  void predictMutipleSymbols(uint_t numSymToPredict,
-                             symbol_list_t& predictedSymbols);
+  void predictMutipleSymbols(symbol_list_t& predictedSymbols,
+                             uint_t numSymToPredict);
 
   // the logarithm of the block probability of the whole sequence
   double getLogBlockProbability();

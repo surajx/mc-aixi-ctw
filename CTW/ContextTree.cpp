@@ -6,8 +6,10 @@
 
 #include <cassert>
 #include <iostream>
+#include <math.h>
 
 #include "../common/types.hpp"
+#include "../common/constants.hpp"
 
 #include "CTNode.hpp"
 #include "ContextTree.hpp"
@@ -38,38 +40,46 @@ void ContextTree::update(const symbol_list_t& symbol_list) {
 
 void ContextTree::update(const symbol_t sym) {
   if (sequenceHistory.size() >= maxTreeDepth) {
-    update(sym, 0, rootNode);
+    update(sym, 0, rootNode, NODE_UPDATE);
   }
   sequenceHistory.push_back(sym);
 }
 
-void ContextTree::update(const symbol_t sym, uint_t depth, CTNode* node) {
+void ContextTree::update(const symbol_t sym,
+                         uint_t depth,
+                         CTNode* node,
+                         const int node_action) {
   if (depth == maxTreeDepth) {
-    node->updateLeaf(sym);
+    node->updateLeaf(sym, node_action);
     return;
   }
-  symbol_t childSym = sequenceHistory[sequenceHistory.size()-1-depth];
+  symbol_t childSym = sequenceHistory[sequenceHistory.size() - 1 - depth];
   if (!node->child(childSym)) {
     CTNode* child = new CTNode();
     node->addChild(childSym, child, node);
   }
-  update(sym, depth + 1, node->child(childSym));
-  node->update(sym);
+  update(sym, depth + 1, node->child(childSym), node_action);
+  node->update(sym, node_action);
 }
 
-// updates the history statistics, without touching the context tree
-// use it to update the history of those percept bits that predict an action
-// bit.
+/*
+* Updates the history statistics, without touching the context tree
+* use it to update the history of those percept bits that predict an action
+* bit.
+*/
 void ContextTree::updateHistory(const symbol_list_t& symbol_list) {
-  // for (size_t i = 0; i < symbol_list.size(); i++) {
-  //   sequenceHistory.push_back(symbol_list[i]);
-  // }
-  return;
+  for (uint_t i = 0; i < symbol_list.size(); i++) {
+    sequenceHistory.push_back(symbol_list[i]);
+  }
 }
 
-// removes the most recently observed symbol from the context tree
+// revert ContextTree with last symbol from history.
 void ContextTree::revert() {
-  // TODO: implement reverting a symbol
+  const symbol_t lastSym = sequenceHistory.back();
+  sequenceHistory.pop_back();
+  if (sequenceHistory.size() >= maxTreeDepth - 1) {
+    update(lastSym, 0, rootNode, NODE_REVERT);
+  }
 }
 
 // shrinks the history down to a former size
@@ -82,14 +92,21 @@ void ContextTree::revertHistory(uint_t newsize) {
 // Predict what the next symbol would be according to the context tree
 // statistics.
 symbol_t ContextTree::predictSymbol() {
-  // TODO: actually predict looking at root node weighted Prob
-  return true;  // Dummy symbol_t type
+  double logProbWeighted = rootNode->getLogProbWeighted();
+  update(SYMBOL_1);
+  double logProbWeightedPrime = rootNode->getLogProbWeighted();
+  revert();
+  double probOneGivenHistory = exp(logProbWeightedPrime - logProbWeighted);
+  std::cout << "probOneGivenHistory: " << probOneGivenHistory << std::endl;
+  if (probOneGivenHistory >= 0.5)
+    return SYMBOL_1;
+  return SYMBOL_0;
 }
 
 // generate a specified number of random symbols
 // distributed according to the context tree statistics
-void ContextTree::predictMutipleSymbols(uint_t numSymToPredict,
-                                        symbol_list_t& predictedSymbols) {
+void ContextTree::predictMutipleSymbols(symbol_list_t& predictedSymbols,
+                                        uint_t numSymToPredict) {
   predictedSymbols.clear();
   for (uint_t i = 0; i < numSymToPredict; i++) {
     symbol_t predictedSymbol = predictSymbol();

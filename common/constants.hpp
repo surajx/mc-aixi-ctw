@@ -12,4 +12,7 @@
 const symbol_t SYMBOL_0 = false;
 const symbol_t SYMBOL_1 = true;
 
+const int NODE_REVERT = -1;
+const int NODE_UPDATE = +1;
+
 #endif

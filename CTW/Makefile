@@ -18,16 +18,16 @@ mk_bin:
 	$(MKDIR_P) $(BIN_DIR)
 
 ctw: bin/CTNode.o bin/ContextTree.o bin/main.o
-	$(CXX) $(FLAGS) bin/CTNode.o bin/ContextTree.o bin/main.o -o $(OUT_FILE)
+	$(CXX) $(FLAGS) $(BIN_DIR)/CTNode.o $(BIN_DIR)/ContextTree.o $(BIN_DIR)/main.o -o $(BIN_DIR)/$(OUT_FILE)
 
 bin/main.o: main.cpp
-	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
+	$(CXX) $(FLAGS) -c main.cpp -o $(BIN_DIR)/main.o
 
 bin/ContextTree.o: ContextTree.cpp
-	$(CXX) $(FLAGS) -c ContextTree.cpp -o bin/ContextTree.o
+	$(CXX) $(FLAGS) -c ContextTree.cpp -o $(BIN_DIR)/ContextTree.o
 
 bin/CTNode.o: CTNode.cpp
-	$(CXX) $(FLAGS) -c CTNode.cpp -o bin/CTNode.o
+	$(CXX) $(FLAGS) -c CTNode.cpp -o $(BIN_DIR)/CTNode.o
 
 clean:
-	rm -rf ${OUT_FILE} bin/*.o
+	rm -rf $(BIN_DIR)/${OUT_FILE} $(BIN_DIR)/*.o

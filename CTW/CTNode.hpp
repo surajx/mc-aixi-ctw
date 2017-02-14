@@ -40,14 +40,14 @@ class CTNode {
   * Update the node after having observed a new symbol.
   * TODO: implement and more documentation
   */
-  void update(const symbol_t symbol);
+  void update(const symbol_t symbol, const int node_action);
 
 
   /**
   * Update just the leaf node with the observed symbol.
   * TODO: implement and more documentation
   */
-  void updateLeaf(const symbol_t symbol);
+  void updateLeaf(const symbol_t symbol, const int node_action);
 
   /*
   * Return the node to its state immediately prior to the last update.

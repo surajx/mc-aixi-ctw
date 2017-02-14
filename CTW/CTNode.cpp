@@ -44,9 +44,14 @@ double CTNode::logKTMul(const symbol_t sym) {
 }
 
 // Update the node after having observed a new symbol.
-void CTNode::update(const symbol_t symbol) {
-  logProbKT += logKTMul(symbol);
-  symbolCount[symbol] += 1;
+void CTNode::update(const symbol_t symbol, const int node_action) {
+  if (node_action == NODE_UPDATE) {
+    logProbKT += logKTMul(symbol);
+    symbolCount[symbol] += 1;
+  } else { //NODE_REVERT
+    symbolCount[symbol] -= 1;
+    logProbKT -= logKTMul(symbol);
+  }
   double logProbW0 = 0.0;
   double logProbW1 = 0.0;
   if (child(SYMBOL_0)) {
@@ -63,9 +68,15 @@ void CTNode::update(const symbol_t symbol) {
   probSanity();
 }
 
-void CTNode::updateLeaf(const symbol_t symbol) {
-  logProbKT += logKTMul(symbol);
-  symbolCount[symbol] += 1;
+void CTNode::updateLeaf(const symbol_t symbol, const int node_action) {
+  //TODO: Code duplication, you lazy fuck!
+  if (node_action == NODE_UPDATE) {
+    logProbKT += logKTMul(symbol);
+    symbolCount[symbol] += 1;
+  } else {
+    symbolCount[symbol] -= 1;
+    logProbKT -= logKTMul(symbol);
+  }
   logProbWeighted = logProbKT;
   probSanity();
 }
