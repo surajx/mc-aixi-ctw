@@ -2,6 +2,8 @@
 
 #include <cassert>
 #include <cmath>
+#include <algorithm>
+
 
 #include "../common/util.hpp"
 
@@ -204,7 +206,23 @@ void Pacman::performAction(action_t action) {
 
 TicTacToe::TicTacToe(options_t &options) {
 	//Also stuff
-	state = pow(2,19);
+	state = 0;
+	m_reward = 0;
+	m_observation = state;
+	win_cond = 0;
+	opponent_win_cond = 0;
+	//open_squares = (1,2,3,4,5,6,7,8,9);
+
+	int myints[] = {1,2,3,4,5,6,7,8,9};
+	std::vector<int> open_squares (myints, myints + sizeof(myints) / sizeof(int) );
+
+	game_finished = 0;
+	// Set up board, 0 for empty, -1 for O and 1 for X
+	for (int i = 0; i < 3 ; i++) {
+		for (int j = 0 ; j < 3 ; j++) {
+			board[i][j] = 0;
+		}
+	}
 	// Set up the initial observation
 	//Stuff
 }
@@ -213,19 +231,70 @@ TicTacToe::TicTacToe(options_t &options) {
 void TicTacToe::performAction(action_t action) {
 	//Agent move is added to state
 	//If he wins game ends, if illegal lose points
-	// All positive rewards???
-	if ( (fmod((state/pow(4, action)),2) == 1) || (fmod((state/(pow(4, action)*2) ),2) == 1) ) {
+	// All positive rewards, normalised at 3
+
+	// to find the nth number base 2 in the state, b = state/pow(2,n-1) % 4
+
+
+	if ( board[action / 3][action % 3] != 0) {
+		// (fmod((state/pow(4, action)),2) == 1) || (fmod((state/(pow(4, action)*2) ),2) == 1) 
+		// If the agent performs an illegal move
 		m_reward += 0;
 	} else {
+		// Agent move is added to state
 		state += pow(4,action);
-		if (isFinished()) {
+		board[action / 3][action % 3] = 1;
+		// Remove the square from open squares
+		open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), action), open_squares.end());
+		// Reward for an action
+		m_reward += 3;
+		// Check is game is finished
+		win_cond = ( (board[0][0] == board[0][1] == board[0][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[1][0] == board[1][1] == board[1][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[2][0] == board[2][1] == board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][0] == board[1][0] == board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][1] == board[1][1] == board[2][1] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][2] == board[1][2] == board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][0] == board[1][1] == board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][2] == board[1][1] == board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+
+		if (win_cond) {
+			// If game is finished, then agent has won, and get reward of 5
+			game_finished = 1;
 			m_reward += 5;
+
+		// check if board fills up
+		} else if (open_squares.size() == 0) {
+			// game is a draw
+			game_finished = 1;
+			m_reward += 4;
 		} else {
 			// find how many moves are possible, then make random move
-			random_choice = 0;
+			// number_of_open_sqaures = open_squares.size();
+			std::random_shuffle ( open_squares.begin(), open_squares.end() );
+			random_choice = open_squares[0];
+
 			state += pow(4,random_choice)*2;
-			if (isFinished()) {
+
+			board[random_choice / 3][random_choice % 3] = -1;
+
+			open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), random_choice), open_squares.end());
+
+			opponent_win_cond = ( (board[0][0] == board[0][1] == board[0][2] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[1][0] == board[1][1] == board[1][2] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[2][0] == board[2][1] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[1][0] == board[2][0] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][1] == board[1][1] == board[2][1] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][2] == board[1][2] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[1][1] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][2] == board[1][1] == board[2][0] == -1) || win_cond == 1) ? 1 : 0;
+
+			if (opponent_win_cond) {
+				game_finished = 1;
 				m_reward += 1;
+			} else if (open_squares.size() == 0) {
+				game_finished = 1;
+				m_reward += 4;
 			}
 		}
 	}
@@ -238,7 +307,7 @@ void TicTacToe::performAction(action_t action) {
 
 BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {
 	//Also stuff
-
+	m_reward = 0;
 	// Set up the initial observation
 	//Stuff
 }
@@ -259,15 +328,15 @@ void BiasedRockPaperSciessor::performAction(action_t action) {
 
 	// If same actions then draw, if agent wins +1 reward, if looses -1 reward
 	if (opponent_action == action) {
-		m_reward += 0;
+		m_reward = 1;
 		m_observation = opponent_action;
 		opponent_won_last_round = 0;
 	} else if ((opponent_action == 0 && action == 1) || (opponent_action == 1 && action == 2) || (opponent_action == 2 && action == 0)) {
-		m_reward += 1;
+		m_reward = 2;
 		m_observation = opponent_action;
 		opponent_won_last_round = 0;
 	} else {
-		m_reward -= 1;
+		m_reward = 0;
 		m_observation = opponent_action;
 		opponent_won_last_round = 1;
 	}
@@ -277,9 +346,8 @@ void BiasedRockPaperSciessor::performAction(action_t action) {
 ExtendedTiger::ExtendedTiger(options_t &options) {
 	//Initial state of 0 is sitting, 1 is standing
 	state = 0;
-	// Set up the initial observation
 
-	//Setting up initial reward
+	//Setting up initial reward and initial observation
 	m_observation = 0;
 	m_reward = 0;
 	gold_door = (rand01() < 0.5) ? 1 : 2;
@@ -289,6 +357,7 @@ ExtendedTiger::ExtendedTiger(options_t &options) {
 
 void ExtendedTiger::performAction(action_t action) {
 	//Observations
+	// Rewarda are normalised to 100 to be positive, 0 reward is a reward of 100
 	// Actions
 	// 1 is stand
 	// 2 is listen
@@ -399,6 +468,8 @@ KuhnPoker::KuhnPoker(options_t &options) {
 
 void KuhnPoker::performAction(action_t action) {
 
+	// Using normalized reward to 4
+
 	// Agent takes action, 1 to bet or 0 to pass
 
 	// amount of chips put in, and amoutn of chips in play both increase if agent bets
@@ -407,37 +478,37 @@ void KuhnPoker::performAction(action_t action) {
 
 
 	// if actions are equal showdown occurs, 
-	//else if opponents bets he wins, 
-	//else opponent has choice to bet and showdown occurs or pass and let agent win
+	// else if opponents bets he wins, 
+	// else opponent has choice to bet and showdown occurs or pass and let agent win
 
 	if (opponent_action == action) {
 		//showdown
 		if (agent_card > opponent_card) {
 			//agent wins
-			m_reward = chips_in_play;
+			m_reward = 4 + chips_in_play;
 		} else {
 			//opponent wins
-			m_reward = -agent_chips_put_in; 
+			m_reward = 4 - agent_chips_put_in; 
 		}
 
 	} else if (opponent_action == 1) {
 		//opponent wins
-		m_reward = -agent_chips_put_in; 
+		m_reward = 4 - agent_chips_put_in; 
 	} else {
 		if (rand01() < alpha + 1/3.0) {
 			// opponent calls then showdown
 			chips_in_play += 1;
 			if (agent_card > opponent_card) {
 				//agent wins
-				m_reward = chips_in_play;
+				m_reward = 4 + chips_in_play;
 			} else {
 				//opponent wins
-				m_reward = -agent_chips_put_in; 
+				m_reward = 4 - agent_chips_put_in; 
 			}
 
 		} else {
 			//opponent folds and agent wins
-			m_reward = chips_in_play;
+			m_reward = 4 + chips_in_play;
 		}
 	}
 	

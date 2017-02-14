@@ -113,6 +113,11 @@ private:
 	//more stuff
 	int state;
 	int random_choice;
+	int board[3][3];
+	std::vector<int> open_squares;
+	int win_cond;
+	int opponent_win_cond;
+	int game_finished;
 };
 
 
