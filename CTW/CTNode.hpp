@@ -24,7 +24,7 @@ class CTNode {
  public:
   /**
   * Compute the logarithm of the KT-estimator update multiplier
-  * TODO: implement and more documentation
+  * TODO: More Documentation
   */
   double logKTMul(const symbol_t sym);
 
@@ -32,26 +32,26 @@ class CTNode {
   * Calculate the logarithm of the weighted block probability.
   * be careful of numerical issues, use an identity for log(a+b)
   * so that you can work in logspace instead.
-  * TODO: implement and more documentation
+  * TODO: More Documentation
   */
   void updateLogProbability();
 
   /**
   * Update the node after having observed a new symbol.
-  * TODO: implement and more documentation
+  * TODO: More Documentation
   */
   void update(const symbol_t symbol, const int node_action);
 
 
   /**
   * Update just the leaf node with the observed symbol.
-  * TODO: implement and more documentation
+  * TODO: More Documentation
   */
   void updateLeaf(const symbol_t symbol, const int node_action);
 
   /*
   * Return the node to its state immediately prior to the last update.
-  * TODO: implement
+  * TODO: More Documentation
   */
   void revert(const symbol_t symbol);
 
