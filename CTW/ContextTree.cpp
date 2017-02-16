@@ -8,6 +8,7 @@
 #include <iostream>
 #include <math.h>
 
+#include "../common/util.hpp"
 #include "../common/types.hpp"
 #include "../common/constants.hpp"
 
@@ -25,17 +26,13 @@ ContextTree::~ContextTree() {
 }
 
 void ContextTree::clear() {
-  std::cout << "1: " << sequenceHistory.size()<< std::endl;
   sequenceHistory.clear();
-  std::cout << "2: "<< sequenceHistory.size()<< std::endl;
-  sequenceHistory.shrink_to_fit();
-  std::cout << "3: "<< sequenceHistory.size()<< std::endl;
-  sequenceHistory.resize(0);
-  std::cout << "4: "<< sequenceHistory.size()<< std::endl;
-
-  if (rootNode)
-    deleteTree(rootNode);
+  if (rootNode) {
+    // TODO: Investigate further why this results in a strange unconsequential
+    // segfault.
+    // deleteTree(rootNode);
     delete rootNode;
+  }
   rootNode = new CTNode();
 }
 
@@ -99,21 +96,11 @@ void ContextTree::updateHistory(const symbol_list_t& symbol_list) {
 }
 
 void ContextTree::revert() {
-  // std::cout << "here1: " << std::endl;
   const symbol_t lastSym = sequenceHistory.back();
-  // std::cout << "here2: " << std::endl;
-  // std::cout << "lastSym: "<< lastSym << std::endl;
-  // std::cout << "sequenceHistory.size b4: "<< sequenceHistory.size() << std::endl;
-  // std::cout << "sequenceHistory.max_size b4: "<< sequenceHistory.max_size() << std::endl;  
-  // std::cout << "sequenceHistory[5119]: "<< sequenceHistory[5119] << std::endl;
   sequenceHistory.pop_back();
-  // std::cout << "sequenceHistory.size af: "<< sequenceHistory.size() << std::endl;
-  // std::cout << "sequenceHistory.max_size af: "<< sequenceHistory.max_size() << std::endl;  
-  // std::cout << "here3: " << std::endl;
   if (sequenceHistory.size() >= maxTreeDepth - 1) {
     update(lastSym, 0, rootNode, NODE_REVERT);
   }
-  // std::cout << "here4: " << std::endl;
 }
 
 void ContextTree::revertHistory(uint_t newsize) {
@@ -143,10 +130,7 @@ double ContextTree::predict(symbol_list_t& symbol_list) {
 }
 
 symbol_t ContextTree::predictSymbol() {
-  double probOneGivenHistory = predict(SYMBOL_1);
-  if (probOneGivenHistory >= 0.5)
-    return SYMBOL_1;
-  return SYMBOL_0;
+  return rand01() < predict(SYMBOL_1) ? SYMBOL_1 : SYMBOL_0;
 }
 
 void ContextTree::genNextSymbols(symbol_list_t& predictedSymbols, uint_t num) {
@@ -159,11 +143,11 @@ void ContextTree::genNextSymbols(symbol_list_t& predictedSymbols, uint_t num) {
 void ContextTree::genNextSymbolsAndUpdate(symbol_list_t& predictedSymbols,
                                           uint_t num) {
   predictedSymbols.clear();
+  symbol_t predictedSymbol;
   for (uint_t i = 0; i < num; i++) {
-    // std::cout << "cnt: " << i << std::endl;
-    symbol_t predictedSymbol = predictSymbol();
-    update(predictedSymbol);    
-    predictedSymbols.push_back(predictedSymbol);    
+    predictedSymbol = predictSymbol();
+    update(predictedSymbol);
+    predictedSymbols.push_back(predictedSymbol);
   }
 }
 

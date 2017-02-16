@@ -23,18 +23,33 @@ class CTNode {
 
  public:
   /**
+  * Constructor for Context Tree Node.
+  */
+  CTNode();
+
+  /**
+  * Add child to parent
+  * TODO: More Documentation
+  */
+  void addChild(symbol_t sym, CTNode* child, CTNode* parent);
+
+  /**
+  * Number of descendants of a node in the context tree
+  * TODO: More Documentation
+  */
+  uint_t descendentsCount();  
+
+  /**
   * Compute the logarithm of the KT-estimator update multiplier
   * TODO: More Documentation
   */
   double logKTMul(const symbol_t sym);
 
   /**
-  * Calculate the logarithm of the weighted block probability.
-  * be careful of numerical issues, use an identity for log(a+b)
-  * so that you can work in logspace instead.
+  * Update the logarithm of the KT-estimator.
   * TODO: More Documentation
   */
-  void updateLogProbability();
+  void updateLogKT(const symbol_t symbol, const int node_action);
 
   /**
   * Update the node after having observed a new symbol.
@@ -49,11 +64,10 @@ class CTNode {
   */
   void updateLeaf(const symbol_t symbol, const int node_action);
 
-  /*
-  * Return the node to its state immediately prior to the last update.
-  * TODO: More Documentation
+  /**
+  * Checkes sanity node variables.
   */
-  void revert(const symbol_t symbol);
+  void probSanity();
 
   /**
   * Log weighted blocked probability
@@ -71,28 +85,11 @@ class CTNode {
   uint_t visits() { return symbolCount[SYMBOL_0] + symbolCount[SYMBOL_1]; }
 
   /**
-  * Checkes sanity node variables.
-  */
-  void probSanity();
-
-  /**
   * Child corresponding to a particular symbol
   */
   CTNode* child(symbol_t sym) { return children[sym]; }
 
-  /**
-  * Add child to parent
-  */
-  void addChild(symbol_t sym, CTNode* child, CTNode* parent);
-
-  /**
-  * Number of descendants of a node in the context tree
-  */
-  uint_t descendentsCount();
-
-  CTNode();
-
-  // Destructor
+  // The Destructor
   ~CTNode();
 };
 
