@@ -16,7 +16,12 @@ static double C; // exploration-exploitation constant C
 static unsigned int m; // also known as horizon, or max tree depth.
 static SearchNode*  root_ptr; // pointer to the root node
 
+// map an (o,r) pair to a unique index 
+percept_t perceptIndex(percept_t obs, percept_t rew);
+
 // determine the best action by searching ahead
-extern action_t search(Agent &agent);
+extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+
+static reward_t playout(Agent &agent, unsigned int playout_len, int test_arg);
 
 #endif // __SEARCH_HPP__
