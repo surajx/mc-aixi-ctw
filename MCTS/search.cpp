@@ -130,8 +130,8 @@ public:
 			percept_t new_obs;
 			percept_t new_rew;
 			if (test_arg == 1 || test_arg == 3) {
-				new_obs = 1;
-				new_rew = 1;
+				new_obs = 4;
+				new_rew = 3;
 			} else if (test_arg == 2) {
 				new_obs = 1;
 				new_rew = 1;
@@ -201,21 +201,28 @@ static reward_t playout(Agent &agent, unsigned int horiz, int test_arg) {
 
 // number of distinct percepts (size of the percept space)
 unsigned int countPercepts(unsigned int num_obs, unsigned num_rew) {
-	return (unsigned int) pow(2,num_obs) + pow(2,num_rew);
+	return (unsigned int) pow(2,num_obs) * pow(2,num_rew);
 }
 
 // encode an observation and a reward as a single observation-reward
 percept_t perceptIndex(percept_t obs, percept_t rew) {
-	return pow(2,obsBits) * obs + rew;
+	// return pow(2,obsBits) * obs + rew;
+	symbol_list_t obs_bitstring;
+	symbol_list_t rew_bitstring;
+	encode(obs_bitstring, obs, obsBits);
+	encode(rew_bitstring, rew, rewBits);
+	obs_bitstring.insert(obs_bitstring.end(),rew_bitstring.begin(),rew_bitstring.end());
+	return decode(obs_bitstring, obsBits+rewBits);
 }
 
 // initialize the tree by setting the constants and creating a root node
 void initializeTree(Agent &agent) {
 	std::cout << "initializing" << std::endl;
-	// numActions = agent.numActions(); // set number of actions
-	// numPercepts = countPercepts(agent.numObservations(), agent.numRewards()); // set number of percepts
-	numActions = 3; // test
-	numPercepts = countPercepts(2,2); // test
+	numActions = agent.numActions(); // set number of actions
+	numPercepts = countPercepts(agent.numObservations(), agent.numRewards()); // set number of percepts
+	std::cout << "numActions: " << numActions << ", numPercepts: " << numPercepts << std::endl;
+	//numActions = 3; // test
+	//numPercepts = countPercepts(2,2); // test
 	C = agent.exploreExploitRatio();
 	m = agent.horizon();
 	obsBits = agent.numObservations();
@@ -226,7 +233,7 @@ void initializeTree(Agent &agent) {
 // Prune the tree by updating the root node and pruning dead branches
 void pruneTree(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act) {
 	SearchNode* old_root_ptr = root_ptr;
-	int prev_obs_rew_index = pow(2,obsBits) * prev_obs + prev_rew;
+	int prev_obs_rew_index = (int) perceptIndex(prev_obs,prev_rew);
 	std::cout << "pruning with prev_act: " << prev_act << ", prev_obs_rew_index: " << prev_obs_rew_index << std::endl;
 	SearchNode* chance_child = root_ptr->getChildren()[prev_act];
 	if (chance_child == NULL) {

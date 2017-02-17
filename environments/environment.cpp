@@ -1256,35 +1256,36 @@ void ExtendedTiger::performAction(action_t action) {
 		case 1:
 			// When action is standing, if already standing, take less reward for invalid action
 			if (state == 1) {
-				m_reward += 90;
+				m_reward = 90;
+				m_observation = (pow(2,2)*state);
 			} else{
 				state = 1;
-				m_reward += 99;
+				m_reward = 99;
 			}
 			break;
 		case 2:
 			// When action is listen, take less reward if invalid action (while standing), else gain observation
 			if (state == 1) {
-				m_reward += 90;
+				m_reward = 90;
 			} else{
-				m_observation = (rand01() < 0.85) ? tiger_door : gold_door;
-				m_reward += 99;
+				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door ) + (pow(2,2)*state);
+				m_reward = 99;
 			}
 			break;
 		case 3:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
-				m_reward += 90;
+				m_reward = 90;
 			} else {
-				m_reward += (1 == gold_door) ? 130 : 0;
+				m_reward = (1 == gold_door) ? 130 : 0;
 			}
 			break;
 		case 4:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
-				m_reward += 90;
+				m_reward = 90;
 			} else {
-				m_reward += (2 == gold_door) ? 130 : 0;
+				m_reward = (2 == gold_door) ? 130 : 0;
 			}
 			break;
 	}
@@ -1386,6 +1387,7 @@ void KuhnPoker::performAction(action_t action) {
 			m_reward = 4 + chips_in_play;
 		}
 	}
+	// m_observation = 0;
 	
 }
 
