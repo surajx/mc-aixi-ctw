@@ -88,12 +88,38 @@ private:
 	int pacmanX;
 	int pacmanY;
 	int complete_game_state[19][21];
+	int original_complete_game_state[19][21];
 	int new_position;
 	int power_pill;
+	int power_pill_time;
 	Ghost ghost1;
 	Ghost ghost2;
 	Ghost ghost3;
 	Ghost ghost4;
+	int wall;
+	int distance;
+	int pellat_within_2;
+	int pellat_within_3;
+	int pellat_within_4;
+	int left_food;
+	int right_food;
+	int up_food;
+	int down_food;
+	int left_ghost;
+	int right_ghost;
+	int up_ghost;
+	int down_ghost;
+	int wall_obs;
+	int ghost_obs;
+	int smell_obs;
+	int pellat_obs;
+	int power_obs;
+	double random_number;
+	int left_wall;
+	int right_wall;
+	int down_wall;
+	int up_wall;
+	int food_pellats;
 
 	//more stuff
 };

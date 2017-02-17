@@ -66,51 +66,640 @@ Pacman::Pacman(options_t &options) {
 	ghost2 = {8, 10, 5, 1};
 	ghost3 = {9, 9, 6, 1};
 	ghost4 = {9, 10, 4, 1};
+	// ghosts also saving in game state as 4
+	complete_game_state[10][8] = 4;
+	complete_game_state[11][8] = 4;
+	complete_game_state[10][9] = 4;
+	complete_game_state[11][9] = 4;
+
+	// game state of 6 is power pill
+	// game state of 8 is ghost and food
+	// game state of 10 is power pill and ghost
+
 	pacmanX = 9;
 	pacmanY = 12;
 	power_pill = 0;
+	food_pellats = 74;
+
 	// Setting outer walls in game state, 1 is for walls
 	for (int i=0;i<19;i++){
 		complete_game_state[i][0] = complete_game_state[i][20] = complete_game_state[0][i] = complete_game_state[18][i] = 1;
 	}
 	complete_game_state[0][19] = complete_game_state[0][20] = complete_game_state[18][19] = complete_game_state[18][20] = 1;
 	//complete_game_state[]
-	//TODO add all the walls
 
-	//TODO add random bits
+	//TODO add all the walls
+	// Walls of the game, line by line (literally), each line is a bloack
+	complete_game_state[2][2] = complete_game_state[3][2] = 1;
+	complete_game_state[5][2] = complete_game_state[6][2] = complete_game_state[7][2] = 1;
+	complete_game_state[9][2] = 1;
+	complete_game_state[11][2] = complete_game_state[12][2] = complete_game_state[13][2] = 1;
+	complete_game_state[15][2] = complete_game_state[16][2] = 1;
+
+	complete_game_state[2][4] = complete_game_state[3][4] = 1;
+	complete_game_state[5][4] = 1;
+	complete_game_state[7][4] = complete_game_state[8][4] = complete_game_state[9][4] = complete_game_state[10][4] = complete_game_state[11][4] = 1;
+	complete_game_state[13][4] = 1;
+	complete_game_state[15][4] = complete_game_state[16][4] = 1;
+
+	complete_game_state[5][5] = 1;
+	complete_game_state[9][5] = 1;
+	complete_game_state[13][5] = 1;
+
+	complete_game_state[1][6] = complete_game_state[2][6] = complete_game_state[3][6] = 1;
+	complete_game_state[5][6] = complete_game_state[6][6] = complete_game_state[7][6] = 1;
+	complete_game_state[9][6] = 1;
+	complete_game_state[11][6] = complete_game_state[12][6] = complete_game_state[13][6] = 1;
+	complete_game_state[15][6] = complete_game_state[16][6] = complete_game_state[17][6] = 1;
+
+	complete_game_state[1][7] = complete_game_state[2][7] = complete_game_state[3][7] = 1;
+	complete_game_state[5][7] = 1;
+	complete_game_state[13][7] = 1;
+	complete_game_state[15][7] = complete_game_state[16][7] = complete_game_state[17][7] = 1;
+
+	complete_game_state[1][8] = complete_game_state[2][8] = complete_game_state[3][8] = 1;
+	complete_game_state[5][8] = 1;
+	complete_game_state[7][8] = 1;
+	complete_game_state[11][8] = 1;
+	complete_game_state[13][8] = 1;
+	complete_game_state[15][8] = complete_game_state[16][8] = complete_game_state[17][8] = 1;
+
+	// Removing walls in sides
+	complete_game_state[0][9] = 0;
+	complete_game_state[5][9] = 1;
+	complete_game_state[7][9] = 1;
+	complete_game_state[11][9] = 1;
+	complete_game_state[13][9] = 1;
+	complete_game_state[19][9] = 0;
+
+	complete_game_state[1][10] = complete_game_state[2][8] = complete_game_state[3][8] = 1;
+	complete_game_state[5][10] = 1;
+	complete_game_state[7][10] = 1;
+	complete_game_state[8][10] = 1;
+	complete_game_state[9][10] = 1;
+	complete_game_state[10][10] = 1;
+	complete_game_state[11][10] = 1;
+	complete_game_state[13][10] = 1;
+	complete_game_state[15][10] = complete_game_state[16][8] = complete_game_state[17][8] = 1;
+
+	complete_game_state[1][11] = complete_game_state[2][8] = complete_game_state[3][8] = 1;
+	complete_game_state[5][11] = 1;
+	complete_game_state[13][11] = 1;
+	complete_game_state[15][11] = complete_game_state[16][8] = complete_game_state[17][8] = 1;
+
+	complete_game_state[1][12] = complete_game_state[2][8] = complete_game_state[3][8] = 1;
+	complete_game_state[5][12] = 1;
+	complete_game_state[7][12] = 1;
+	complete_game_state[8][12] = 1;
+	complete_game_state[9][12] = 1;
+	complete_game_state[10][12] = 1;
+	complete_game_state[11][12] = 1;
+	complete_game_state[13][12] = 1;
+	complete_game_state[15][12] = complete_game_state[16][8] = complete_game_state[17][8] = 1;
+
+	complete_game_state[2][14] = complete_game_state[3][14] = 1;
+	complete_game_state[5][14] = complete_game_state[6][14] = complete_game_state[7][14] = 1;
+	complete_game_state[9][14] = 1;
+	complete_game_state[11][14] = complete_game_state[12][14] = complete_game_state[13][14] = 1;
+	complete_game_state[15][14] = complete_game_state[16][14] = 1;
+
+	complete_game_state[3][15] = 1;
+	complete_game_state[15][15] = 1;
+
+	complete_game_state[1][16] = 1;
+	complete_game_state[3][16] = 1;
+	complete_game_state[5][16] = 1;
+	complete_game_state[7][16] = complete_game_state[8][16] = complete_game_state[9][16] = complete_game_state[10][16] = complete_game_state[11][16] = 1;
+	complete_game_state[13][16] = 1;
+	complete_game_state[15][16] = 1;
+	complete_game_state[17][16] = 1;
+
+	complete_game_state[5][17] = 1;
+	complete_game_state[9][17] = 1;
+	complete_game_state[13][17] = 1;
+
+	complete_game_state[2][18] = complete_game_state[3][18] = complete_game_state[4][18] = complete_game_state[5][18] = complete_game_state[6][18] = complete_game_state[7][18] = 1;
+	complete_game_state[9][18] = 1;
+	complete_game_state[11][18] = complete_game_state[12][18] = complete_game_state[13][18] = complete_game_state[14][18] = complete_game_state[15][18] = complete_game_state[16][18] = 1;
+
+
+	// 2 is food pellats for complete game state
+	complete_game_state[3][1] = complete_game_state[4][1] = complete_game_state[2][1] = complete_game_state[13][1] = complete_game_state[14][1] = complete_game_state[15][1] = complete_game_state[16][1] = complete_game_state[12][1] = 2;
+	complete_game_state[1][2] = complete_game_state[8][2] = complete_game_state[17][2] = 2;
+	complete_game_state[7][3] = complete_game_state[8][3] = complete_game_state[9][3] = complete_game_state[10][3] = complete_game_state[12][3] = complete_game_state[15][3] = 2;
+	complete_game_state[1][4] = complete_game_state[12][4] = 2;
+	complete_game_state[1][5] = complete_game_state[2][5] = complete_game_state[4][5] = complete_game_state[6][5] = complete_game_state[7][5] = 2;
+	complete_game_state[4][6] = complete_game_state[14][6] = 2;
+	complete_game_state[14][7] = 2;
+	complete_game_state[4][10] = 2;
+	complete_game_state[4][11] = 2;
+	complete_game_state[12][12] = 2;
+	complete_game_state[4][13] = complete_game_state[5][13] = complete_game_state[7][13] = complete_game_state[11][13] = complete_game_state[13][13] = complete_game_state[14][13] = complete_game_state[15][13] = complete_game_state[16][13] = complete_game_state[17][13] = 2;
+	complete_game_state[8][14] = complete_game_state[14][14] = 2;
+	complete_game_state[2][15] = complete_game_state[4][15] = complete_game_state[11][15] = complete_game_state[13][15] = complete_game_state[14][15] = 2;
+	complete_game_state[2][16] = complete_game_state[4][16] = complete_game_state[14][16] = 2;
+	complete_game_state[3][17] = complete_game_state[7][17] = complete_game_state[8][17] = complete_game_state[10][17] = complete_game_state[11][17] = complete_game_state[12][17] = 2;
+	complete_game_state[10][18] = 2;
+	complete_game_state[1][19] = complete_game_state[2][19] = complete_game_state[6][19] = complete_game_state[7][19] = complete_game_state[8][19] = complete_game_state[11][19] = complete_game_state[15][19] = complete_game_state[16][19] = complete_game_state[17][19] = 2;
+
+	// save original gamestate, for future reference
 
 	// Set up the initial observation
-	//Stuff
+	// wall_obs = (left_wall * pow(2,0)) + (right_wall * pow(2,1)) + (up_wall * pow(2,2)) + (down_wall * pow(2,3));
+	// ghost_obs = (left_ghost * pow(2,4)) + (right_ghost * pow(2,5)) + (up_ghost * pow(2,6)) + (down_ghost * pow(2,7));
+	// smell_obs = (pellat_within_2 * pow(2,8)) + (pellat_within_3 * pow(2,9)) + (pellat_within_4 * pow(2,10));
+	// pellat_obs = (left_food * pow(2,11)) + (right_food * pow(2,12)) + (up_food * pow(2,13)) + (down_food * pow(2,14));
+	// power_obs = (power_pill * pow(2,15));
+
+	wall_obs = (0 * pow(2,0)) + (0 * pow(2,1)) + (1 * pow(2,2)) + (1 * pow(2,3));
+	ghost_obs = (0 * pow(2,4)) + (0 * pow(2,5)) + (0 * pow(2,6)) + (0 * pow(2,7));
+	smell_obs = (1 * pow(2,8)) + (0 * pow(2,9)) + (1 * pow(2,10));
+	pellat_obs = (1 * pow(2,11)) + (1 * pow(2,12)) + (0 * pow(2,13)) + (0 * pow(2,14));
+	power_obs = (0 * pow(2,15));
+
+	// Combine all the observations
+	m_observation = wall_obs + ghost_obs + smell_obs + pellat_obs + power_obs;
 }
 
 
 void Pacman::performAction(action_t action) {
-	
+	if (power_pill_time < 1 ) {
+		power_pill_time = 0;
+		power_pill = 0;
+	} else {
+		power_pill_time -= 1;
+	}
 	//ghost movement
 	//check manhatten distance
+	// action 1 X += 1;
+	// action 2 X -= 1;
+	// action 3 Y += 1;
+	// action 4 Y -= 1;
+
 	
 
 	// check if distance is less then or equal to 5
 	if (ghost1.manhattan_distance <= 5) {
 		//pursue pacman
+		// TODO turn into a function
+		// Check which quadrant pacman is in, TopLeft, etc
+		if (ghost1.x > pacmanX)  {
+			if (ghost1.y > pacmanY) {
+				// ghost moves UP or left
+				if (complete_game_state[ghost1.x][ghost1.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost1.action = 4;
+				} else if (complete_game_state[ghost1.x - 1][ghost1.y] != 1) {
+					// no wall to left
+					ghost1.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost1.action = 1;
+					} else {
+						ghost1.action = 3;
+					}
+				}
+			} else {
+				// ghost moves up or right
+				if (complete_game_state[ghost1.x][ghost1.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost1.action = 4;
+				} else if (complete_game_state[ghost1.x + 1][ghost1.y] != 1) {
+					// no wall to right
+					ghost1.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost1.action = 2;
+					} else {
+						ghost1.action = 3;
+					}
+				}
+			}
+		} else {
+			if (ghost1.y > pacmanY) {
+				// ghost moves down or left
+				if (complete_game_state[ghost1.x][ghost1.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost1.action = 3;
+				} else if (complete_game_state[ghost1.x - 1][ghost1.y] != 1) {
+					// no wall to left
+					ghost1.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost1.action = 1;
+					} else {
+						ghost1.action = 4;
+					}
+				}
+			} else {
+				// ghost moves down or right
+				if (complete_game_state[ghost1.x][ghost1.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost1.action = 3;
+				} else if (complete_game_state[ghost1.x + 1][ghost1.y] != 1) {
+					// no wall to right
+					ghost1.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost1.action = 2;
+					} else {
+						ghost1.action = 4;
+					}
+				}
+			}
+		}
+		
 	} else {
 		//random move
+		random_number = rand01();
+		ghost1.action = (random_number < 0.25) ? 1 : ((random_number < 0.5) ? 2 : ((random_number < 0.75) ? 3 : 4));
 	}
 	if (ghost2.manhattan_distance <= 5) {
 		//pursue pacman
+		// TODO turn into a function
+		// Check which quadrant pacman is in, TopLeft, etc
+		if (ghost2.x > pacmanX)  {
+			if (ghost2.y > pacmanY) {
+				// ghost moves UP or left
+				if (complete_game_state[ghost2.x][ghost2.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost2.action = 4;
+				} else if (complete_game_state[ghost2.x - 1][ghost2.y] != 1) {
+					// no wall to left
+					ghost2.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost2.action = 1;
+					} else {
+						ghost2.action = 3;
+					}
+				}
+			} else {
+				// ghost moves up or right
+				if (complete_game_state[ghost2.x][ghost2.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost2.action = 4;
+				} else if (complete_game_state[ghost2.x + 1][ghost2.y] != 1) {
+					// no wall to right
+					ghost2.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost2.action = 2;
+					} else {
+						ghost2.action = 3;
+					}
+				}
+			}
+		} else {
+			if (ghost2.y > pacmanY) {
+				// ghost moves down or left
+				if (complete_game_state[ghost2.x][ghost2.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost2.action = 3;
+				} else if (complete_game_state[ghost2.x - 1][ghost2.y] != 1) {
+					// no wall to left
+					ghost2.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost2.action = 1;
+					} else {
+						ghost2.action = 4;
+					}
+				}
+			} else {
+				// ghost moves down or right
+				if (complete_game_state[ghost2.x][ghost2.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost2.action = 3;
+				} else if (complete_game_state[ghost2.x + 1][ghost2.y] != 1) {
+					// no wall to right
+					ghost2.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost2.action = 2;
+					} else {
+						ghost2.action = 4;
+					}
+				}
+			}
+		}
 	} else {
 		//random move
+		random_number = rand01();
+		ghost2.action = (random_number < 0.25) ? 1 : ((random_number < 0.5) ? 2 : ((random_number < 0.75) ? 3 : 4));
 	}
 	if (ghost3.manhattan_distance <= 5) {
 		//pursue pacman
+		// TODO turn into a function
+		// Check which quadrant pacman is in, TopLeft, etc
+		if (ghost3.x > pacmanX)  {
+			if (ghost3.y > pacmanY) {
+				// ghost moves UP or left
+				if (complete_game_state[ghost3.x][ghost3.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost3.action = 4;
+				} else if (complete_game_state[ghost3.x - 1][ghost3.y] != 1) {
+					// no wall to left
+					ghost3.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost3.action = 1;
+					} else {
+						ghost3.action = 3;
+					}
+				}
+			} else {
+				// ghost moves up or right
+				if (complete_game_state[ghost3.x][ghost3.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost3.action = 4;
+				} else if (complete_game_state[ghost3.x + 1][ghost3.y] != 1) {
+					// no wall to right
+					ghost3.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost3.action = 2;
+					} else {
+						ghost3.action = 3;
+					}
+				}
+			}
+		} else {
+			if (ghost3.y > pacmanY) {
+				// ghost moves down or left
+				if (complete_game_state[ghost3.x][ghost3.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost3.action = 3;
+				} else if (complete_game_state[ghost3.x - 1][ghost3.y] != 1) {
+					// no wall to left
+					ghost3.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost3.action = 1;
+					} else {
+						ghost3.action = 4;
+					}
+				}
+			} else {
+				// ghost moves down or right
+				if (complete_game_state[ghost3.x][ghost3.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost3.action = 3;
+				} else if (complete_game_state[ghost3.x + 1][ghost3.y] != 1) {
+					// no wall to right
+					ghost3.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost3.action = 2;
+					} else {
+						ghost3.action = 4;
+					}
+				}
+			}
+		}
+
 	} else {
 		//random move
+		random_number = rand01();
+		ghost3.action = (random_number < 0.25) ? 1 : ((random_number < 0.5) ? 2 : ((random_number < 0.75) ? 3 : 4));
 	}
 	if (ghost4.manhattan_distance <= 5) {
 		//pursue pacman
+		// TODO turn into a function
+		// Check which quadrant pacman is in, TopLeft, etc
+		if (ghost4.x > pacmanX)  {
+			if (ghost4.y > pacmanY) {
+				// ghost moves UP or left
+				if (complete_game_state[ghost4.x][ghost4.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost4.action = 4;
+				} else if (complete_game_state[ghost4.x - 1][ghost4.y] != 1) {
+					// no wall to left
+					ghost4.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost4.action = 1;
+					} else {
+						ghost4.action = 3;
+					}
+				}
+			} else {
+				// ghost moves up or right
+				if (complete_game_state[ghost4.x][ghost4.y - 1] != 1) {
+					// no wall above
+					// move up
+					ghost4.action = 4;
+				} else if (complete_game_state[ghost4.x + 1][ghost4.y] != 1) {
+					// no wall to right
+					ghost4.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost4.action = 2;
+					} else {
+						ghost4.action = 3;
+					}
+				}
+			}
+		} else {
+			if (ghost4.y > pacmanY) {
+				// ghost moves down or left
+				if (complete_game_state[ghost4.x][ghost4.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost4.action = 3;
+				} else if (complete_game_state[ghost4.x - 1][ghost4.y] != 1) {
+					// no wall to left
+					ghost4.action = 2;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost4.action = 1;
+					} else {
+						ghost4.action = 4;
+					}
+				}
+			} else {
+				// ghost moves down or right
+				if (complete_game_state[ghost4.x][ghost4.y + 1] != 1) {
+					// no wall below
+					// move down
+					ghost4.action = 3;
+				} else if (complete_game_state[ghost4.x + 1][ghost4.y] != 1) {
+					// no wall to right
+					ghost4.action = 1;
+				} else {
+					// if the ghost cannot go towards pacman, it will move in random other direction
+					if (rand01() < 0.5) {
+						ghost4.action = 2;
+					} else {
+						ghost4.action = 4;
+					}
+				}
+			}
+		}
+
 	} else {
 		//random move
+		random_number = rand01();
+		ghost4.action = (random_number < 0.25) ? 1 : ((random_number < 0.5) ? 2 : ((random_number < 0.75) ? 3 : 4));
 	}
+
+	// ghost1
+	// change the square the ghost moved out of
+	if (complete_game_state[ghost1.x][ghost1.y] == 8) {
+		complete_game_state[ghost1.x][ghost1.y] = 2;
+	} else if (complete_game_state[ghost1.x][ghost1.y] == 10) {
+		complete_game_state[ghost1.x][ghost1.y] = 6;
+	}
+	switch(ghost1.action) {
+		case 1:
+			ghost1.x += 1;
+			break;
+		case 2:
+			ghost1.x -= 1;
+			break;
+		case 3:
+			ghost1.y += 1;
+			break;
+		default:
+			ghost1.y -= 1;
+
+	}
+	// check and change the square the ghost is moving into
+	if (complete_game_state[ghost1.x][ghost1.y] == 2) {
+		// food and ghost
+		complete_game_state[ghost1.x][ghost1.y] = 8;
+	} else if (complete_game_state[ghost1.x][ghost1.y] == 6) {
+		// power pills and ghost
+		complete_game_state[ghost1.x][ghost1.y] = 10;
+	} else {
+		complete_game_state[ghost1.x][ghost1.y] = 4;
+	}
+
+	//ghost2
+	// change the square the ghost moved out of
+	if (complete_game_state[ghost2.x][ghost2.y] == 8) {
+		complete_game_state[ghost2.x][ghost2.y] = 2;
+	} else if (complete_game_state[ghost2.x][ghost1.y] == 10) {
+		complete_game_state[ghost2.x][ghost2.y] = 6;
+	}
+	switch(ghost2.action) {
+		case 1:
+			ghost2.x += 1;
+			break;
+		case 2:
+			ghost2.x -= 1;
+			break;
+		case 3:
+			ghost2.y += 1;
+			break;
+		default:
+			ghost2.y -= 1;
+
+	}
+	// check and change the square the ghost is moving into
+	if (complete_game_state[ghost2.x][ghost2.y] == 2) {
+		// food and ghost
+		complete_game_state[ghost2.x][ghost2.y] = 8;
+	} else if (complete_game_state[ghost2.x][ghost2.y] == 6) {
+		// power pills and ghost
+		complete_game_state[ghost2.x][ghost2.y] = 10;
+	} else {
+		complete_game_state[ghost2.x][ghost2.y] = 4;
+	}
+
+	// ghost3
+	// change the square the ghost moved out of
+	if (complete_game_state[ghost3.x][ghost3.y] == 8) {
+		complete_game_state[ghost3.x][ghost3.y] = 2;
+	} else if (complete_game_state[ghost3.x][ghost3.y] == 10) {
+		complete_game_state[ghost3.x][ghost3.y] = 6;
+	}
+	switch(ghost3.action) {
+		case 1:
+			ghost3.x += 1;
+			break;
+		case 2:
+			ghost3.x -= 1;
+			break;
+		case 3:
+			ghost3.y += 1;
+			break;
+		default:
+			ghost3.y -= 1;
+
+	}
+	// check and change the square the ghost is moving into
+	if (complete_game_state[ghost3.x][ghost3.y] == 2) {
+		// food and ghost
+		complete_game_state[ghost3.x][ghost3.y] = 8;
+	} else if (complete_game_state[ghost3.x][ghost3.y] == 6) {
+		// power pills and ghost
+		complete_game_state[ghost3.x][ghost3.y] = 10;
+	} else {
+		complete_game_state[ghost3.x][ghost3.y] = 4;
+	}
+
+	// ghost4
+	// change the square the ghost moved out of
+	if (complete_game_state[ghost4.x][ghost4.y] == 8) {
+		complete_game_state[ghost4.x][ghost4.y] = 2;
+	} else if (complete_game_state[ghost4.x][ghost4.y] == 10) {
+		complete_game_state[ghost4.x][ghost4.y] = 6;
+	}
+	switch(ghost4.action) {
+		case 1:
+			ghost4.x += 1;
+			break;
+		case 2:
+			ghost4.x -= 1;
+			break;
+		case 3:
+			ghost4.y += 1;
+			break;
+		default:
+			ghost4.y -= 1;
+
+	}
+	// check and change the square the ghost is moving into
+	if (complete_game_state[ghost4.x][ghost4.y] == 2) {
+		// food and ghost
+		complete_game_state[ghost4.x][ghost4.y] = 8;
+	} else if (complete_game_state[ghost4.x][ghost4.y] == 6) {
+		// power pills and ghost
+		complete_game_state[ghost4.x][ghost4.y] = 10;
+	} else {
+		complete_game_state[ghost4.x][ghost4.y] = 4;
+	}
+
+
 
 	// and pacman movement
 	if (action == 1){
@@ -135,6 +724,7 @@ void Pacman::performAction(action_t action) {
 				pacmanY -= 1;
 			}
 			m_reward -= 1;
+			break;
 		case 1:
 			//The new position is a wall, and pacman can't move into it
 			//pacmanX = pacmanX;
@@ -142,7 +732,7 @@ void Pacman::performAction(action_t action) {
 			m_reward -= 10;
 			break;
 		case 2:
-			//The new position is a bit
+			//The new position is a food pellat
 			if (action == 1){
 				pacmanX += 1;
 			} else if (action == 2){
@@ -153,14 +743,101 @@ void Pacman::performAction(action_t action) {
 				pacmanY -= 1;
 			}
 			m_reward += 10;
+			food_pellats -= 1;
+			complete_game_state[pacmanX][pacmanY] = 0;
+			if (food_pellats == 0) {
+				// if no food pellats left, pacman wins
+				m_reward += 100;
+				// episode ends
+			}
+			break;
+		case 6:
+			// If pacman eats a powerpill, it lasts for ?10 seconds
+			power_pill = 1;
+			power_pill_time = 10;
+			if (action == 1){
+				pacmanX += 1;
+			} else if (action == 2){
+				pacmanX -= 1;
+			} else if (action == 3){
+				pacmanY += 1;
+			} else {
+				pacmanY -= 1;
+			}
+			complete_game_state[pacmanX][pacmanY] = 0;
+			break;
+		case 8:
+			if (action == 1){
+				pacmanX += 1;
+			} else if (action == 2){
+				pacmanX -= 1;
+			} else if (action == 3){
+				pacmanY += 1;
+			} else {
+				pacmanY -= 1;
+			}
+			m_reward += 10;
+			food_pellats -= 1;
+			complete_game_state[pacmanX][pacmanY] = 4;
+			if (food_pellats == 0) {
+				// if no food pellats left, pacman wins
+				m_reward += 100;
+				// episode ends
+			}
+			break;
+		case 10:
+			power_pill = 1;
+			power_pill_time = 10;
+			if (action == 1){
+				pacmanX += 1;
+			} else if (action == 2){
+				pacmanX -= 1;
+			} else if (action == 3){
+				pacmanY += 1;
+			} else {
+				pacmanY -= 1;
+			}
+			complete_game_state[pacmanX][pacmanY] = 4;
 			break;
 	}
 
+
 	
 	//check if caught by ghosts
+
+	// Initial ghost positions
+	// ghost1 = {8, 9, 5, 1};
+	// ghost2 = {8, 10, 5, 1};
+	// ghost3 = {9, 9, 6, 1};
+	// ghost4 = {9, 10, 4, 1};
+
 	if ((ghost1.x == pacmanX && ghost1.y == pacmanY) || (ghost2.x == pacmanX && ghost2.y == pacmanY) || (ghost3.x == pacmanX && ghost3.y == pacmanY) || (ghost4.x == pacmanX && ghost4.y == pacmanY)) {
 		if (power_pill) {
-			//
+			// check which ghosts were hit
+			if (ghost1.x == pacmanX && ghost1.y == pacmanY) {
+				complete_game_state[ghost1.x][ghost1.y] = 0;
+				ghost1.x = 8;
+				ghost1.y = 9;
+				complete_game_state[ghost1.x][ghost1.y] = 4;
+			}
+			if (ghost2.x == pacmanX && ghost2.y == pacmanY) {
+				complete_game_state[ghost2.x][ghost2.y] = 0;
+				ghost2.x = 8;
+				ghost2.y = 10;
+				complete_game_state[ghost2.x][ghost2.y] = 4;
+			}
+			if (ghost3.x == pacmanX && ghost3.y == pacmanY) {
+				complete_game_state[ghost3.x][ghost3.y] = 0;
+				ghost3.x = 9;
+				ghost3.y = 9;
+				complete_game_state[ghost3.x][ghost3.y] = 4;
+			}
+			if (ghost4.x == pacmanX && ghost4.y == pacmanY) {
+				complete_game_state[ghost4.x][ghost4.y] = 0;
+				ghost4.x = 9;
+				ghost4.y = 10;
+				complete_game_state[ghost4.x][ghost4.y] = 4;
+			}
 		} else {
 			m_reward -= 50;
 			//game ends
@@ -169,12 +846,35 @@ void Pacman::performAction(action_t action) {
 		//check if moved through any of the ghosts
 		// by checking if old and current manhattan_distance is 1 and both pacman and ghost both moved in opposite directions in the same axis
 		if (power_pill) {
-			//
+			// check which ghosts were hit
+			if (ghost1.manhattan_distance == 1 && (ghost1.action + action == 3 || ghost1.action + action == 7)  && (abs(ghost1.x -pacmanX) + abs(ghost1.y -pacmanY) == 1)) {
+				complete_game_state[ghost1.x][ghost1.y] = 0;
+				ghost1.x = 8;
+				ghost1.y = 9;
+				complete_game_state[ghost1.x][ghost1.y] = 4;
+			}
+			if (ghost2.manhattan_distance == 1 && (ghost2.action + action == 3 || ghost2.action + action == 7)  && (abs(ghost2.x -pacmanX) + abs(ghost2.y -pacmanY) == 1)) {
+				complete_game_state[ghost2.x][ghost2.y] = 0;
+				ghost2.x = 8;
+				ghost2.y = 10;
+				complete_game_state[ghost2.x][ghost2.y] = 4;
+			}
+			if (ghost3.manhattan_distance == 1 && (ghost3.action + action == 3 || ghost3.action + action == 7)  && (abs(ghost3.x -pacmanX) + abs(ghost3.y -pacmanY) == 1)) {
+				complete_game_state[ghost3.x][ghost3.y] = 0;
+				ghost3.x = 9;
+				ghost3.y = 9;
+				complete_game_state[ghost3.x][ghost3.y] = 4;
+			}
+			if (ghost4.manhattan_distance == 1 && (ghost4.action + action == 3 || ghost4.action + action == 7)  && (abs(ghost4.x -pacmanX) + abs(ghost4.y -pacmanY) == 1)) {
+				complete_game_state[ghost4.x][ghost4.y] = 0;
+				ghost4.x = 9;
+				ghost4.y = 10;
+				complete_game_state[ghost4.x][ghost4.y] = 4;
+			}
 		} else {
 			m_reward -= 50;
 			//game ends
 		}
-		
 	}
 	// calculate mantahhan distances
 	ghost1.manhattan_distance = abs(ghost1.x -pacmanX) + abs(ghost1.y -pacmanY);
@@ -185,19 +885,185 @@ void Pacman::performAction(action_t action) {
 
 	//Resolve Observations
 
-	// 4-bit describing walls
-	//complete_game_state[pacmanX+1][pacmanY] % 2;
-	//complete_game_state[pacmanX-1][pacmanY] % 2;
-	//complete_game_state[pacmanX][pacmanY+1] % 2;
-	//complete_game_state[pacmanX][pacmanY-1] % 2;
+	// 4-bit describing neighbouring walls
+	left_wall = (complete_game_state[pacmanX-1][pacmanY] == 1) ? 1 : 0;
+	right_wall = (complete_game_state[pacmanX+1][pacmanY] == 1) ? 1 : 0;
+	up_wall = (complete_game_state[pacmanX][pacmanY-1] == 1) ? 1 : 0;
+	down_wall = (complete_game_state[pacmanX][pacmanY+1] == 1) ? 1 : 0;
+
 
 	// 4-bit describing whether or not ghost is visible
 
+	// Check left
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < pacmanX+1) && (!left_food) ) {
+		if (complete_game_state[pacmanX - distance][pacmanY] == 1) {
+			wall = 1;
+			left_ghost = 0;
+		} else if ((complete_game_state[pacmanX - distance][pacmanY] == 4) || (complete_game_state[pacmanX - distance][pacmanY] == 8)  || (complete_game_state[pacmanX - distance][pacmanY] == 10)) {
+			left_ghost = 1;
+		}
+		distance++;
+	}
+
+	// Check right
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < 22) && (!right_food) ) {
+		if (complete_game_state[pacmanX + distance][pacmanY] == 1) {
+			wall = 1;
+			right_ghost = 0;
+		} else if ((complete_game_state[pacmanX + distance][pacmanY] == 4) || (complete_game_state[pacmanX + distance][pacmanY] == 8)  || (complete_game_state[pacmanX + distance][pacmanY] == 10)) {
+			right_ghost = 1;
+		}
+		distance++;
+	}
+
+	// Check up
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < pacmanY + 1) && (!up_food) ) {
+		if (complete_game_state[pacmanX][pacmanY - distance] == 1) {
+			wall = 1;
+			up_ghost = 0;
+		} else if ((complete_game_state[pacmanX][pacmanY - distance] == 4) || (complete_game_state[pacmanX][pacmanY - distance] == 8)  || (complete_game_state[pacmanX][pacmanY - distance] == 10)) {
+			up_ghost = 1;
+		}
+		distance++;
+	}
+
+	// Check down
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < 24) && (!down_food) ) {
+		if (complete_game_state[pacmanX][pacmanY + distance] == 1) {
+			wall = 1;
+			down_ghost = 0;
+		} else if ((complete_game_state[pacmanX][pacmanY + distance] == 4) || (complete_game_state[pacmanX][pacmanY + distance] == 8)  || (complete_game_state[pacmanX][pacmanY + distance] == 10)) {
+			down_ghost = 1;
+		}
+		distance++;
+	}
+
+
+
 	// 3-bit observation on whether or not a pellat is within 2,3,4 manhattan distance from pacman
+
+	// TODO implement as a tree style search under a while loop, only need one to be true
+	// Pellat is within 2
+	pellat_within_2 = (complete_game_state[pacmanX+2][pacmanY] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX-2][pacmanY] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX][pacmanY+2] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX][pacmanY-2] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX+1][pacmanY+1] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX+1][pacmanY-1] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX-1][pacmanY+1] == 2 || pellat_within_2) ? 1 : 0;
+	pellat_within_2 = (complete_game_state[pacmanX-1][pacmanY-1] == 2 || pellat_within_2) ? 1 : 0;
+
+	// Pellat is within 3
+	pellat_within_3 = (complete_game_state[pacmanX+3][pacmanY] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX-3][pacmanY] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX][pacmanY+3] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX][pacmanY-3] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX+2][pacmanY+1] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX+2][pacmanY-1] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX-2][pacmanY+1] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX-2][pacmanY-1] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX+1][pacmanY+2] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX+1][pacmanY-2] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX-1][pacmanY+2] == 2 || pellat_within_3) ? 1 : 0;
+	pellat_within_3 = (complete_game_state[pacmanX-1][pacmanY-2] == 2 || pellat_within_3) ? 1 : 0;
+
+	// Pellat is within 4
+	pellat_within_4 = (complete_game_state[pacmanX+4][pacmanY] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-4][pacmanY] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX][pacmanY+4] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX][pacmanY-4] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+3][pacmanY+1] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+3][pacmanY-1] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-3][pacmanY+1] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-3][pacmanY-1] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+1][pacmanY+3] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+1][pacmanY-3] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-1][pacmanY+3] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-1][pacmanY-3] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+2][pacmanY+2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+2][pacmanY-2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-2][pacmanY+2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-2][pacmanY-2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+2][pacmanY+2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX+2][pacmanY-2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-2][pacmanY+2] == 2 || pellat_within_4) ? 1 : 0;
+	pellat_within_4 = (complete_game_state[pacmanX-2][pacmanY-2] == 2 || pellat_within_4) ? 1 : 0;
 
 	// 4-bit describing whether of not food is in line of sight
 
+	// Assuming you can see through ghosts
+
+	// Check left
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < pacmanX+1) && (!left_food) ) {
+		if (complete_game_state[pacmanX - distance][pacmanY] == 1) {
+			wall = 1;
+			left_food = 0;
+		} else if (complete_game_state[pacmanX - distance][pacmanY] == 2) {
+			left_food = 1;
+		}
+		distance++;
+	}
+
+	// Check right
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < 22) && (!right_food) ) {
+		if (complete_game_state[pacmanX + distance][pacmanY] == 1) {
+			wall = 1;
+			right_food = 0;
+		} else if (complete_game_state[pacmanX + distance][pacmanY] == 2) {
+			right_food = 1;
+		}
+		distance++;
+	}
+
+	// Check up
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < pacmanY + 1) && (!up_food) ) {
+		if (complete_game_state[pacmanX][pacmanY - distance] == 1) {
+			wall = 1;
+			up_food = 0;
+		} else if (complete_game_state[pacmanX][pacmanY - distance] == 2) {
+			up_food = 1;
+		}
+		distance++;
+	}
+
+	// Check down
+	wall = 0;
+	distance = 1;
+	while ( (!wall) && (distance < 24) && (!down_food) ) {
+		if (complete_game_state[pacmanX][pacmanY + distance] == 1) {
+			wall = 1;
+			down_food = 0;
+		} else if (complete_game_state[pacmanX][pacmanY + distance] == 2) {
+			down_food = 1;
+		}
+		distance++;
+	}
+
 	// 1-bit describing whether or not pacman is under effects of power pill
+
+	// Combine each of the observations
+	wall_obs = (left_wall * pow(2,0)) + (right_wall * pow(2,1)) + (up_wall * pow(2,2)) + (down_wall * pow(2,3));
+	ghost_obs = (left_ghost * pow(2,4)) + (right_ghost * pow(2,5)) + (up_ghost * pow(2,6)) + (down_ghost * pow(2,7));
+	smell_obs = (pellat_within_2 * pow(2,8)) + (pellat_within_3 * pow(2,9)) + (pellat_within_4 * pow(2,10));
+	pellat_obs = (left_food * pow(2,11)) + (right_food * pow(2,12)) + (up_food * pow(2,13)) + (down_food * pow(2,14));
+	power_obs = (power_pill * pow(2,15));
+
+	// Combine all the observations
+	m_observation = wall_obs + ghost_obs + smell_obs + pellat_obs + power_obs;
 }
 
 
@@ -205,26 +1071,30 @@ void Pacman::performAction(action_t action) {
 
 
 TicTacToe::TicTacToe(options_t &options) {
-	//Also stuff
+	// Initial state reward and observation, state is integer = observation
 	state = 0;
 	m_reward = 0;
 	m_observation = state;
+
+	// The win conditions of agent and opponent
 	win_cond = 0;
 	opponent_win_cond = 0;
+
 	//open_squares = (1,2,3,4,5,6,7,8,9);
 
+	// The square which have yet to be used
 	int myints[] = {1,2,3,4,5,6,7,8,9};
 	std::vector<int> open_squares (myints, myints + sizeof(myints) / sizeof(int) );
 
+	// if the game is finished
 	game_finished = 0;
+
 	// Set up board, 0 for empty, -1 for O and 1 for X
 	for (int i = 0; i < 3 ; i++) {
 		for (int j = 0 ; j < 3 ; j++) {
 			board[i][j] = 0;
 		}
 	}
-	// Set up the initial observation
-	//Stuff
 }
 
 
@@ -271,6 +1141,20 @@ void TicTacToe::performAction(action_t action) {
 		} else {
 			// find how many moves are possible, then make random move
 			// number_of_open_sqaures = open_squares.size();
+			
+
+			/*
+			// Alternative randomisation
+
+			#include <random>
+			std::random_device random_device;
+			std::mt19937 engine{random_device()};
+			std::uniform_int_distribution<int> dist(0, open_squares.size() - 1);
+			
+			int random_choice = open_squares[dist(engine)];
+
+			*/
+
 			std::random_shuffle ( open_squares.begin(), open_squares.end() );
 			random_choice = open_squares[0];
 
@@ -280,6 +1164,7 @@ void TicTacToe::performAction(action_t action) {
 
 			open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), random_choice), open_squares.end());
 
+			// could implement as a tree style search under a while loop, only need one to be true
 			opponent_win_cond = ( (board[0][0] == board[0][1] == board[0][2] == -1) || win_cond == 1) ? 1 : 0;
 			opponent_win_cond = ( (board[1][0] == board[1][1] == board[1][2] == -1) || win_cond == 1) ? 1 : 0;
 			opponent_win_cond = ( (board[2][0] == board[2][1] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
@@ -306,10 +1191,11 @@ void TicTacToe::performAction(action_t action) {
 
 
 BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {
-	//Also stuff
+	// Set up the initial observation and reward
 	m_reward = 0;
-	// Set up the initial observation
-	//Stuff
+	m_observation = 0;
+	opponent_won_last_round = 0;
+	
 }
 
 
@@ -320,6 +1206,7 @@ void BiasedRockPaperSciessor::performAction(action_t action) {
 	// 2 is scisors
 	// Opponent chooses last rounds action if they won
 	// Or random action otherwise
+
 	if (opponent_won_last_round) {
 		opponent_action = opponent_last_round_action;
 	} else {
@@ -350,23 +1237,24 @@ ExtendedTiger::ExtendedTiger(options_t &options) {
 	//Setting up initial reward and initial observation
 	m_observation = 0;
 	m_reward = 0;
+
+	// Set up which door is which
 	gold_door = (rand01() < 0.5) ? 1 : 2;
 	tiger_door = ((gold_door + 1) % 2) + 1;
 }
 
 
 void ExtendedTiger::performAction(action_t action) {
-	//Observations
-	// Rewarda are normalised to 100 to be positive, 0 reward is a reward of 100
+	// Rewards are normalised to 100 to be positive
 	// Actions
 	// 1 is stand
 	// 2 is listen
 	// 3 is open door 1
 	// 4 is open door 2
 	switch(action){
-		//stuff
+		// Cases for actions
 		case 1:
-			//stuff
+			// When action is standing, if already standing, take less reward for invalid action
 			if (state == 1) {
 				m_reward += 90;
 			} else{
@@ -375,7 +1263,7 @@ void ExtendedTiger::performAction(action_t action) {
 			}
 			break;
 		case 2:
-			//stuff
+			// When action is listen, take less reward if invalid action (while standing), else gain observation
 			if (state == 1) {
 				m_reward += 90;
 			} else{
@@ -384,7 +1272,7 @@ void ExtendedTiger::performAction(action_t action) {
 			}
 			break;
 		case 3:
-			//stuff
+			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward += 90;
 			} else {
@@ -392,7 +1280,7 @@ void ExtendedTiger::performAction(action_t action) {
 			}
 			break;
 		case 4:
-			//stuff
+			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward += 90;
 			} else {
@@ -401,19 +1289,6 @@ void ExtendedTiger::performAction(action_t action) {
 			break;
 	}
 
-	/*
-	if (state == 0 && (action ==  'open door 1' || action == 'open door 2')) {
-		m_reward -= 10;
-	} else if (state == 0) {
-		m_reward -= 1;
-		state = (action == 'stand') ? 1 : 0;
-		m_observation = (action == 'listen') ? (rand01() < 0.85 ? tiger_door : gold_door) : 0;
-	} else if (action == 'stand' || action == 'listen') {
-		m_reward -= 10;
-	} else {
-		m_reward = (action == 'open tiger door') ? -100 : 30;
-		m_observation = (action == 'open tiger door') ? 'tiger' : 'gold';
-	} */
 }
 
 
@@ -462,7 +1337,7 @@ KuhnPoker::KuhnPoker(options_t &options) {
 
 	// observations are current card, and opponents choice (to bet or pass)
 	// 3 bits on agent card?, 1 bit on opponent actions
-	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,1): pow(2,0)) : pow(2,2));
+	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
 
