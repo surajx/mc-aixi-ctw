@@ -18,7 +18,7 @@ mk_bin:
 	$(MKDIR_P) $(BIN_DIR)
 
 mcAixiCtw: bin/agent.o bin/util.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o
-	$(CXX) $(FLAGS) bin/agent.o bin/util.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o -o $(OUT_FILE)
+	$(CXX) $(FLAGS) bin/agent.o bin/util.o bin/ContextTree.o bin/environment.o bin/search.o bin/main.o -o $(BIN_DIR)/$(OUT_FILE)
 
 bin/main.o: main.cpp
 	$(CXX) $(FLAGS) -c main.cpp -o bin/main.o
@@ -39,4 +39,4 @@ bin/environment.o: environments/environment.cpp
 	$(CXX) $(FLAGS) -c environments/environment.cpp -o bin/environment.o
 
 clean:
-	rm -rf ${OUT_FILE} bin/*.o
+	rm -rf $(BIN_DIR)/${OUT_FILE} bin/*.o
