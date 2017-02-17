@@ -130,8 +130,8 @@ public:
 			percept_t new_obs;
 			percept_t new_rew;
 			if (test_arg == 1 || test_arg == 3) {
-				new_obs = 4;
-				new_rew = 3;
+				new_obs = 1;
+				new_rew = 1;
 			} else if (test_arg == 2) {
 				new_obs = 1;
 				new_rew = 1;
@@ -253,9 +253,9 @@ void pruneTree(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t pr
 }
 
 // determine the best action by searching ahead using MCTS
-extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act) {
+extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act, bool tree_initialized) {
 	std::cout << "Start search. lifetime: " << agent.lifetime() << std::endl;
-	if (agent.lifetime() == 0) {
+	if (!tree_initialized) {
 		initializeTree(agent);
 	} else {
 		pruneTree(agent, prev_obs, prev_rew, prev_act);
