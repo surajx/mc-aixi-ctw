@@ -1109,7 +1109,7 @@ void TicTacToe::performAction(action_t action) {
 	if ( board[action / 3][action % 3] != 0) {
 		// (fmod((state/pow(4, action)),2) == 1) || (fmod((state/(pow(4, action)*2) ),2) == 1) 
 		// If the agent performs an illegal move
-		m_reward += 0;
+		m_reward = 0;
 	} else {
 		// Agent move is added to state
 		state += pow(4,action);
@@ -1117,7 +1117,7 @@ void TicTacToe::performAction(action_t action) {
 		// Remove the square from open squares
 		open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), action), open_squares.end());
 		// Reward for an action
-		m_reward += 3;
+		m_reward = 3;
 		// Check is game is finished
 		win_cond = ( (board[0][0] == board[0][1] == board[0][2] == 1) || win_cond == 1) ? 1 : 0;
 		win_cond = ( (board[1][0] == board[1][1] == board[1][2] == 1) || win_cond == 1) ? 1 : 0;
@@ -1131,13 +1131,13 @@ void TicTacToe::performAction(action_t action) {
 		if (win_cond) {
 			// If game is finished, then agent has won, and get reward of 5
 			game_finished = 1;
-			m_reward += 5;
+			m_reward = 5;
 
 		// check if board fills up
 		} else if (open_squares.size() == 0) {
 			// game is a draw
 			game_finished = 1;
-			m_reward += 4;
+			m_reward = 4;
 		} else {
 			// find how many moves are possible, then make random move
 			// number_of_open_sqaures = open_squares.size();
@@ -1158,7 +1158,7 @@ void TicTacToe::performAction(action_t action) {
 			std::random_shuffle ( open_squares.begin(), open_squares.end() );
 			random_choice = open_squares[0];
 
-			state += pow(4,random_choice)*2;
+			state = pow(4,random_choice)*2;
 
 			board[random_choice / 3][random_choice % 3] = -1;
 
@@ -1176,10 +1176,10 @@ void TicTacToe::performAction(action_t action) {
 
 			if (opponent_win_cond) {
 				game_finished = 1;
-				m_reward += 1;
+				m_reward = 1;
 			} else if (open_squares.size() == 0) {
 				game_finished = 1;
-				m_reward += 4;
+				m_reward = 4;
 			}
 		}
 	}
@@ -1253,7 +1253,7 @@ void ExtendedTiger::performAction(action_t action) {
 	// 4 is open door 2
 	switch(action){
 		// Cases for actions
-		case 1:
+		case 0:
 			// When action is standing, if already standing, take less reward for invalid action
 			if (state == 1) {
 				m_reward = 90;
@@ -1261,31 +1261,37 @@ void ExtendedTiger::performAction(action_t action) {
 			} else{
 				state = 1;
 				m_reward = 99;
+				m_observation = (pow(2,2)*state);
 			}
 			break;
-		case 2:
+		case 1:
 			// When action is listen, take less reward if invalid action (while standing), else gain observation
 			if (state == 1) {
 				m_reward = 90;
+				m_observation = (pow(2,2)*state);
 			} else{
 				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door ) + (pow(2,2)*state);
 				m_reward = 99;
+			}
+			break;
+		case 2:
+			// When action is open door, less reward if sitting, then check if door is gold or tiger
+			if (state == 0) {
+				m_reward = 90;
+				m_observation = (pow(2,2)*state);
+			} else {
+				m_reward = (1 == gold_door) ? 130 : 0;
+				m_observation = (pow(2,2)*state);
 			}
 			break;
 		case 3:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward = 90;
-			} else {
-				m_reward = (1 == gold_door) ? 130 : 0;
-			}
-			break;
-		case 4:
-			// When action is open door, less reward if sitting, then check if door is gold or tiger
-			if (state == 0) {
-				m_reward = 90;
+				m_observation = (pow(2,2)*state);
 			} else {
 				m_reward = (2 == gold_door) ? 130 : 0;
+				m_observation = (pow(2,2)*state);
 			}
 			break;
 	}

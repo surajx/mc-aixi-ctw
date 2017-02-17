@@ -20,7 +20,7 @@ static SearchNode*  root_ptr; // pointer to the root node
 percept_t perceptIndex(percept_t obs, percept_t rew);
 
 // determine the best action by searching ahead
-extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act, bool tree_initialized);
 
 static reward_t playout(Agent &agent, unsigned int playout_len, int test_arg);
 

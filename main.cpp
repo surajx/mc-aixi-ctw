@@ -37,6 +37,8 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		assert(0 <= terminate_lifetime);
 	}
 
+	bool tree_initialized = false;
+	
 	// Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
 
@@ -49,7 +51,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		// Get a percept from the environment
 		percept_t observation = env.getObservation();
 		percept_t reward = env.getReward();
-
+		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
 		// Update agent's environment model with the new percept
 		ai.modelUpdate(observation, reward); // TODO: implement in agent.cpp
 
@@ -57,11 +59,13 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		action_t action;
 		bool explored = false;
 		if (explore && rand01() < explore_rate) {
+			std::cout << "exploring" << std::endl;
 			explored = true;
 			action = ai.genRandomAction();
 		}
 		else {
-			action = search(ai, observation, reward, action);
+			action = search(ai, observation, reward, action, tree_initialized);
+			tree_initialized = true;
 		}
 
 		// Send an action to the environment
@@ -173,7 +177,7 @@ int main(int argc, char *argv[]) {
 	options["ct-depth"] = "3";
 	options["agent-horizon"] = "16";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "500";
+	options["num-simulations"] = "5";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
@@ -214,26 +218,26 @@ int main(int argc, char *argv[]) {
 	else if (environment_name == "extended-tiger") {
 		// TODO: instantiate "env" (if appropriate)
 		env = new ExtendedTiger(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "4";
+		options["agent-actions"] = "4";
+		options["observation-bits"] = "3";
+		options["reward-bits"] = "7";
 	}
 	else if (environment_name == "4x4-grid") {
 		// TODO: instantiate "env" (if appropriate)
 	}
 	else if (environment_name == "tictactoe") {
 		// TODO: instantiate "env" (if appropriate)
-		env = new KuhnPoker(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
+		env = new TicTacToe(options);
+		options["agent-actions"] = "9";
+		options["observation-bits"] = "18";
 		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		// TODO: instantiate "env" (if appropriate)
-		env = new KuhnPoker(options);
+		env = new BiasedRockPaperSciessor(options);
 		options["agent-actions"] = "2";
 		options["observation-bits"] = "4";
-		options["reward-bits"] = "4";
+		options["reward-bits"] = "3";
 	}
 	else if (environment_name == "kuhn-poker") {
 		// TODO: instantiate "env" (if appropriate)
@@ -244,10 +248,17 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "pacman") {
 		// TODO: instantiate "env" (if appropriate)
-		env = new KuhnPoker(options);
+		env = new Pacman(options);
+		options["agent-actions"] = "4";
+		options["observation-bits"] = "16";
+		options["reward-bits"] = "8";
+	}
+	else if (environment_name == "ctwtest") {
+		// TODO: instantiate "env" (if appropriate)
+		env = new CTWTest(options);
 		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "4";
+		options["observation-bits"] = "1";
+		options["reward-bits"] = "1";
 	}
 	else {
 		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
