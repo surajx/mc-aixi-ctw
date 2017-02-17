@@ -109,6 +109,10 @@ void ContextTree::revertHistory(uint_t newsize) {
     sequenceHistory.pop_back();
 }
 
+void ContextTree::revertHistory() {
+  sequenceHistory.pop_back();
+}
+
 double ContextTree::predict(symbol_t sym) {
   double logProbWeighted = rootNode->getLogProbWeighted();
   update(sym);

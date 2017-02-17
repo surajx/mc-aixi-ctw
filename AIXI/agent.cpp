@@ -6,6 +6,8 @@
 
 #include "agent.hpp"
 
+#include <deque>
+
 
 // construct a learning agent from the command line arguments
 Agent::Agent(options_t & options) {
@@ -106,15 +108,22 @@ action_t Agent::genRandomAction(void) const {
 
 // generate a percept distributed according
 // to our history statistics
-percept_t Agent::genPercept(void) const {
-	return NULL; // TODO: implement
+percept_t Agent::genPercept(uint_t percept_size) const {
+	symbol_list_t percept;
+	// uint_t percept_size = m_obs_bits + m_rew_bits;
+	m_ct->genNextSymbols(percept, percept_size);
+	return decode(percept, percept_size);
 }
 
 
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
-percept_t Agent::genPerceptAndUpdate(void) {
-	return NULL; // TODO: implement
+percept_t Agent::genPerceptAndUpdate(uint_t percept_size) {
+	symbol_list_t percept;
+	// uint_t percept_size = m_obs_bits + m_rew_bits;
+	m_ct->genNextSymbolsAndUpdate(percept, percept_size);
+	m_last_update_percept = true;
+	return decode(percept, percept_size);
 }
 
 
@@ -142,8 +151,8 @@ void Agent::modelUpdate(action_t action) {
 	// Update internal model
 	symbol_list_t action_syms;
 	encodeAction(action_syms, action);
-	m_ct->update(action_syms);
-	// m_ct->updateHistory(action_syms); //Not Needed
+	// m_ct->update(action_syms); //Not Needed
+	m_ct->updateHistory(action_syms); 
 
 	m_time_cycle++;
 	m_last_update_percept = false;
@@ -156,6 +165,26 @@ bool Agent::modelRevert(const ModelUndo &mu) {
 	return NULL; // TODO: implement
 }
 
+bool Agent::modelRevert() {
+	// std::deque<symbol_t> q = m_ct->getFullHistory();
+	// std::cout << "CT History Size: "<< q.size() <<std::endl;
+	// std::cout << "CT History Size: "<< m_horizon*(m_obs_bits + m_rew_bits + m_actions_bits) <<std::endl;
+	// std::cout << "m_actions_bits: " << m_actions_bits << std::endl;
+  for (size_t simIdx = 0; simIdx < m_horizon; simIdx++) {
+    for (size_t perceptBit = 0; perceptBit < m_obs_bits + m_rew_bits;
+         perceptBit++) {
+      m_ct->revert();
+    }
+    for (size_t actionBit = 0; actionBit < m_actions_bits;
+         actionBit++) {
+      m_ct->revertHistory();
+    }
+		// q = m_ct->getFullHistory();
+		// std::cout << "CT History Size: "<< q.size() <<std::endl;
+  }
+	// q = m_ct->getFullHistory();
+	// std::cout << "CT History Size: "<< q.size() <<std::endl;
+}
 
 void Agent::reset(void) {
 	m_ct->clear();

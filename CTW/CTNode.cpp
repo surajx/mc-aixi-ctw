@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <iostream>
 
 #include "../common/types.hpp"
 #include "../common/constants.hpp"
@@ -99,6 +100,10 @@ void CTNode::updateLeaf(const symbol_t symbol, const int node_action) {
 }
 
 void CTNode::probSanity() {
-  assert(logProbKT <= 0);
-  assert(logProbWeighted <= 0);
+  assert(logProbKT <= 1.0e-10);
+  assert(logProbWeighted <= 1.0e-10);
+  if (logProbKT > 0)
+    logProbKT=0;
+  if (logProbWeighted > 0)
+    logProbWeighted=0;
 }

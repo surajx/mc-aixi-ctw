@@ -53,8 +53,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		percept_t reward = env.getReward();
 		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
 		// Update agent's environment model with the new percept
-		ai.modelUpdate(observation, reward); // TODO: implement in agent.cpp
-
+		ai.modelUpdate(observation, reward); // TODO: implement in agent.cpp		
 		// Determine best exploitive action, or explore
 		action_t action;
 		bool explored = false;
@@ -62,8 +61,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			std::cout << "exploring" << std::endl;
 			explored = true;
 			action = ai.genRandomAction();
-		}
-		else {
+		} else {
 			action = search(ai, observation, reward, action, tree_initialized);
 			tree_initialized = true;
 		}
@@ -73,6 +71,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		// Update agent's environment model with the chosen action
 		ai.modelUpdate(action); // TODO: implement in agent.cpp
+
 
 		// Log this turn
 		logger << "cycle: " << cycle << std::endl;

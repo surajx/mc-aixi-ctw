@@ -60,11 +60,11 @@ public:
 
 	// generate a percept distributed according
 	// to our history statistics
-	percept_t genPercept(void) const; // TODO: implement in agent.cpp
+	percept_t genPercept(uint_t percept_size) const; // TODO: implement in agent.cpp
 
 	// generate a percept distributed to our history statistics, and
 	// update our mixture environment model with it
-	percept_t genPerceptAndUpdate(void); // TODO: implement in agent.cpp
+	percept_t genPerceptAndUpdate(uint_t percept_size); // TODO: implement in agent.cpp
 
 	// update the internal agent's model of the world
 	// due to receiving a percept or performing an action
@@ -74,6 +74,8 @@ public:
 	// revert the agent's internal model of the world
 	// to that of a previous time cycle, false on failure
 	bool modelRevert(const ModelUndo &mu); // TODO: implement in agent.cpp
+
+	bool modelRevert();
 
 	// resets the agent
 	void reset(void);
