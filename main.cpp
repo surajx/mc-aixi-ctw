@@ -13,7 +13,7 @@
 #include "common/types.hpp"
 
 // Streams for logging
-std::ofstream log;        // A verbose human-readable log
+std::ofstream logger;        // A verbose human-readable log
 std::ofstream compactLog; // A compact comma-separated value log
 
 // The main agent/environment interaction loop
@@ -42,14 +42,14 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		// check for agent termination
 		if (terminate_check && ai.lifetime() > terminate_lifetime) {
-			log << "info: terminating lifetiment" << std::endl;
+			logger << "info: terminating lifetiment" << std::endl;
 			break;
 		}
 
 		// Get a percept from the environment
 		percept_t observation = env.getObservation();
 		percept_t reward = env.getReward();
-
+		
 		// Update agent's environment model with the new percept
 		ai.modelUpdate(observation, reward); // TODO: implement in agent.cpp
 
@@ -63,7 +63,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		else {
 			action = search(ai); // TODO: implement in search.cpp
 		}
-
+		
 		// Send an action to the environment
 		env.performAction(action); // TODO: implement for each environment
 
@@ -71,14 +71,14 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		ai.modelUpdate(action); // TODO: implement in agent.cpp
 
 		// Log this turn
-		log << "cycle: " << cycle << std::endl;
-		log << "observation: " << observation << std::endl;
-		log << "reward: " << reward << std::endl;
-		log << "action: " << action << std::endl;
-		log << "explored: " << (explored ? "yes" : "no") << std::endl;
-		log << "explore rate: " << explore_rate << std::endl;
-		log << "total reward: " << ai.reward() << std::endl;
-		log << "average reward: " << ai.averageReward() << std::endl;
+		logger << "cycle: " << cycle << std::endl;
+		logger << "observation: " << observation << std::endl;
+		logger << "reward: " << reward << std::endl;
+		logger << "action: " << action << std::endl;
+		logger << "explored: " << (explored ? "yes" : "no") << std::endl;
+		logger << "explore rate: " << explore_rate << std::endl;
+		logger << "total reward: " << ai.reward() << std::endl;
+		logger << "average reward: " << ai.averageReward() << std::endl;
 
 		// Log the data in a more compact form
 		compactLog << cycle << ", " << observation << ", " << reward << ", "
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 
 	// Set up logging
 	std::string log_file = argc < 3 ? "log" : argv[2];
-	log.open((log_file + ".log").c_str());
+	logger.open((log_file + ".log").c_str());
 	compactLog.open((log_file + ".csv").c_str());
 
 	// Print header to compactLog
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
 	// Run the main agent/environment interaction loop
 	mainLoop(ai, *env, options);
 
-	log.close();
+	logger.close();
 	compactLog.close();
 
 	return 0;

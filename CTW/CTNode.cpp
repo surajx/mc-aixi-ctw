@@ -1,10 +1,10 @@
-/****************************************************************************************
+/******************************************************************************
 ** TODO: Documentation
 **
 ** Author: Suraj Narayanan Sasikumar
-***************************************************************************************/
+******************************************************************************/
 
-#include <math.h>
+#include <cmath>
 #include <cassert>
 
 #include "../common/types.hpp"
@@ -73,15 +73,21 @@ void CTNode::update(const symbol_t symbol, const int node_action) {
 
   // (p_w0.p_w1)/(p_kt) = exp(log(p_w0) + log(p_w1) - log(p_kt))
   double probW01_KTRatio = exp(logProbW0 + logProbW1 - logProbKT);
+  if (probW01_KTRatio > 1) {
+    probW01_KTRatio = exp(logProbKT - logProbW0 - logProbW1);
 
+    // log(p_w) = log(p_w0) + log(p_w1) + log(1 + (p_kt)/(p_w0.p_w1)) - log(2)
+    logProbWeighted = logProbW0 + logProbW1;
+  } else {
+    // log(p_w) = log(p_kt) + log(1 + (p_w0.p_w1)/(p_kt)) - log(2)
+    logProbWeighted = logProbKT;
+  }
   // Detecting underflow NaN!=NaN
-  // if (p_w0.p_w1)/(p_kt)==NaN then log(1 + (p_w0.p_w1)/(p_kt))=log(1)=0
+  // if ratio underflows then log(1 + ratio)=log(1)=0
   if (probW01_KTRatio != probW01_KTRatio) {
     probW01_KTRatio = 0;
   }
-
-  // log(p_w) = log(p_kt) + log(1 + (p_w0.p_w1)/(p_kt)) - log(2)
-  logProbWeighted = logProbKT + log1p(probW01_KTRatio) - log(2);
+  logProbWeighted += log1p(probW01_KTRatio) - log(2);
   probSanity();
 }
 

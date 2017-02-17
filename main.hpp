@@ -7,7 +7,7 @@
 #include <vector>
 
 // Streams for logging (defined in main.cpp)
-extern std::ofstream log;
+extern std::ofstream logger;
 extern std::ofstream compactLog;
 
 #endif // __MAIN_HPP__
