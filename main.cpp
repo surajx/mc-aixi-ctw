@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 	options["ct-depth"] = "3";
 	options["agent-horizon"] = "16";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "5";
+	options["num-simulations"] = "500";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
@@ -213,21 +213,41 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "extended-tiger") {
 		// TODO: instantiate "env" (if appropriate)
+		env = new ExtendedTiger(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "4x4-grid") {
 		// TODO: instantiate "env" (if appropriate)
 	}
 	else if (environment_name == "tictactoe") {
 		// TODO: instantiate "env" (if appropriate)
+		env = new KuhnPoker(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		// TODO: instantiate "env" (if appropriate)
+		env = new KuhnPoker(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "kuhn-poker") {
 		// TODO: instantiate "env" (if appropriate)
+		env = new KuhnPoker(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "pacman") {
 		// TODO: instantiate "env" (if appropriate)
+		env = new KuhnPoker(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "4";
 	}
 	else {
 		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
