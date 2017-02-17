@@ -206,6 +206,12 @@ int main(int argc, char *argv[]) {
 		options["observation-bits"] = "1";
 		options["reward-bits"] = "1";
 	}
+	else if (environment_name == "ctw-test") {
+		env = new CTWTest(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "1";
+		options["reward-bits"] = "1";
+	}
 	else if (environment_name == "1d-maze") {
 		// TODO: instantiate "env" (if appropriate)
 	}
