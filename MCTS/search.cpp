@@ -29,6 +29,7 @@ public:
 				children[i] = NULL;
 			}
 			// START block for testing
+			test_tree_size++; // test
 			if (m_chance_node) {
 				// std::cout << "creating chance node" << std::endl;
 			} else {
@@ -42,6 +43,7 @@ public:
 	~SearchNode(void) {
 		// if there are children recursively delete all offspring
 		// std::cout << "delete node with m_visits: " << m_visits << std::endl;
+		test_tree_size--; // test
 		for (int i=0;i<m_children;i++) {
 			if (children[i] != NULL && children[i] !=  root_ptr) {
 				delete children[i];
@@ -53,12 +55,18 @@ public:
 	// return unif random one of the best actions
 	action_t bestAction(Agent &agent) const {
 		std::vector<action_t> best_children;
-		best_children.push_back(0);
-		double best_mean = children[0]->expectation();
+		double best_mean;				
+		for (action_t i = 1; i < m_children;i++) {
+			if (children[i] != NULL) {
+				best_children.push_back(i);
+				best_mean = children[i]->expectation();
+				break;
+			}
+		}
 		unsigned int num_best_children = 1;
 		for (action_t i = 1; i < m_children;i++) {
 			if (children[i] != NULL) {
-				if (children[i]->expectation() > children[best_children[0]]->expectation()) { // new best
+				if (children[i]->expectation() > best_mean) { // new best
 					best_children = {i};
 					best_mean = children[i]->expectation();
 					num_best_children = 1;
@@ -107,7 +115,6 @@ public:
 					}
 				}
 			}
-			std::cout << "call modelUpdate from selectAction" << std::endl;
 			agent.modelUpdate(a_max);
 			return children[a_max];
 		}
@@ -205,7 +212,7 @@ static reward_t playout(Agent &agent, unsigned int horiz, int test_arg) {
 		percept_t new_obs = agent.genPerceptAndUpdate(obsBits);
 		percept_t new_rew = agent.genPerceptAndUpdate(rewBits);
 		rew = rew + new_rew;
-	}	
+	}
 	agent.modelRevert();
 	// std::cout << "af Cycle "  << std::endl;
 	return rew;
@@ -238,6 +245,7 @@ void initializeTree(Agent &agent) {
 	obsBits = agent.numObservations();
 	rewBits = agent.numRewards();
 	root_ptr = new SearchNode(false,numActions);
+	test_tree_size = 0; // test
 }
 
 // Prune the tree by updating the root node and pruning dead branches
@@ -275,8 +283,5 @@ extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, act
 		// std::cout << "sim: " << sim << std::endl;
 		reward_t r = root_ptr->sample(agent, m, sim-1); // test statement
 	}
-	// std::cout << "End search. obsBits rewBits: " << obsBits << rewBits << std::endl;
-	return 1; // test
-	// std::cout << "End search. Return: " << root_ptr->bestAction(agent) << std::endl;
-	//return root_ptr->bestAction(agent);
+	return root_ptr->bestAction(agent);
 }

@@ -38,8 +38,20 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 	}
 
 	bool tree_initialized = false;
-	
-	// Agent/environment interaction loop
+
+	percept_t observation;
+	percept_t reward;
+	action_t action;
+
+	while (ai.historySize() <= strExtract<unsigned int>(options["ct-depth"])) {
+		observation = env.getObservation();
+		reward = env.getReward();
+		action = ai.genRandomAction();
+		ai.modelUpdate(observation, reward);
+		ai.modelUpdate(action);
+	}
+
+        // Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
 
 		// check for agent termination
@@ -49,28 +61,27 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		}
 
 		// Get a percept from the environment
-		percept_t observation = env.getObservation();
-		percept_t reward = env.getReward();
+		observation = env.getObservation();
+		reward = env.getReward();
 		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
 		// Update agent's environment model with the new percept
 		ai.modelUpdate(observation, reward); // TODO: implement in agent.cpp		
 		// Determine best exploitive action, or explore
-		action_t action;
 		bool explored = false;
 		if (explore && rand01() < explore_rate) {
 			std::cout << "exploring" << std::endl;
 			explored = true;
 			action = ai.genRandomAction();
-		} else {
+		} else {			
 			action = search(ai, observation, reward, action, tree_initialized);
 			tree_initialized = true;
 		}
-		
+
 		// Send an action to the environment
 		env.performAction(action); // TODO: implement for each environment
 
-		// Update agent's environment model with the chosen action
-		ai.modelUpdate(action); // TODO: implement in agent.cpp
+		// Update agent's environment model with the chosen action		
+		ai.modelUpdate(action); // TODO: implement in agent.cpp		
 
 
 		// Log this turn
@@ -174,9 +185,9 @@ int main(int argc, char *argv[]) {
 
 	// Default configuration values
 	options["ct-depth"] = "3";
-	options["agent-horizon"] = "16";
+	options["agent-horizon"] = "9";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "5";
+	options["num-simulations"] = "500";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 

@@ -15,6 +15,7 @@ static unsigned int rewBits; // number of reward bits
 static double C; // exploration-exploitation constant C
 static unsigned int m; // also known as horizon, or max tree depth.
 static SearchNode*  root_ptr; // pointer to the root node
+static unsigned int test_tree_size; // test
 
 // map an (o,r) pair to a unique index 
 percept_t perceptIndex(percept_t obs, percept_t rew);
