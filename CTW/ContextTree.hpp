@@ -94,6 +94,11 @@ class ContextTree {
   void revertHistory(uint_t newsize);
 
   /**
+  * Shrinks the history down to by one bit.
+  */
+  void revertHistory();
+
+  /**
   * Estimates the probability of observing a particular symbol
   *
   * @param  sym The given binary symbol
