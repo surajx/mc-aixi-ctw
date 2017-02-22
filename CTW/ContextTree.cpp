@@ -97,14 +97,18 @@ void ContextTree::updateHistory(const symbol_list_t& symbol_list) {
 
 void ContextTree::revert() {
   // CTW history should always have size >= depth
-  assert(sequenceHistory.size() >= maxTreeDepth + 1);
+  assert(
+      "Revert called on CTW which makes history size less than tree depth: " &&
+      sequenceHistory.size() >= maxTreeDepth + 1);
   const symbol_t lastSym = sequenceHistory.back();
   sequenceHistory.pop_back();
   update(lastSym, 0, rootNode, NODE_REVERT);
 }
 
 void ContextTree::revertHistory(uint_t newsize) {
-  assert(newsize <= sequenceHistory.size());
+  assert(
+      "New reverted history size should be less than current history size: " &&
+      newsize <= sequenceHistory.size());
   while (sequenceHistory.size() > newsize)
     sequenceHistory.pop_back();
 }

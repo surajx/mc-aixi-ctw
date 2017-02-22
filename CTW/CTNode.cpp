@@ -50,6 +50,16 @@ void CTNode::updateLogKT(const symbol_t symbol, const int node_action) {
     logProbKT += logKTMul(symbol);
     symbolCount[symbol] += 1;
   } else {  // NODE_REVERT
+    if (symbolCount[symbol] == 0) {
+      std::cout << "WARNING: Revert Called on a CTW Node which has not seen "
+                   "any symbol."
+                << std::endl;
+      std::cout << "DEBUG: Revert cancelled (nothing to revert)." << std::endl;
+      std::cout << "DEBUG: symbolCount[symbol]=" << symbolCount[symbol]
+                << std::endl;
+      std::cout << "DEBUG: logProbKT=" << logProbKT << std::endl;
+      return;
+    }
     symbolCount[symbol] -= 1;
     logProbKT -= logKTMul(symbol);
   }
@@ -100,10 +110,16 @@ void CTNode::updateLeaf(const symbol_t symbol, const int node_action) {
 }
 
 void CTNode::probSanity() {
-  assert(logProbKT <= 1.0e-10);
-  assert(logProbWeighted <= 1.0e-10);
+  assert(
+      "Log Probability should be always less that 0, with a proposed tolerance "
+      "of 1.0e-10. " &&
+      logProbKT <= 1.0e-10);
+  assert(
+      "Log Probability should be always less that 0, with a proposed tolerance "
+      "of 1.0e-10. " &&
+      logProbWeighted <= 1.0e-10);
   if (logProbKT > 0)
-    logProbKT=0;
+    logProbKT = 0;
   if (logProbWeighted > 0)
-    logProbWeighted=0;
+    logProbWeighted = 0;
 }
