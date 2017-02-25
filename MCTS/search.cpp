@@ -225,6 +225,7 @@ extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, act
 		reward_t r = root_ptr->sample(agent, m);
 	}
 	std::cout << "Exit search" << std::endl;
+	
 	std::cout << root_ptr->bestAction(agent) << std::endl;
 	return root_ptr->bestAction(agent);
 }
