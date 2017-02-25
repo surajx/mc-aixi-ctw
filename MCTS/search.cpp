@@ -30,19 +30,12 @@ public:
 			}
 			// START block for testing
 			test_tree_size++; // test
-			if (m_chance_node) {
-				// std::cout << "creating chance node" << std::endl;
-			} else {
-				// std::cout << "creating action node" << std::endl;
-			}
-			// END block for testing
 	}
 
 	// recursively destruct the SearchNode and its children.
 	// do not destruct the newly assigned root node.
 	~SearchNode(void) {
 		// if there are children recursively delete all offspring
-		// std::cout << "delete node with m_visits: " << m_visits << std::endl;
 		test_tree_size--; // test
 		for (int i=0;i<m_children;i++) {
 			if (children[i] != NULL && children[i] !=  root_ptr) {
@@ -55,8 +48,8 @@ public:
 	// return unif random one of the best actions
 	action_t bestAction(Agent &agent) const {
 		std::vector<action_t> best_children;
-		double best_mean;				
-		for (action_t i = 1; i < m_children;i++) {
+		double best_mean;
+		for (action_t i = 0; i < m_children;i++) {
 			if (children[i] != NULL) {
 				best_children.push_back(i);
 				best_mean = children[i]->expectation();
@@ -64,13 +57,13 @@ public:
 			}
 		}
 		unsigned int num_best_children = 1;
-		for (action_t i = 1; i < m_children;i++) {
+		for (action_t i = 0; i < m_children;i++) {
 			if (children[i] != NULL) {
 				if (children[i]->expectation() > best_mean) { // new best
 					best_children = {i};
 					best_mean = children[i]->expectation();
 					num_best_children = 1;
-				} else if (children[i]->expectation() == children[best_children[0]]->expectation()) { // more than one best child
+				} else if (children[i]->expectation() == children[best_children[0]]->expectation() && i != best_children[0]) { // more than one best child
 					best_children.push_back(i);
 					num_best_children++;
 				}
@@ -82,11 +75,10 @@ public:
 
 
 	// select action based on UCT
-	SearchNode* selectAction(Agent &agent, unsigned int horiz, int test_arg) {
+	SearchNode* selectAction(Agent &agent, unsigned int horiz) {
 		std::vector<action_t> unvisited;
 		for (action_t a = 0; a < numActions; a++) {
 			if (children[a] == NULL) {
-				// std::cout << "selectAction finds unvisited action: " << a << std::endl;
 				unvisited.push_back(a);
 			}
 		}
@@ -94,24 +86,19 @@ public:
 			int ran_index = randRange(unvisited.size());
 			action_t ran_action = unvisited[ran_index];
 			// create child a if necessary,
-			// std::cout << "selectAction selects unvisited action: " << ran_action << std::endl;
 			SearchNode* ha_ptr = new SearchNode(true,numPercepts);
 			children[ran_action] = ha_ptr;
 			return ha_ptr;
 		} else { // find a_max = argmax, return a_max
-			// std::cout << "selectAction finds all actions were visited." << std::endl;
 			action_t a_max = 0;
 			double best_val = 0;
 			for (action_t a = 0; a < numActions; a++) {
 				if (children[a] != NULL) {
-					// std::cout << "selectAction finding argmax. a: " << a << ", children[a]: " << children[a] << std::endl;
 					double curr_val = (1.0 / (horiz * (agent.maxReward() - agent.minReward() ))) * children[a]->visits()
 						+ C * sqrt(log10(m_visits) / children[a]->visits());
-					// std::cout << "curr_val: " << curr_val << std::endl;
 					if (curr_val > best_val) {
 						a_max = a;
 						best_val = curr_val;
-						// std::cout << "new best action " << a_max << " with value " << best_val << std::endl;
 					}
 				}
 			}
@@ -122,61 +109,29 @@ public:
 
 	// perform a sample run through this node and its children,
 	// returning the accumulated reward from this sample run
-	reward_t sample(Agent &agent, unsigned int horiz, int test_arg) {
-		// std::cout << "Enter sample. horiz: " << horiz << std::endl;
-		// START part of testing
-		if (test_arg == 4) {
-			test_arg = 2;
-		}
-		// END part of testing
-		// std::cout << "test_arg: " << test_arg << std::endl;
-		// std::cout << "m_chance_node: " << m_chance_node << std::endl;
+	reward_t sample(Agent &agent, unsigned int horiz) {
 		reward_t rew = 0;
 		if (horiz == 0) {
 			return rew;
 		} else if (m_chance_node) {
-			// std::cout << "call modelUpdate from sample" << std::endl;
 			percept_t new_obs = agent.genPerceptAndUpdate(obsBits);
 			percept_t new_rew = agent.genPerceptAndUpdate(rewBits);
-			// // START test code generate percept
-			// percept_t new_obs;
-			// percept_t new_rew;
-			// if (test_arg == 1 || test_arg == 3) {
-			// 	new_obs = 1;
-			// 	new_rew = 1;
-			// } else if (test_arg == 2) {
-			// 	new_obs = 1;
-			// 	new_rew = 1;
-			// } else {
-			// 	// std::cout << "h wrongly identified as chance node" << std::endl;
-			// 	new_obs = 0;
-			// 	new_rew = 0;
-			// }
-			// percept_t percept_index = perceptIndex(new_obs,new_rew);
-			// // std::cout << "new_obs new_rew: " << new_obs << new_rew << ", percept_index: " << percept_index << std::endl;
-			// // END test code generate percept
-
 			percept_t percept_index = perceptIndex(new_obs,new_rew);
-
 			SearchNode* hor_ptr = new SearchNode(false,numActions);
 			if (children[percept_index] == NULL) {
 				children[percept_index] = hor_ptr;
-				// std::cout << "Percept witnessed for first time" << std::endl;
 			} else {
 				hor_ptr = children[percept_index];
-				// std::cout << "Percept witnessed before" << std::endl;
 			}
-			rew = new_rew + hor_ptr->sample(agent, horiz - 1, test_arg);
+			rew = new_rew + hor_ptr->sample(agent, horiz - 1);
 		} else if (m_visits == 0) {
-			rew = playout(agent, horiz, test_arg);
+			rew = playout(agent, horiz);
 		} else { // we are at action node with previous visits
-			SearchNode* ha_ptr = selectAction(agent, horiz, test_arg);
-			rew = ha_ptr->sample(agent, horiz, test_arg);
+			SearchNode* ha_ptr = selectAction(agent, horiz);
+			rew = ha_ptr->sample(agent, horiz);
 		}
 		m_mean =  (1.0 / (m_visits+1)) * (rew + m_visits*m_mean);
 		m_visits++;
-		// std::cout << "End sample. horiz: " << horiz << " and m_chance_node: " << m_chance_node << std::endl;
-		// std::cout << "m_mean: " << m_mean << ", m_visits: " << m_visits << ", rew: " << rew << std::endl;
 		return rew;
 	}
 
@@ -200,21 +155,16 @@ private:
 
 // simulate a path through a hypothetical future for the agent within its
 // internal model of the world, returning the accumulated reward.
-static reward_t playout(Agent &agent, unsigned int horiz, int test_arg) {
+static reward_t playout(Agent &agent, unsigned int horiz) {
 	reward_t rew = 0;
-	rew = rew + test_arg; // test
-	// std::cout << "Executing playout. test_arg: " << test_arg << std::endl;
 	for (int i = 0;i < horiz; i++) {
 		action_t act = (action_t) randRange(numActions);
-		// std::cout << "call modelUpdate from playout" << std::endl;
 		agent.modelUpdate(act);
-		// std::cout << "call genPerceptAndUpdate from playout" << std::endl;
 		percept_t new_obs = agent.genPerceptAndUpdate(obsBits);
 		percept_t new_rew = agent.genPerceptAndUpdate(rewBits);
 		rew = rew + new_rew;
 	}
 	agent.modelRevert();
-	// std::cout << "af Cycle "  << std::endl;
 	return rew;
 }
 
@@ -225,7 +175,6 @@ unsigned int countPercepts(unsigned int num_obs, unsigned num_rew) {
 
 // encode an observation and a reward as a single observation-reward
 percept_t perceptIndex(percept_t obs, percept_t rew) {
-	// return pow(2,obsBits) * obs + rew;
 	symbol_list_t obs_bitstring;
 	symbol_list_t rew_bitstring;
 	encode(obs_bitstring, obs, obsBits);
@@ -236,10 +185,8 @@ percept_t perceptIndex(percept_t obs, percept_t rew) {
 
 // initialize the tree by setting the constants and creating a root node
 void initializeTree(Agent &agent) {
-	// std::cout << "initializing" << std::endl;
 	numActions = agent.numActions(); // set number of actions
 	numPercepts = countPercepts(agent.numObservations(), agent.numRewards()); // set number of percepts
-	// std::cout << "numActions: " << numActions << ", numPercepts: " << numPercepts << std::endl;
 	C = agent.exploreExploitRatio();
 	m = agent.horizon();
 	obsBits = agent.numObservations();
@@ -252,36 +199,32 @@ void initializeTree(Agent &agent) {
 void pruneTree(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act) {
 	SearchNode* old_root_ptr = root_ptr;
 	int prev_obs_rew_index = (int) perceptIndex(prev_obs,prev_rew);
-	// std::cout << "pruning with prev_act: " << prev_act << ", prev_obs_rew_index: " << prev_obs_rew_index << std::endl;
 	SearchNode* chance_child = root_ptr->getChildren()[prev_act];
 	if (chance_child == NULL) {
-		// std::cout << "chance child did not exist." << std::endl;
+		std::cout << "Prune: witness action for which no child existed" << std::endl;
 		chance_child = new SearchNode(true,numPercepts);
 	}
 	SearchNode* action_child = chance_child->getChildren()[prev_obs_rew_index];
 	if (action_child == NULL) {
-		// std::cout << "action child did not exist." << std::endl;
+		std::cout << "Prune: witness percept for which no child existed" << std::endl;
 		action_child = new SearchNode(false,numActions);
 	}
 	root_ptr = action_child;
-	//root_ptr = root_ptr->getChildren()[prev_act]->getChildren()[prev_obs_rew_index];
-	// root_ptr = root_ptr->getChildren()[1]->getChildren()[1]; // test
-	// std::cout << "setting new root address: " << root_ptr << std::endl;
 	delete old_root_ptr;
 }
 
 // determine the best action by searching ahead using MCTS
 extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act, bool tree_initialized) {
-	// std::cout << "Start search. lifetime: " << agent.lifetime() << std::endl;
+	std::cout << "Enter search" << std::endl; // testing
 	if (!tree_initialized) {
 		initializeTree(agent);
 	} else {
 		pruneTree(agent, prev_obs, prev_rew, prev_act);
 	}
-	// std::cout << "agent.numSimulations(): " << agent.numSimulations() << std::endl;
 	for (unsigned int sim = 1;sim <= agent.numSimulations(); sim++) {
-		// std::cout << "sim: " << sim << std::endl;
-		reward_t r = root_ptr->sample(agent, m, sim-1); // test statement
+		reward_t r = root_ptr->sample(agent, m);
 	}
+	std::cout << "Exit search" << std::endl;
+	std::cout << root_ptr->bestAction(agent) << std::endl;
 	return root_ptr->bestAction(agent);
 }
