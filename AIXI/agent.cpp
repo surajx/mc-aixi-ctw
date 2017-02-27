@@ -152,7 +152,7 @@ void Agent::modelUpdate(action_t action) {
 	symbol_list_t action_syms;
 	encodeAction(action_syms, action);
 	// m_ct->update(action_syms); //Not Needed
-	m_ct->updateHistory(action_syms); 
+	m_ct->updateHistory(action_syms);
 
 	m_time_cycle++;
 	m_last_update_percept = false;
@@ -179,6 +179,8 @@ bool Agent::modelRevert() {
          actionBit++) {
       m_ct->revertHistory();
     }
+		std::cout << "modelRevert. current time cycle: " << m_time_cycle << std::endl;
+		m_time_cycle--; // after reverting one obs-rew-act triple, set lifetime back by 1
 		// q = m_ct->getFullHistory();
 		// std::cout << "CT History Size: "<< q.size() <<std::endl;
   }
