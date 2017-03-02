@@ -220,16 +220,6 @@ public:
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
 
-	virtual void move(int direction, int power, Ball ball, Robot agent);
-
-	virtual void turn_body(int direction, Robot agent);
-
-	virtual void turn_head(int direction, Robot agent);
-
-	virtual void kick(int direction, Ball ball, Robot agent);
-
-	virtual int check_vision(Robot agent, Ball ball);
-
 	struct Robot {
 		int x;
 		int y;
@@ -241,6 +231,18 @@ public:
 		int x;
 		int y;
 	};
+
+	virtual void move(int direction, int power, SoccerBall ball, Robot agent);
+
+	virtual void turn_body(int direction, Robot agent);
+
+	virtual void turn_head(int direction, Robot agent);
+
+	virtual void kick(int direction, SoccerBall ball, Robot agent);
+
+	virtual int check_vision(Robot agent, SoccerBall ball);
+
+	
 
 private:
 	Robot agent;
@@ -256,6 +258,8 @@ private:
 	int vision_observation;
 	int position_observation;
 	int ball_vision_number;
+	int ball_in_opponent_goals;
+	int ball_in_agent_goals;
 
 };
 
