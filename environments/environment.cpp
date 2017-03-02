@@ -58,6 +58,11 @@ void CTWTest::performAction(action_t action) {
 
 
 void Pacman::reset_game() {
+	for (int i=0;i<19;i++){
+		for (int j=0;j<21;j++) {
+			complete_game_state[i][j] = 0;
+		}
+	}
 	// Reset the pacman game
 	ghost1 = {8, 9, 5, 1};
 	ghost2 = {8, 10, 5, 1};
@@ -348,7 +353,7 @@ void Pacman::ghost_movement(Ghost ghost) {
 
 
 void Pacman::performAction(action_t action) {
-	// Rewards normalised for -60
+	// Rewards normalised for -70
 
 	if (power_pill_time < 1 ) {
 		power_pill_time = 0;
@@ -741,6 +746,17 @@ void Pacman::performAction(action_t action) {
 
 	// Combine all the observations
 	m_observation = wall_obs + ghost_obs + smell_obs + pellat_obs + power_obs;
+
+	// Printing the screen
+
+	for (int i = 0; i < 19; ++i)
+    {
+        for (int j = 0; j < 21; ++j)
+        {
+            std::cout << complete_game_state[i][j] << ' ';
+        }
+        std::cout << std::endl;
+    }
 }
 
 
@@ -1005,6 +1021,48 @@ void ExtendedTiger::performAction(action_t action) {
 
 }
 
+void KuhnPoker::reset_game() {
+	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
+
+	// agent is delt card
+	agent_card  = rand01() < 0.5 ? ((opponent_card + 1 )%3) : ((opponent_card + 2 )%3);
+	
+
+	// Both parties bet
+	agent_chips_put_in = 1;
+	chips_in_play = 2;
+
+
+	// Opponent takes action, pass or bet, using a nash stratergy
+	// 1 is to bet, 0 is to pass
+	// for the nash stratergy, first choose any alpha between 0 and 1/3
+	// this is the probability the opponent bets on a jack
+	// the opponent will always pass on a queen
+	// and bet with a probabiliy of 3alpha with a king
+	alpha = rand01() / 3.0;
+	if (opponent_card == 0) {
+		if (rand01() < alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+		} else {
+			opponent_action = 0;
+		}
+	} else if (opponent_card == 1) {
+		opponent_action = 0;
+	} else {
+		if (rand01() < 3*alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+		} else {
+			opponent_action = 0;
+		}
+	}
+
+	// observations are current card, and opponents choice (to bet or pass)
+	// 3 bits on agent card?, 1 bit on opponent actions
+	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
+}
+
 
 KuhnPoker::KuhnPoker(options_t &options) {
 	//Also stuff
@@ -1075,14 +1133,20 @@ void KuhnPoker::performAction(action_t action) {
 		if (agent_card > opponent_card) {
 			//agent wins
 			m_reward = 4 + chips_in_play;
+			// Reset the game
+			reset_game();
 		} else {
 			//opponent wins
 			m_reward = 4 - agent_chips_put_in; 
+			// Reset the game
+			reset_game();
 		}
 
 	} else if (opponent_action == 1) {
 		//opponent wins
 		m_reward = 4 - agent_chips_put_in; 
+		// Reset the game
+		reset_game();
 	} else {
 		if (rand01() < alpha + 1/3.0) {
 			// opponent calls then showdown
@@ -1090,14 +1154,20 @@ void KuhnPoker::performAction(action_t action) {
 			if (agent_card > opponent_card) {
 				//agent wins
 				m_reward = 4 + chips_in_play;
+				// Reset the game
+				reset_game();
 			} else {
 				//opponent wins
 				m_reward = 4 - agent_chips_put_in; 
+				// Reset the game
+				reset_game();
 			}
 
 		} else {
 			//opponent folds and agent wins
 			m_reward = 4 + chips_in_play;
+			// Reset the game
+			reset_game();
 		}
 	}
 	// m_observation = 0;

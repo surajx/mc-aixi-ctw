@@ -198,6 +198,8 @@ public:
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
 
+	virtual void reset_game();
+
 private:
 	int opponent_card;
 	int agent_card;
