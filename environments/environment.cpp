@@ -1174,3 +1174,450 @@ void KuhnPoker::performAction(action_t action) {
 	
 }
 
+
+RobocupSimulation::RobocupSimulation(options_t &options) {
+	// Set up initial field
+	// Set up initial field as 0
+	// Ball is 1
+	// Agent is 2
+	// HomeGoals are 3
+	// OpponentGoals are 4
+	// ?Other robots are 5
+	for (int k; k < 20; k++) {
+		for (int j; j < 12; j++) {
+			full_field[j][k] = 0;
+		}
+	}
+
+	ball.x = 5;
+	ball.y = 9;
+
+	ball.x = 5;  // (x,y) position of ball
+	ball.y = 9;
+	full_field[5][9] = 1;
+
+
+
+
+	agent.x = 5; // (x,y,theta,phi) position and heading of agent, 
+	agent.y = 7;
+	agent.body_facing = 1; // theta in {towardsOpponents,towardsHome,left,right} = {1,2,3,4}
+	agent.head_facing = 1; // phi in {forward,left,right} = {1,2,3}
+	full_field[5][7] = 2;
+
+	home_goal[0] = 4; //Home goal positions
+	home_goal[1] = 6;
+	for (int i = home_goal[0]; i <= home_goal[1]; i++) {
+		full_field[0][i] = 3;
+	}
+
+	opponent_goal[0] = 4; //opponent goal positions
+	opponent_goal[1] = 6;
+	for (int i = opponent_goal[0]; i <= opponent_goal[1]; i++) {
+		full_field[18][i] = 4;
+	}
+
+
+	// Set up the initial observation
+	// Position
+	bodyfacing_observation = (pow(2,0)*(agent.body_facing%2)) + (pow(2,1)*((3*agent.body_facing)%2));
+	headfacing_observation = (pow(2,2)*(agent.head_facing%2)) + (pow(2,3)*((3*agent.head_facing)%2));
+	vision_observation = pow(2,4)*19; // 0 if no ball, else 1 to 24 from top left going across then down
+	position_observation = (pow(2,10)*agent.x) + (pow(2,15)*agent.y);
+	m_observation = bodyfacing_observation + headfacing_observation + vision_observation + position_observation; // BodyFacing + HeadFacing + Vision + Position 
+	m_reward = 0;
+}
+
+// 
+
+
+void RobocupSimulation::turn_body(int direction, Robot agent) {
+	//stuff
+	if (direction == 1) {
+		// turning left
+		if (agent.body_facing < 3) {
+			agent.body_facing += 2;
+		} else if (agent.body_facing == 3) {
+			agent.body_facing -= 1;
+		} else {
+			agent.body_facing -= 3;
+		}
+	} else {
+		// turning right
+		if (agent.body_facing > 2) {
+			agent.body_facing -= 2;
+		} else if (agent.body_facing == 1) {
+			agent.body_facing += 3;
+		} else {
+			agent.body_facing += 1;
+		}
+	}
+}
+
+
+void RobocupSimulation::turn_head(int direction, Robot agent) {
+	//stuff
+	if (direction == 1) {
+		// turning left
+		if (agent.head_facing != 3) {
+			if (agent.head_facing == 4) {
+				agent.head_facing = 1;
+			} else {
+				agent.head_facing = 3;
+			}
+		} else {
+			// negative reward for invalid action
+		}
+	} else {
+		// turning right
+		if (agent.body_facing > 2) {
+			agent.body_facing -= 2;
+		} else if (agent.body_facing == 1) {
+			agent.body_facing += 3;
+		} else {
+			agent.body_facing += 1;
+		}
+	}
+}
+
+
+void kick(int direction, Ball ball, Robot agent) {
+	// check if ball is in front
+	// if it is, move it in direction, else negative reward
+	bool ball_in_front = false;
+	int direction;
+
+	if (agent.body_facing == 1) {
+		// Check if agent is facing forward
+		if ((agent.x + 1 == ball.x) && (agent.y == ball.y)) {
+			ball_in_front = true;
+		}
+	} else if (agent.body_facing == 2) {
+		// check if agent facing back
+		if ((agent.x - 1 == ball.x) && (agent.y == ball.y)) {
+			ball_in_front = true;
+		}
+	} else if (agent.body_facing == 3) {
+		// check if agent facing left
+		if ((agent.x == ball.x) && (agent.y - 1 == ball.y)) {
+			ball_in_front = true;
+		}
+	} else {
+		// check if agent facing down
+		if ((agent.x == ball.x) && (agent.y + 1 == ball.y)) {
+			ball_in_front = true;
+		}
+	}
+
+	if (ball_in_front) {
+		// move in direction
+		if (agent.body_facing == 1) {
+			ball.x += 3;
+		} else if (agent.body_facing == 2) {
+			ball.x -= 3;
+		} else if (agent.body_facing == 3) {
+			ball.y -= 3;
+		} else {
+			ball.y -= 3;
+		}
+	} else {
+		// negative reward
+	}
+}
+
+
+void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot agent) {
+	// set up switch based on agent body facing
+	// 8 possible movements, 2 in any direction, 1 in any direction
+	int movement_direction;
+
+	if (agent.body_facing == 1) {
+		// if facing forward to opponents goals
+		if (direction == 1) {
+			movement_direction = 1;
+		} else if (direction == 2) {
+			movement_direction = 2;
+		} else if (direction == 3) {
+			movement_direction = 3;
+		} else {
+			movement_direction = 4;
+		}
+	} else if (agent.body_facing == 2) {
+		// if facing toward own goal
+		if (direction == 1) {
+			movement_direction = 2;
+		} else if (direction == 2) {
+			movement_direction = 1;
+		} else if (direction == 3) {
+			movement_direction = 4;
+		} else {
+			movement_direction = 3;
+		}
+	} else if (agent.body_facing == 3) {
+		// if facing left
+		if (direction == 1) {
+			movement_direction = 3;
+		} else if (direction == 2) {
+			movement_direction = 4;
+		} else if (direction == 3) {
+			movement_direction = 2;
+		} else {
+			movement_direction = 1;
+		}
+	} else {
+		// if facing right
+		if (direction == 1) {
+			movement_direction = 4;
+		} else if (direction == 2) {
+			movement_direction = 3;
+		} else if (direction == 3) {
+			movement_direction = 1;
+		} else {
+			movement_direction = 2;
+		}
+	}
+
+	if (power == 2) {
+		switch(movement_direction) {
+			case 1:
+				// if it is forward, check the amount of power
+				if (agent.x + 1 == ball.x && agent.y == ball.y) {
+					ball.x += 2;
+				} else if (agent.x + 2 == ball.x && agent.y == ball.y) {
+					ball.x += 1;
+				}
+				agent.x += 1;
+				break;
+			case 2:
+				// if it is backward, check the amount of power
+				if (agent.x - 1 == ball.x && agent.y == ball.y) {
+					ball.x -= 2;
+				} else if (agent.x - 2 == ball.x && agent.y == ball.y) {
+					ball.x -= 1;
+				}
+				agent.x -= 1;
+				break;
+			case 3:
+				// if it is left, check the amount of power
+				if (agent.x == ball.x && agent.y - 1 == ball.y) {
+					ball.y -= 2;
+				} else if (agent.x == ball.x && agent.y - 2 == ball.y) {
+					ball.y -= 1;
+				}
+				agent.y -= 1;
+				break;
+			case 4:
+				// if it is right, check the amount of power
+				if (agent.x == ball.x && agent.y + 1 == ball.y) {
+					ball.y += 2;
+				} else if (agent.x == ball.x && agent.y + 2 == ball.y) {
+					ball.y += 1;
+				}
+				agent.y += 1;
+				break;
+		}
+	} else {
+		switch(movement_direction) {
+			case 1:
+				// if it is forward, check the amount of power
+				if (agent.x + 1 == ball.x && agent.y == ball.y) {
+					ball.x += 1;
+				}
+				agent.x += 1;
+				break;
+			case 2:
+				// if it is backward, check the amount of power
+				if (agent.x - 1 == ball.x && agent.y == ball.y) {
+					ball.x -= 1;
+				}
+				agent.x -= 1;
+				break;
+			case 3:
+				// if it is left, check the amount of power
+				if (agent.x == ball.x && agent.y - 1 == ball.y) {
+					ball.y -= 1;
+				}
+				agent.y -= 1;
+				break;
+			case 4:
+				// if it is right, check the amount of power
+				if (agent.x == ball.x && agent.y + 1 == ball.y) {
+					ball.y += 1;
+				}
+				agent.y += 1;
+				break;
+		}
+	}
+
+}
+
+int RobocupSimulation::check_vision(Robot agent, Ball ball) {
+	// Return the vision number according to where the ball is
+	// According to the cone
+	//  # # # # # # #
+	//    # # # # #
+	//    # # # # #
+	//      # # #
+	//      # # #
+	//        #
+	// 1 refers to top left
+	// 2 refers to top right
+	// 3-17 are the block at the top, left to right, top to bottom
+	// 18-24 are the remaining bottom ones
+	// 0 is no ball
+	
+	int vision_number = 0;
+	if (agent.body_facing == 1) {
+		if ((ball.x == agent.x + 6) && (ball.y ==  agent.y - 3)) {
+			ball_vision_number = 1;
+		} else if ((ball.x == agent.x + 6) && (ball.y ==  agent.y + 3)) {
+			ball_vision_number = 2;
+		} else if ((ball.x <= agent.x + 6) && (ball.y <=  agent.y + 2) && (ball.x >= agent.x + 4) && (ball.y >=  agent.y - 2)) {
+			int counter = 3;
+			for (int j = 4; j<=6;j++) {
+				for (int i = -2; i <= 2; i++) {
+					if (ball.x == agent.x + j) && (ball.y ==  agent.y + i) {
+						vision_number = counter;
+					}
+					counter++;
+				}
+			}
+		} else if (ball.x == agent.x + 3) && (ball.y ==  agent.y - 1) {
+			vision_number = 18;
+		} else if (ball.x == agent.x + 3) && (ball.y ==  agent.y) {
+			vision_number = 19;
+		} else if (ball.x == agent.x + 3) && (ball.y ==  agent.y + 1) {
+			vision_number = 20;
+		} else if (ball.x == agent.x + 2) && (ball.y ==  agent.y - 1) {
+			vision_number = 21;
+		} else if (ball.x == agent.x + 2) && (ball.y ==  agent.y) {
+			vision_number = 22;
+		} else if (ball.x == agent.x + 2) && (ball.y ==  agent.y + 1) {
+			vision_number = 23;
+		} else if (ball.x == agent.x + 3) && (ball.y ==  agent.y) {
+			vision_number = 24;
+		}
+	}
+
+	return vision_number;
+}
+
+void RobocupSimulation::performAction(action_t action) {
+	// All agents move throughout the field
+	// Actions are as follows
+	// Dash(direction,power) moves in a direction (up,down,left,right) at a power (1,2*) can only go 2 if forward
+	// Turnbody, turn the body left or right
+	// Turnneck, turn the neck left or right
+	// For simple model, kick foward, leftish or rightish
+	// For more complex, kick(direction,power) kicks in a direction (0, pi/4, pi/2, 3pi/4, pi) with power (1,2)
+	// Possibly tackle and catch (for goalies)
+	// | Actions | = | Dash | + | TurnBody | + | TurnHead | + | Kick | = 12 ~ 16 = 2^4
+
+// Writong code in clever way
+
+
+	// move(direction,amount);
+
+
+	switch (action) {
+		case 1:
+			move(1,1,agent,ball);
+			break;
+		case 2:
+			// Move forward 2
+			move(1,2,agent,ball);
+			break;
+		case 3:
+			// Move back 1
+			move(2,1,agent,ball);
+			break;
+		case 4:
+			// Move left 1
+			move(3,1,agent,ball);
+			break;
+		case 5:
+			// Move right 1
+			move(4,1,agent,ball);
+			break;
+		case 6:
+			// Turn body left
+			turn_body(1,agent);
+		case 7:
+			// Turn body right
+			turn_body(2,agent);
+		case 8:
+			// Turn head left
+			turn_head(1,agent);
+		case 9:
+			// Turn head right
+			turn_head(2,agent);
+		case 10:
+			// kick foward
+			kick(1,agent,ball);
+		case 11:
+			// kick left
+			kick(1,agent,ball);
+		case 12:
+			// kick right
+			kick(1,agent,ball);
+	}
+
+	// Observations
+	// Current position (x,y) in ([-53,-35],[53,35])
+	// | {Possibly positions} | = |P| = 70*106 = 7420
+	// Instead, use very simplified field, as 150cmx270cm with robo width of 15cm
+	// Effectivly making the field 10*18 = 180 ~ 256 = 2^8
+	//
+	// BodyFacing = {up,down,left,right} 
+	// | BodyFacing | = 4 = 2^2
+	//
+	// HeadFacing = {forward,left,right}
+	// | HeadFacing | = 3 ~ 4 = 2^2
+	//
+	// can see in cone in direction head is facing
+	//  # # # # # # #
+	//    # # # # #
+	//    # # # # #
+	//      # # #
+	//      # # #
+	//        #
+	// Can see 24 points in the field
+	// Ball can only be in 1 position
+	// 25 ~ 32 = 2^5
+	// Total observations space
+	// | Position | * | BodyFacing | * | HeadFacing | * | Vision | = 2^17 < | Observations(Tictactoe) |
+	//
+	//
+	// Instead, use largest obvservation space
+	// | Position | = 7420 ~ 8192 = 2^13
+	// Same BodyFacing and HeadFacing
+	// Using 4 possible states of each vision position, empty, robot,  and seperate ball
+	// | Vision | = 2^24 * 2^5 = 2*29
+	// Total observation
+	// | Position | * | BodyFacing | * | HeadFacing | * | Vision | = 2^46
+
+
+	ball_vision_number = check_vision(agent,ball);
+
+	// Reward 
+	// -1 for just moving
+	// -10 for walking out of the field or kicking a blank space
+	// -40 for walking into another robot
+	// -100 for a goal being scored against you (possibly by yourself)
+	// +5 for ball being in front of you
+	// ?+20 for kicking the ball
+	// +100 for scoring a goal (against the opponents)
+	// |R| = 200 ~ 256 = 2^8
+
+
+
+
+	// Set up the observation
+	// Position
+	bodyfacing_observation = (pow(2,0)*(agent.body_facing%2)) + (pow(2,1)*((3*agent.body_facing)%2));
+	headfacing_observation = (pow(2,2)*(agent.head_facing%2)) + (pow(2,3)*((3*agent.head_facing)%2));
+	vision_observation = pow(2,4)*ball_vision_number; // 0 if no ball, else 1 to 24 from top left going across then down
+	position_observation = (pow(2,10)*agent.x) + (pow(2,15)*agent.y);
+	m_observation = bodyfacing_observation + headfacing_observation + vision_observation + position_observation;
+}
+

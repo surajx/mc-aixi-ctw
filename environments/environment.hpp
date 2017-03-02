@@ -211,7 +211,53 @@ private:
 };
 
 
+class RobocupSimulation : public Environment {
+public:
 
+	// set up the initial environment percept
+	RobocupSimulation(options_t &options);
+
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+	virtual void move(int direction, int power, Ball ball, Robot agent);
+
+	virtual void turn_body(int direction, Robot agent);
+
+	virtual void turn_head(int direction, Robot agent);
+
+	virtual void kick(int direction, Ball ball, Robot agent);
+
+	virtual int check_vision(Robot agent, Ball ball);
+
+	struct Robot {
+		int x;
+		int y;
+		int body_facing;
+		int head_facing;
+	};
+
+	struct SoccerBall {
+		int x;
+		int y;
+	};
+
+private:
+	Robot agent;
+	int agent_position_and_heading_and_head[4];
+	//int agent_velocity; //probably vector
+	SoccerBall ball;
+	int ball_position[2];
+	int full_field[11][19];
+	int home_goal[2];
+	int opponent_goal[2];
+	int bodyfacing_observation;
+	int headfacing_observation;
+	int vision_observation;
+	int position_observation;
+	int ball_vision_number;
+
+};
 
 
 

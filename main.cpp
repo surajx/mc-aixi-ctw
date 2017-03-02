@@ -260,6 +260,12 @@ int main(int argc, char *argv[]) {
 		options["observation-bits"] = "1";
 		options["reward-bits"] = "1";
 	}
+	else if (environment_name == "robocup-simulation") {
+		env = new RobocupSimulation(options);
+		options["agent-actions"] = "4";
+		options["observation-bits"] = "17";
+		options["reward-bits"] = "8";
+	}
 	else {
 		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
 		return -1;
