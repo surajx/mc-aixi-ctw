@@ -884,14 +884,14 @@ void TicTacToe::performAction(action_t action) {
 			open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), random_choice), open_squares.end());
 
 			// could implement as a tree style search under a while loop, only need one to be true
-			opponent_win_cond = ( (board[0][0] == board[0][1] == board[0][2] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[1][0] == board[1][1] == board[1][2] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[2][0] == board[2][1] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][0] == board[1][0] == board[2][0] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][1] == board[1][1] == board[2][1] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][2] == board[1][2] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][0] == board[1][1] == board[2][2] == -1) || win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][2] == board[1][1] == board[2][0] == -1) || win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[0][1] == board[0][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[1][0] == board[1][1] == board[1][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[2][0] == board[2][1] == board[2][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[1][0] == board[2][0] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][1] == board[1][1] == board[2][1] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][2] == board[1][2] == board[2][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[1][1] == board[2][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][2] == board[1][1] == board[2][0] == -1) || opponent_win_cond == 1) ? 1 : 0;
 
 			if (opponent_win_cond) {
 				game_finished = 1;
