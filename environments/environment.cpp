@@ -1575,24 +1575,31 @@ void RobocupSimulation::performAction(action_t action) {
 		case 6:
 			// Turn body left
 			turn_body(1,agent);
+			break;
 		case 7:
 			// Turn body right
 			turn_body(2,agent);
+			break;
 		case 8:
 			// Turn head left
 			turn_head(1,agent);
+			break;
 		case 9:
 			// Turn head right
 			turn_head(2,agent);
+			break;
 		case 10:
 			// kick foward
 			kick(1,ball,agent);
+			break;
 		case 11:
 			// kick left
 			kick(1,ball,agent);
+			break;
 		case 12:
 			// kick right
 			kick(1,ball,agent);
+			break;
 	}
 
 	// Observations
@@ -1651,8 +1658,8 @@ void RobocupSimulation::performAction(action_t action) {
 
 	// Set up the observation
 	// Position
-	bodyfacing_observation = (pow(2,0)*(agent.body_facing%2)) + (pow(2,1)*((3*agent.body_facing)%2));
-	headfacing_observation = (pow(2,2)*(agent.head_facing%2)) + (pow(2,3)*((3*agent.head_facing)%2));
+	bodyfacing_observation = (pow(2,0)*((agent.body_facing+1)%2)) + (pow(2,1)*((agent.body_facing < 3) ? 0 : 1));
+	headfacing_observation = (pow(2,2)*((agent.head_facing+1)%2)) + (pow(2,1)*((agent.head_facing < 3) ? 0 : 1));
 	vision_observation = pow(2,4)*ball_vision_number; // 0 if no ball, else 1 to 24 from top left going across then down
 	position_observation = (pow(2,10)*agent.x) + (pow(2,15)*agent.y);
 	m_observation = bodyfacing_observation + headfacing_observation + vision_observation + position_observation;
