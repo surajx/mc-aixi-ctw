@@ -144,8 +144,9 @@ symbol_t ContextTree::predictSymbol() {
 void ContextTree::genNextSymbols(symbol_list_t& predictedSymbols, uint_t num) {
   genNextSymbolsAndUpdate(predictedSymbols, num);
   // Restore the context tree to it's original state.
-  for (uint_t i = 0; i < num; i++)
+  for (uint_t i = 0; i < num; i++) {
     revert();
+  }
 }
 
 void ContextTree::genNextSymbolsAndUpdate(symbol_list_t& predictedSymbols,
