@@ -13,7 +13,7 @@
 #include "common/types.hpp"
 
 // Streams for logging
-std::ofstream log;        // A verbose human-readable log
+std::ofstream logger;        // A verbose human-readable log
 std::ofstream compactLog; // A compact comma-separated value log
 
 // The main agent/environment interaction loop
@@ -37,52 +37,61 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		assert(0 <= terminate_lifetime);
 	}
 
-	bool tree_initialized = false;
-	
-	// Agent/environment interaction loop
+	percept_t observation;
+	percept_t reward;
+	action_t action;
+	// Initial cycles to get things going.
+	while (ai.historySize() <= 100*strExtract<unsigned int>(options["ct-depth"])) {
+		std::cout << "initialize context" << std::endl;
+		observation = env.getObservation();
+		reward = env.getReward();
+		action = ai.genRandomAction();
+		ai.modelUpdate(observation, reward);
+		ai.modelUpdate(action);
+		std::cout << "agent lifetime: " << ai.lifetime() << std::endl;		
+	}
+
+        // Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
 
 		// check for agent termination
 		if (terminate_check && ai.lifetime() > terminate_lifetime) {
-			log << "info: terminating lifetiment" << std::endl;
+			logger << "info: terminating lifetiment" << std::endl;
 			break;
 		}
 
 		// Get a percept from the environment
-		percept_t observation = env.getObservation();
-		percept_t reward = env.getReward();
+		observation = env.getObservation();
+		reward = env.getReward();
 		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
 		// Update agent's environment model with the new percept
-		ai.modelUpdate(observation, reward); // TODO: implement in agent.cpp
-
+		ai.modelUpdate(observation, reward);
 		// Determine best exploitive action, or explore
-		action_t action;
 		bool explored = false;
 		if (explore && rand01() < explore_rate) {
 			std::cout << "exploring" << std::endl;
 			explored = true;
 			action = ai.genRandomAction();
-		}
-		else {
-			action = search(ai, observation, reward, action, tree_initialized);
-			tree_initialized = true;
+		} else {
+			action = ai.getPlannedAction(observation, reward, action);
 		}
 
 		// Send an action to the environment
-		env.performAction(action); // TODO: implement for each environment
+		env.performAction(action);
 
 		// Update agent's environment model with the chosen action
-		ai.modelUpdate(action); // TODO: implement in agent.cpp
+		ai.modelUpdate(action);
+
 
 		// Log this turn
-		log << "cycle: " << cycle << std::endl;
-		log << "observation: " << observation << std::endl;
-		log << "reward: " << reward << std::endl;
-		log << "action: " << action << std::endl;
-		log << "explored: " << (explored ? "yes" : "no") << std::endl;
-		log << "explore rate: " << explore_rate << std::endl;
-		log << "total reward: " << ai.reward() << std::endl;
-		log << "average reward: " << ai.averageReward() << std::endl;
+		logger << "cycle: " << cycle << std::endl;
+		logger << "observation: " << observation << std::endl;
+		logger << "reward: " << reward << std::endl;
+		logger << "action: " << action << std::endl;
+		logger << "explored: " << (explored ? "yes" : "no") << std::endl;
+		logger << "explore rate: " << explore_rate << std::endl;
+		logger << "total reward: " << ai.reward() << std::endl;
+		logger << "average reward: " << ai.averageReward() << std::endl;
 
 		// Log the data in a more compact form
 		compactLog << cycle << ", " << observation << ", " << reward << ", "
@@ -100,6 +109,8 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		// Update exploration rate
 		if (explore) explore_rate *= explore_decay;
+
+		std::cout << "end of agent-environment loop iteration" << std::endl; // testing
 
 	}
 
@@ -163,7 +174,7 @@ int main(int argc, char *argv[]) {
 
 	// Set up logging
 	std::string log_file = argc < 3 ? "log" : argv[2];
-	log.open((log_file + ".log").c_str());
+	logger.open((log_file + ".log").c_str());
 	compactLog.open((log_file + ".csv").c_str());
 
 	// Print header to compactLog
@@ -175,9 +186,9 @@ int main(int argc, char *argv[]) {
 
 	// Default configuration values
 	options["ct-depth"] = "3";
-	options["agent-horizon"] = "16";
+	options["agent-horizon"] = "9";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "5";
+	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
@@ -193,12 +204,6 @@ int main(int argc, char *argv[]) {
 	// Set up the environment
 	Environment *env;
 
-	// TODO: instantiate the environment based on the "environment-name"
-	// option. For any environment you do not implement you may delete the
-	// corresponding if statement.
-	// NOTE: you may modify the options map in order to set quantities such as
-	// the reward-bits for each particular environment. See the coin-flip
-	// experiment for an example.
 	std::string environment_name = options["environment"];
 	if (environment_name == "coin-flip") {
 		env = new CoinFlip(options);
@@ -206,55 +211,43 @@ int main(int argc, char *argv[]) {
 		options["observation-bits"] = "1";
 		options["reward-bits"] = "1";
 	}
-	else if (environment_name == "1d-maze") {
-		// TODO: instantiate "env" (if appropriate)
-	}
-	else if (environment_name == "cheese-maze") {
-		// TODO: instantiate "env" (if appropriate)
-	}
-	else if (environment_name == "tiger") {
-		// TODO: instantiate "env" (if appropriate)
+	else if (environment_name == "ctw-test") {
+		env = new CTWTest(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "1";
+		options["reward-bits"] = "1";
 	}
 	else if (environment_name == "extended-tiger") {
-		// TODO: instantiate "env" (if appropriate)
 		env = new ExtendedTiger(options);
 		options["agent-actions"] = "4";
 		options["observation-bits"] = "3";
 		options["reward-bits"] = "7";
 	}
-	else if (environment_name == "4x4-grid") {
-		// TODO: instantiate "env" (if appropriate)
-	}
 	else if (environment_name == "tictactoe") {
-		// TODO: instantiate "env" (if appropriate)
 		env = new TicTacToe(options);
 		options["agent-actions"] = "9";
 		options["observation-bits"] = "18";
 		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
-		// TODO: instantiate "env" (if appropriate)
 		env = new BiasedRockPaperSciessor(options);
 		options["agent-actions"] = "2";
 		options["observation-bits"] = "4";
 		options["reward-bits"] = "3";
 	}
 	else if (environment_name == "kuhn-poker") {
-		// TODO: instantiate "env" (if appropriate)
 		env = new KuhnPoker(options);
 		options["agent-actions"] = "2";
 		options["observation-bits"] = "4";
 		options["reward-bits"] = "4";
 	}
 	else if (environment_name == "pacman") {
-		// TODO: instantiate "env" (if appropriate)
 		env = new Pacman(options);
 		options["agent-actions"] = "4";
 		options["observation-bits"] = "16";
 		options["reward-bits"] = "8";
 	}
 	else if (environment_name == "ctwtest") {
-		// TODO: instantiate "env" (if appropriate)
 		env = new CTWTest(options);
 		options["agent-actions"] = "2";
 		options["observation-bits"] = "1";
@@ -267,11 +260,11 @@ int main(int argc, char *argv[]) {
 
 	// Set up the agent
 	Agent ai(options);
-
+	ai.initPlanner();
 	// Run the main agent/environment interaction loop
 	mainLoop(ai, *env, options);
 
-	log.close();
+	logger.close();
 	compactLog.close();
 
 	return 0;
