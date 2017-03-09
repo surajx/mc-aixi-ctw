@@ -1087,7 +1087,6 @@ void KuhnPoker::reset_game() {
 			opponent_action = 0;
 		}
 	}
-	m_reward = 0;
 
 	// observations are current card, and opponents choice (to bet or pass)
 	// 3 bits on agent card?, 1 bit on opponent actions
