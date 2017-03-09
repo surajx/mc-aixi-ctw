@@ -5,150 +5,152 @@
 
 #include "../common/types.hpp"
 
+class SearchTree;
+class SearchNode;
 class ContextTree;
 
-class ModelUndo;
-
 class Agent {
+ private:
+  uint_t numSimPerCycle;     // number of simulations per planning cycle (Arie)
+  uint_t numActions;         // number of actions
+  uint_t numActionBits;      // number of bits to represent an action
+  uint_t numObervationBits;  // number of bits to represent an observation
+  uint_t numRewardBits;      // number of bits to represent a reward
+  size_t searchHorizon;      // length of the search horizon
 
-public:
+  double exploreExploitRatio;  // parameter C in the UCB algorithm
+  reward_t totalReward;        // Total reward received by the agent
 
-	// construct a learning agent from the command line arguments
-	Agent(options_t & options);
+  // Context Tree representing the agent's beliefs
+  ContextTree* contextTree;
+  SearchTree* planner;
 
-	// destruct the agent and the corresponding context tree
-	~Agent(void);
+  // How many time cycles the agent has been alive
+  lifetime_t agentAge;
 
-	// current lifetime of the agent in cycles
-	lifetime_t lifetime(void) const;
+  // True if the last update was a percept update
+  bool isLastUpdateAPercept;
 
-	// the total accumulated reward across an agents lifespan
-	reward_t reward(void) const;
+  /**
+  * TODO: More Documentation
+  * Action sanity check
+  */
+  bool isActionOk(action_t action) const;
 
-	// the average reward received by the agent at each time step
-	reward_t averageReward(void) const;
+  /**
+  * TODO: More Documentation
+  * Reward Sanity Check
+  */
+  bool isRewardOk(reward_t reward) const;
 
-	// maximum reward in a single time instant
-	reward_t maxReward(void) const;
+  /**
+  * Encodes an action as a list of symbols
+  */
+  void encodeAction(symbol_list_t& symlist, action_t action) const;
 
-	// minimum reward in a single time instant
-	reward_t minReward(void) const;
+  /**
+  * Encodes a percept (observation, reward) as a list of symbols
+  */
+  void encodePercept(symbol_list_t& symlist,
+                     percept_t observation,
+                     percept_t reward) const;
 
-	// number of distinct observations based on observation bits
-	unsigned int numObservations(void) const;
+  /**
+  * Decodes the observation from a list of symbols
+  */
+  action_t decodeAction(const symbol_list_t& symlist) const;
 
-	// number of distinct rewards based on reward bits
-	unsigned int numRewards(void) const;
+  /**
+  * Decodes the reward from a list of symbols
+  */
+  percept_t decodeReward(const symbol_list_t& symlist) const;
 
-	// number of distinct actions
-	unsigned int numActions(void) const;
+ public:
+  // construct a learning agent from the command line arguments
+  Agent(options_t& options);
 
-	// number of simulations per planning cycle
-	unsigned int numSimulations(void) const;
+  // current lifetime of the agent in cycles
+  lifetime_t lifetime(void) const;
 
-	// The C parameter of the UCB algorithm
-	unsigned int exploreExploitRatio(void) const;
+  // Init Planner
+  bool initPlanner();
 
-	// the length of the stored history for an agent
-	size_t historySize(void) const;
+  // Get planned action
+  action_t getPlannedAction(percept_t prev_obs,
+                            percept_t prev_rew,
+                            action_t prev_act);
 
-	// length of the search horizon used by the agent
-	size_t horizon(void) const;
+  // Get planner
+  SearchTree* getPlanner();
 
-	// generate an action uniformly at random
-	action_t genRandomAction(void) const;
+  // Get planner root Node
+  SearchNode* getPlannerRootNode();
 
-	// generate a percept distributed according
-	// to our history statistics
-	percept_t genPercept(uint_t percept_size) const; // TODO: implement in agent.cpp
+  // the total accumulated reward across an agents lifespan
+  reward_t reward(void) const;
 
-	// generate a percept distributed to our history statistics, and
-	// update our mixture environment model with it
-	percept_t genPerceptAndUpdate(uint_t percept_size); // TODO: implement in agent.cpp
+  // the average reward received by the agent at each time step
+  reward_t averageReward(void) const;
 
-	// update the internal agent's model of the world
-	// due to receiving a percept or performing an action
-	void modelUpdate(percept_t observation, percept_t reward);
-	void modelUpdate(action_t action);
+  // maximum reward in a single time instant
+  reward_t maxReward(void) const;
 
-	// revert the agent's internal model of the world
-	// to that of a previous time cycle, false on failure
-	bool modelRevert(const ModelUndo &mu); // TODO: implement in agent.cpp
+  // minimum reward in a single time instant
+  reward_t minReward(void) const;
 
-	bool modelRevert();
+  // getter for number of observation bits
+  uint_t getNumObservationBits(void) const;
 
-	// resets the agent
-	void reset(void);
+  // getter for number of reward bits
+  uint_t getNumRewardBits(void) const;
 
-	// probability of selecting an action according to the
-	// agent's internal model of it's own behaviour
-	double getPredictedActionProb(action_t action); // TODO: implement in agent.cpp
+  // getter for number of action bits
+  uint_t getNumActionBits(void) const;
 
-	// get the agent's probability of receiving a particular percept
-	double perceptProbability(percept_t observation, percept_t reward) const; // TODO: implement in agent.cpp
+  // number of distinct actions
+  uint_t getNumActions(void) const;
 
-private:
-	// action sanity check
-	bool isActionOk(action_t action) const;
+  // number of simulations per planning cycle
+  uint_t numSimulations(void) const;
 
-	// reward sanity check
-	bool isRewardOk(reward_t reward) const;
+  // The C parameter of the UCB algorithm
+  uint_t getExploreExploitRatio(void) const;
 
-	// encoding/decoding actions and percepts to/from symbol lists
-	void encodeAction(symbol_list_t &symlist, action_t action) const;
-	void encodePercept(symbol_list_t &symlist, percept_t observation, percept_t reward) const;
-	action_t decodeAction(const symbol_list_t &symlist) const;
-	percept_t decodeReward(const symbol_list_t &symlist) const;
+  // the length of the stored history for an agent
+  size_t historySize(void) const;
 
+  // length of the search horizon used by the agent
+  size_t horizon(void) const;
 
-	// agent properties
-	unsigned int m_num_simulations; // number of simulations per planning cycle
-	double m_explore_exploit_ratio; // parameter C in the UCB algorithm
-	unsigned int m_actions;      // number of actions
-	unsigned int m_actions_bits; // number of bits to represent an action
-	unsigned int m_obs_bits;     // number of bits to represent an observation
-	unsigned int m_rew_bits;     // number of bits to represent a reward
-	size_t m_horizon;            // length of the search horizon
+  // generate an action uniformly at random
+  action_t genRandomAction(void) const;
 
-	// Context Tree representing the agent's beliefs
-	ContextTree *m_ct;
+  /**
+  * Generate a percept distributed according to our history statistics.
+  */
+  percept_t genPercept(uint_t percept_size) const;
 
-	// How many time cycles the agent has been alive
-	lifetime_t m_time_cycle;
+  /**
+  * Generate a percept distributed to our history statistics, and update our
+  * mixture environment model with it
+  */
+  percept_t genPerceptAndUpdate(uint_t percept_size);
 
-	// The total reward received by the agent
-	reward_t m_total_reward;
+  // Update agent's internal  model of the world due to receiving a percept.
+  void modelUpdate(percept_t observation, percept_t reward);
 
-	// True if the last update was a percept update
-	bool m_last_update_percept;
+  // Update agent's internal model of the world due to performing an action.
+  void modelUpdate(action_t action);
+
+  // Revert agent's internal model of the world to that of a previous time
+  // cycle.
+  bool modelRevert();
+
+  // Resets the agent
+  void reset(void);
+
+  // Destroy the agent and the corresponding context tree
+  ~Agent(void);
 };
 
-
-// used to store sufficient information to revert an agent
-// to a copy of itself from a previous time cycle
-class ModelUndo {
-
-    public:
-        // construct a save point
-        ModelUndo(const Agent &agent);
-
-        // saved state lifetime accessor
-        lifetime_t lifetime(void) const { return m_lifetime; }
-
-        // saved state reward accessor
-        reward_t reward(void) const { return m_reward; }
-
-        // saved state history size accessor
-        size_t historySize(void) const { return m_history_size; }
-
-        bool lastUpdate(void) const { return m_last_update_percept; }
-
-    private:
-        lifetime_t m_lifetime;
-        reward_t m_reward;
-        size_t m_history_size;
-        bool m_last_update_percept;
-};
-
-
-#endif // __AGENT_HPP__
+#endif  // __AGENT_HPP__

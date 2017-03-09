@@ -1,4 +1,5 @@
 #include <cassert>
+#include <deque>
 
 #include "../CTW/ContextTree.hpp"
 #include "../MCTS/search.hpp"
@@ -6,253 +7,203 @@
 
 #include "agent.hpp"
 
-#include <deque>
-
-
 // construct a learning agent from the command line arguments
-Agent::Agent(options_t & options) {
-	std::string s;
+Agent::Agent(options_t& options) {
+  std::string s;
 
-	strExtract(options["agent-actions"], m_actions);
-	strExtract(options["agent-horizon"], m_horizon);
-	strExtract(options["observation-bits"], m_obs_bits);
-	strExtract(options["num-simulations"], m_num_simulations);
-	strExtract(options["exploration-exploitation-ratio"], m_explore_exploit_ratio);
-	strExtract<unsigned int>(options["reward-bits"], m_rew_bits);
+  strExtract(options["agent-actions"], numActions);
+  strExtract(options["agent-horizon"], searchHorizon);
+  strExtract(options["observation-bits"], numObervationBits);
+  strExtract(options["num-simulations"], numSimPerCycle);
+  strExtract(options["exploration-exploitation-ratio"], exploreExploitRatio);
+  strExtract<unsigned int>(options["reward-bits"], numRewardBits);
 
-	// calculate the number of bits needed to represent the action
-	for (unsigned int i = 1, c = 1; i < m_actions; i *= 2, c++) {
-		m_actions_bits = c;
-	}
+  // Calculate the number of bits needed to represent the action
+  for (unsigned int i = 1, c = 1; i < numActions; i *= 2, c++) {
+    numActionBits = c;
+  }
 
-	m_ct = new ContextTree(strExtract<unsigned int>(options["ct-depth"]));
-
-	reset();
+  contextTree = new ContextTree(strExtract<unsigned int>(options["ct-depth"]));
+  reset();
 }
 
-
-// destruct the agent and the corresponding context tree
 Agent::~Agent(void) {
-	if (m_ct) delete m_ct;
+  if (contextTree)
+    delete contextTree;
 }
 
+bool Agent::initPlanner() {
+  planner = new SearchTree(this);
+  if (planner)
+    return true;
+  return false;
+}
 
-// current lifetime of the agent in cycles
+action_t Agent::getPlannedAction(percept_t prev_obs,
+                                 percept_t prev_rew,
+                                 action_t prev_act) {
+  return planner->search(prev_obs, prev_rew, prev_act);
+}
+
+SearchTree* Agent::getPlanner() {
+  return planner;
+}
+
+SearchNode* Agent::getPlannerRootNode() {
+  return planner->getRootNode();
+}
+
 lifetime_t Agent::lifetime(void) const {
-	return m_time_cycle;
+  return agentAge;
 }
 
-// the total accumulated reward across an agents lifespan
 reward_t Agent::reward(void) const {
-	return m_total_reward;
+  return totalReward;
 }
 
-
-// the average reward received by the agent at each time step
 reward_t Agent::averageReward(void) const {
-    return lifetime() > 0 ? reward() / reward_t(lifetime()) : 0.0;
+  return lifetime() > 0 ? reward() / reward_t(lifetime()) : 0.0;
 }
 
-// maximum reward in a single time instant
 reward_t Agent::maxReward(void) const {
-	return reward_t((1 << m_rew_bits) - 1);
+  return reward_t((1 << numRewardBits) - 1);
 }
 
-
-// minimum reward in a single time instant
 reward_t Agent::minReward(void) const {
-	return 0.0;
+  return 0.0;
 }
 
-// number of distinct observations based on observation bits
-unsigned int Agent::numObservations(void) const {
-	return m_obs_bits;
+unsigned int Agent::getNumObservationBits(void) const {
+  return numObervationBits;
 }
 
-// number of distinct rewards based on reward bits
-unsigned int Agent::numRewards(void) const {
-	return m_rew_bits;
+unsigned int Agent::getNumRewardBits(void) const {
+  return numRewardBits;
 }
 
-// number of distinct actions
-unsigned int Agent::numActions(void) const {
-	return m_actions;
+unsigned int Agent::getNumActionBits(void) const {
+  return numActionBits;
 }
 
-// number of simulations per planning cycle
+unsigned int Agent::getNumActions(void) const {
+  return numActions;
+}
+
 unsigned int Agent::numSimulations(void) const {
-	return m_num_simulations;
+  return numSimPerCycle;
 }
 
-// The C parameter of the UCB algorithm
-unsigned int Agent::exploreExploitRatio(void) const {
-	return m_explore_exploit_ratio;
+unsigned int Agent::getExploreExploitRatio(void) const {
+  return exploreExploitRatio;
 }
 
-// the length of the stored history for an agent
 size_t Agent::historySize(void) const {
-	return m_ct->historySize();
+  return contextTree->historySize();
 }
 
-
-// length of the search horizon used by the agent
 size_t Agent::horizon(void) const {
-	return m_horizon;
+  return searchHorizon;
 }
 
-
-// generate an action uniformly at random
 action_t Agent::genRandomAction(void) const {
-	return randRange(m_actions);
+  return randRange(numActions);
 }
 
-// generate a percept distributed according
-// to our history statistics
 percept_t Agent::genPercept(uint_t percept_size) const {
-	symbol_list_t percept;
-	// uint_t percept_size = m_obs_bits + m_rew_bits;
-	m_ct->genNextSymbols(percept, percept_size);
-	return decode(percept, percept_size);
+  symbol_list_t percept;
+  contextTree->genNextSymbols(percept, percept_size);
+  return decode(percept, percept_size);
 }
 
-
-// generate a percept distributed to our history statistics, and
-// update our mixture environment model with it
 percept_t Agent::genPerceptAndUpdate(uint_t percept_size) {
-	symbol_list_t percept;
-	// uint_t percept_size = m_obs_bits + m_rew_bits;
-	m_ct->genNextSymbolsAndUpdate(percept, percept_size);
-	m_last_update_percept = true;
-	return decode(percept, percept_size);
+  symbol_list_t percept;
+  contextTree->genNextSymbolsAndUpdate(percept, percept_size);
+  isLastUpdateAPercept = true;
+  return decode(percept, percept_size);
 }
 
-
-// Update the agent's internal model of the world after receiving a percept
 void Agent::modelUpdate(percept_t observation, percept_t reward) {
-	// Update internal model
-	symbol_list_t percept;
-	encodePercept(percept, observation, reward);
+  // Update internal model
+  symbol_list_t percept;
+  encodePercept(percept, observation, reward);
+  contextTree->update(percept);
 
-	m_ct->update(percept);
-	// m_ct->updateHistory(percept); //Not Needed
-
-
-	// Update other properties
-	m_total_reward += reward;
-	m_last_update_percept = true;
+  // Update other properties
+  totalReward += reward;
+  isLastUpdateAPercept = true;
 }
 
-
-// Update the agent's internal model of the world after performing an action
 void Agent::modelUpdate(action_t action) {
-	assert(isActionOk(action));
-	assert(m_last_update_percept == true);
+  assert(isActionOk(action));
+  assert(isLastUpdateAPercept == true);
 
-	// Update internal model
-	symbol_list_t action_syms;
-	encodeAction(action_syms, action);
-	// m_ct->update(action_syms); //Not Needed
-	m_ct->updateHistory(action_syms);
+  // Update internal model
+  symbol_list_t action_syms;
+  encodeAction(action_syms, action);
 
-	m_time_cycle++;
-	m_last_update_percept = false;
-}
+  // Only updating the CTW history as it is AC-CTW
+  // Model update is not needed when observing an action.
+  contextTree->updateHistory(action_syms);
 
-
-// revert the agent's internal model of the world
-// to that of a previous time cycle, false on failure
-bool Agent::modelRevert(const ModelUndo &mu) {
-	return NULL; // TODO: implement
+  agentAge++;
+  isLastUpdateAPercept = false;
 }
 
 bool Agent::modelRevert() {
-	// std::deque<symbol_t> q = m_ct->getFullHistory();
-	// std::cout << "CT History Size: "<< q.size() <<std::endl;
-	// std::cout << "CT History Size: "<< m_horizon*(m_obs_bits + m_rew_bits + m_actions_bits) <<std::endl;
-	// std::cout << "m_actions_bits: " << m_actions_bits << std::endl;
-  for (size_t simIdx = 0; simIdx < m_horizon; simIdx++) {
-    for (size_t perceptBit = 0; perceptBit < m_obs_bits + m_rew_bits;
+  for (size_t simIdx = 0; simIdx < searchHorizon; simIdx++) {
+    for (size_t perceptBit = 0; perceptBit < numObervationBits + numRewardBits;
          perceptBit++) {
-      m_ct->revert();
+      contextTree->revert();
     }
-    for (size_t actionBit = 0; actionBit < m_actions_bits;
-         actionBit++) {
-      m_ct->revertHistory();
+    for (size_t actionBit = 0; actionBit < numActionBits; actionBit++) {
+      contextTree->revertHistory();
     }
-		std::cout << "modelRevert. current time cycle: " << m_time_cycle << std::endl;
-		m_time_cycle--; // after reverting one obs-rew-act triple, set lifetime back by 1
-		// q = m_ct->getFullHistory();
-		// std::cout << "CT History Size: "<< q.size() <<std::endl;
+
+    // After reverting one obs-rew-act triple, set lifetime back by 1
+    agentAge--;
   }
-	// q = m_ct->getFullHistory();
-	// std::cout << "CT History Size: "<< q.size() <<std::endl;
 }
 
 void Agent::reset(void) {
-	m_ct->clear();
+  contextTree->clear();
 
-	m_time_cycle = 0;
-	m_total_reward = 0.0;
+  agentAge = 0;
+  totalReward = 0.0;
 }
-
-
-// probability of selecting an action according to the
-// agent's internal model of it's own behaviour
-double Agent::getPredictedActionProb(action_t action) {
-	return NULL; // TODO: implement
-}
-
-
-// get the agent's probability of receiving a particular percept
-double Agent::perceptProbability(percept_t observation, percept_t reward) const {
-	return NULL; // TODO: implement
-}
-
 
 // action sanity check
 bool Agent::isActionOk(action_t action) const {
-	return action < m_actions;
+  return action < numActions;
 }
-
 
 // reward sanity check
 bool Agent::isRewardOk(reward_t reward) const {
-    return reward >= minReward() && reward <= maxReward();
+  return reward >= minReward() && reward <= maxReward();
 }
 
-
 // Encodes an action as a list of symbols
-void Agent::encodeAction(symbol_list_t &symlist, action_t action) const {
-	symlist.clear();
+void Agent::encodeAction(symbol_list_t& symlist, action_t action) const {
+  symlist.clear();
 
-	encode(symlist, action, m_actions_bits);
+  encode(symlist, action, numActionBits);
 }
 
 // Encodes a percept (observation, reward) as a list of symbols
-void Agent::encodePercept(symbol_list_t &symlist, percept_t observation, percept_t reward) const {
-	symlist.clear();
+void Agent::encodePercept(symbol_list_t& symlist,
+                          percept_t observation,
+                          percept_t reward) const {
+  symlist.clear();
 
-	encode(symlist, observation, m_obs_bits);
-	encode(symlist, reward, m_rew_bits);
+  encode(symlist, observation, numObervationBits);
+  encode(symlist, reward, numRewardBits);
 }
 
 // Decodes the observation from a list of symbols
-action_t Agent::decodeAction(const symbol_list_t &symlist) const {
-	return decode(symlist, m_actions_bits);
+action_t Agent::decodeAction(const symbol_list_t& symlist) const {
+  return decode(symlist, numActionBits);
 }
-
 
 // Decodes the reward from a list of symbols
-percept_t Agent::decodeReward(const symbol_list_t &symlist) const {
-	return decode(symlist, m_rew_bits);
-}
-
-
-// used to revert an agent to a previous state
-ModelUndo::ModelUndo(const Agent &agent) {
-
-    m_lifetime     = agent.lifetime();
-    m_reward       = agent.reward();
-    m_history_size = agent.historySize();
-
+percept_t Agent::decodeReward(const symbol_list_t& symlist) const {
+  return decode(symlist, numRewardBits);
 }

@@ -19,20 +19,29 @@ int randRange(int start, int end);
 
 // Extract a value from a string
 template <typename T>
-void strExtract(std::string &str, T &val) {
-	std::istringstream iss(str);
-	iss >> val;
+void strExtract(std::string& str, T& val) {
+  std::istringstream iss(str);
+  iss >> val;
 }
 
 template <typename T>
-T strExtract(std::string &str) {
-	T val;
-	strExtract(str, val);
-	return val;
+T strExtract(std::string& str) {
+  T val;
+  strExtract(str, val);
+  return val;
 }
 
 // encode/decode values to/from symbol lists
-unsigned int decode(const symbol_list_t &symlist, unsigned int bits);
-void encode(symbol_list_t &symlist, unsigned int value, unsigned int bits);
+unsigned int decode(const symbol_list_t& symlist, unsigned int bits);
+void encode(symbol_list_t& symlist, unsigned int value, unsigned int bits);
 
-#endif // __UTIL_HPP__
+// number of distinct percepts (size of the percept space)
+unsigned int countPercepts(unsigned int num_obs, unsigned num_rew);
+
+// encode an observation and a reward as a single observation-reward
+percept_t perceptIndex(percept_t obs,
+                       percept_t rew,
+                       uint_t numObservationBits,
+                       uint_t numRewardBits);
+
+#endif  // __UTIL_HPP__

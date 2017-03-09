@@ -37,20 +37,18 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		assert(0 <= terminate_lifetime);
 	}
 
-	bool tree_initialized = false;
-
 	percept_t observation;
 	percept_t reward;
 	action_t action;
-
-	while (ai.historySize() <= strExtract<unsigned int>(options["ct-depth"])) {
+	// Initial cycles to get things going.
+	while (ai.historySize() <= 100*strExtract<unsigned int>(options["ct-depth"])) {
 		std::cout << "initialize context" << std::endl;
 		observation = env.getObservation();
 		reward = env.getReward();
 		action = ai.genRandomAction();
 		ai.modelUpdate(observation, reward);
 		ai.modelUpdate(action);
-		std::cout << "agent lifetime: " << ai.lifetime() << std::endl;
+		std::cout << "agent lifetime: " << ai.lifetime() << std::endl;		
 	}
 
         // Agent/environment interaction loop
@@ -75,8 +73,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			explored = true;
 			action = ai.genRandomAction();
 		} else {
-			action = search(ai, observation, reward, action, tree_initialized);
-			tree_initialized = true;
+			action = ai.getPlannedAction(observation, reward, action);
 		}
 
 		// Send an action to the environment
@@ -263,7 +260,7 @@ int main(int argc, char *argv[]) {
 
 	// Set up the agent
 	Agent ai(options);
-
+	ai.initPlanner();
 	// Run the main agent/environment interaction loop
 	mainLoop(ai, *env, options);
 
