@@ -39,6 +39,10 @@ bool Agent::initPlanner() {
   return false;
 }
 
+void Agent::incAgentAge(){
+  agentAge++;
+}
+
 action_t Agent::getPlannedAction(percept_t prev_obs,
                                  percept_t prev_rew,
                                  action_t prev_act) {
@@ -59,6 +63,10 @@ lifetime_t Agent::lifetime(void) const {
 
 reward_t Agent::reward(void) const {
   return totalReward;
+}
+
+ContextTree* Agent::getModel() {
+  return contextTree;
 }
 
 reward_t Agent::averageReward(void) const {
@@ -99,6 +107,10 @@ unsigned int Agent::getExploreExploitRatio(void) const {
 
 size_t Agent::historySize(void) const {
   return contextTree->historySize();
+}
+
+void Agent::printCurentModelContext(void) const {
+  contextTree->printCurrentContext();
 }
 
 size_t Agent::horizon(void) const {
@@ -145,7 +157,6 @@ void Agent::modelUpdate(action_t action) {
   // Model update is not needed when observing an action.
   contextTree->updateHistory(action_syms);
 
-  agentAge++;
   isLastUpdateAPercept = false;
 }
 
@@ -158,9 +169,6 @@ bool Agent::modelRevert(uint_t newSearchHorizon) {
     for (size_t actionBit = 0; actionBit < numActionBits; actionBit++) {
       contextTree->revertHistory();
     }
-
-    // After reverting one obs-rew-act triple, set lifetime back by 1
-    agentAge--;
   }
 }
 
