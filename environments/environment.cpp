@@ -186,6 +186,18 @@ void Pacman::reset_game() {
 
 
 	// 2 is food pellats for complete game state
+	// Randomised pellet positions
+	for (int i=0;i<19;i++){
+		for (int j=0;j<21;j++) {
+			if (complete_game_state[i][j] == 0) {
+				complete_game_state[i][j] = (rand01() < 0.5) ? 2 : 0;
+			}
+		}
+	}
+
+
+	/*
+	Static pellet positiosn
 	complete_game_state[3][1] = complete_game_state[4][1] = complete_game_state[2][1] = complete_game_state[13][1] = complete_game_state[14][1] = complete_game_state[15][1] = complete_game_state[16][1] = complete_game_state[12][1] = 2;
 	complete_game_state[1][2] = complete_game_state[8][2] = complete_game_state[17][2] = 2;
 	complete_game_state[7][3] = complete_game_state[8][3] = complete_game_state[9][3] = complete_game_state[10][3] = complete_game_state[12][3] = complete_game_state[15][3] = 2;
@@ -203,6 +215,8 @@ void Pacman::reset_game() {
 	complete_game_state[3][17] = complete_game_state[7][17] = complete_game_state[8][17] = complete_game_state[10][17] = complete_game_state[11][17] = complete_game_state[12][17] = 2;
 	complete_game_state[10][18] = 2;
 	complete_game_state[1][19] = complete_game_state[2][19] = complete_game_state[6][19] = complete_game_state[7][19] = complete_game_state[8][19] = complete_game_state[11][19] = complete_game_state[15][19] = complete_game_state[16][19] = complete_game_state[17][19] = 2;
+	*/
+
 
 	// 6 is for power pill
 	complete_game_state[1][3] = complete_game_state[17][3] = complete_game_state[1][15] = complete_game_state[17][15] = 6;
@@ -830,81 +844,96 @@ void TicTacToe::performAction(action_t action) {
 	} else {
 		// Agent move is added to state
 		state += pow(4,action);
-		board[action / 3][action % 3] = 1;
+		board[(action / 3)][(action % 3)] = 1;
 		// Remove the square from open squares
 		open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), action), open_squares.end());
 		// Reward for an action
 		m_reward = 3;
 		// Check is game is finished
-		win_cond = ( (board[0][0] == board[0][1] == board[0][2] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[1][0] == board[1][1] == board[1][2] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[2][0] == board[2][1] == board[2][2] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[0][0] == board[1][0] == board[2][0] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[0][1] == board[1][1] == board[2][1] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[0][2] == board[1][2] == board[2][2] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[0][0] == board[1][1] == board[2][2] == 1) || win_cond == 1) ? 1 : 0;
-		win_cond = ( (board[0][2] == board[1][1] == board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+		win_cond = ( (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+	}
+	if (win_cond == 1) {
+		// If game is finished, then agent has won, and get reward of 5
+		game_finished = 1;
+		reset_game();
+		m_reward = 5;
 
-		if (win_cond) {
-			// If game is finished, then agent has won, and get reward of 5
+	// check if board fills up
+	} else if (open_squares.size() == 0) {
+		// game is a draw
+		game_finished = 1;
+		reset_game();
+		m_reward = 4;
+	} else {
+		// find how many moves are possible, then make random move
+		// number_of_open_sqaures = open_squares.size();
+		
+
+		/*
+		// Alternative randomisation
+
+		#include <random>
+		std::random_device random_device;
+		std::mt19937 engine{random_device()};
+		std::uniform_int_distribution<int> dist(0, open_squares.size() - 1);
+		
+		int random_choice = open_squares[dist(engine)];
+
+		*/
+
+		std::random_shuffle ( open_squares.begin(), open_squares.end() );
+		random_choice = open_squares[0];
+
+		state = pow(4,random_choice)*2;
+
+
+		board[(random_choice / 3)][(random_choice % 3)] = -1;
+		std::cout << board[(random_choice / 3)][(random_choice % 3)] << std::endl;
+
+		open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), random_choice), open_squares.end());
+
+		// could implement as a tree style search under a while loop, only need one to be true
+		opponent_win_cond = ( (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+		opponent_win_cond = ( (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+
+		if (opponent_win_cond == 1) {
 			game_finished = 1;
 			reset_game();
-			m_reward = 5;
-
-		// check if board fills up
+			m_reward = 1;
 		} else if (open_squares.size() == 0) {
-			// game is a draw
 			game_finished = 1;
 			reset_game();
 			m_reward = 4;
-		} else {
-			// find how many moves are possible, then make random move
-			// number_of_open_sqaures = open_squares.size();
-			
-
-			/*
-			// Alternative randomisation
-
-			#include <random>
-			std::random_device random_device;
-			std::mt19937 engine{random_device()};
-			std::uniform_int_distribution<int> dist(0, open_squares.size() - 1);
-			
-			int random_choice = open_squares[dist(engine)];
-
-			*/
-
-			std::random_shuffle ( open_squares.begin(), open_squares.end() );
-			random_choice = open_squares[0];
-
-			state = pow(4,random_choice)*2;
-
-			board[random_choice / 3][random_choice % 3] = -1;
-
-			open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), random_choice), open_squares.end());
-
-			// could implement as a tree style search under a while loop, only need one to be true
-			opponent_win_cond = ( (board[0][0] == board[0][1] == board[0][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[1][0] == board[1][1] == board[1][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[2][0] == board[2][1] == board[2][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][0] == board[1][0] == board[2][0] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][1] == board[1][1] == board[2][1] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][2] == board[1][2] == board[2][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][0] == board[1][1] == board[2][2] == -1) || opponent_win_cond == 1) ? 1 : 0;
-			opponent_win_cond = ( (board[0][2] == board[1][1] == board[2][0] == -1) || opponent_win_cond == 1) ? 1 : 0;
-
-			if (opponent_win_cond) {
-				game_finished = 1;
-				reset_game();
-				m_reward = 1;
-			} else if (open_squares.size() == 0) {
-				game_finished = 1;
-				reset_game();
-				m_reward = 4;
-			}
 		}
+		
 	}
 	m_observation = state;
+
+	// Printing the screen
+
+	for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            std::cout << board[i][j] << ' ';
+            //std::cout << (char)127 << ' ';
+        }
+        std::cout << std::endl;
+    }
+
 	//Random Opponent makes moves
 	//if he wins game ends, if not give observations
 
@@ -1057,6 +1086,7 @@ void KuhnPoker::reset_game() {
 			opponent_action = 0;
 		}
 	}
+	m_reward = 0;
 
 	// observations are current card, and opponents choice (to bet or pass)
 	// 3 bits on agent card?, 1 bit on opponent actions
