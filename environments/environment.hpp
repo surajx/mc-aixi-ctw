@@ -84,6 +84,10 @@ public:
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
 
+	virtual void reset_game();
+
+	virtual void ghost_movement(Ghost ghost);
+
 private:
 	int pacmanX;
 	int pacmanY;
@@ -133,6 +137,8 @@ public:
 
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
+
+	virtual void reset_game();
 
 private:
 
@@ -191,6 +197,8 @@ public:
 
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
+
+	virtual void reset_game();
 
 private:
 	int opponent_card;
