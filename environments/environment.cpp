@@ -1174,7 +1174,7 @@ void KuhnPoker::performAction(action_t action) {
 
 	} else if (opponent_action == 1) {
 		//opponent wins
-		m_reward = 4 - agent_chips_put_in; 
+		m_reward = 2 - agent_chips_put_in; 
 		// Reset the game
 		reset_game();
 	} else {
