@@ -144,7 +144,7 @@ class Agent {
 
   // Revert agent's internal model of the world to that of a previous time
   // cycle.
-  bool modelRevert();
+  bool modelRevert(uint_t newSearchHorizon);
 
   // Resets the agent
   void reset(void);

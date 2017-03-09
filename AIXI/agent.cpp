@@ -149,8 +149,8 @@ void Agent::modelUpdate(action_t action) {
   isLastUpdateAPercept = false;
 }
 
-bool Agent::modelRevert() {
-  for (size_t simIdx = 0; simIdx < searchHorizon; simIdx++) {
+bool Agent::modelRevert(uint_t newSearchHorizon) {
+  for (size_t simIdx = 0; simIdx < newSearchHorizon; simIdx++) {
     for (size_t perceptBit = 0; perceptBit < numObervationBits + numRewardBits;
          perceptBit++) {
       contextTree->revert();

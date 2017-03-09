@@ -32,7 +32,7 @@ reward_t SearchTree::playout(unsigned int searchHorizon) {
     percept_t new_rew = agent->genPerceptAndUpdate(numRewardBits);
     rew += new_rew;
   }
-  agent->modelRevert();
+  agent->modelRevert(searchHorizon);
   return rew;
 }
 
@@ -68,7 +68,7 @@ action_t SearchTree::search(percept_t prev_obs,
     reward_t r = rootNode->sample(m);
   }
 
-  std::cout << rootNode->bestAction() << std::endl;
+  std::cout << "Best Action: " << rootNode->bestAction() << std::endl;
   return rootNode->bestAction();
 }
 
