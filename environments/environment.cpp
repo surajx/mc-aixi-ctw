@@ -1022,6 +1022,7 @@ void ExtendedTiger::performAction(action_t action) {
 			} else{
 				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door ) + (pow(2,2)*state);
 				m_reward = 99;
+				state = 0;
 			}
 			break;
 		case 2:
@@ -1162,12 +1163,12 @@ void KuhnPoker::performAction(action_t action) {
 		//showdown
 		if (agent_card > opponent_card) {
 			//agent wins
-			m_reward = 4 + chips_in_play;
+			m_reward = 2 + chips_in_play;
 			// Reset the game
 			reset_game();
 		} else {
 			//opponent wins
-			m_reward = 4 - agent_chips_put_in; 
+			m_reward = 2 - agent_chips_put_in; 
 			// Reset the game
 			reset_game();
 		}
@@ -1183,19 +1184,19 @@ void KuhnPoker::performAction(action_t action) {
 			chips_in_play += 1;
 			if (agent_card > opponent_card) {
 				//agent wins
-				m_reward = 4 + chips_in_play;
+				m_reward = 2 + chips_in_play;
 				// Reset the game
 				reset_game();
 			} else {
 				//opponent wins
-				m_reward = 4 - agent_chips_put_in; 
+				m_reward = 2 - agent_chips_put_in; 
 				// Reset the game
 				reset_game();
 			}
 
 		} else {
 			//opponent folds and agent wins
-			m_reward = 4 + chips_in_play;
+			m_reward = 2 + chips_in_play;
 			// Reset the game
 			reset_game();
 		}
