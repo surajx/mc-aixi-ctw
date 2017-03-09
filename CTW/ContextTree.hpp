@@ -189,6 +189,8 @@ class ContextTree {
 
   // debug
   symbol_q_t getFullHistory() { return sequenceHistory; }
+
+  void printCurrentContext();
 };
 
 #endif

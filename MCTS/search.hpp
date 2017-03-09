@@ -31,6 +31,8 @@ class SearchNode {
   */
   SearchNode(Agent* ai, bool is_chance_node, unsigned int num_children);
 
+  double getSampleMean(){ return m_mean; }
+
   /**
   * Returns best action.
   * If more than one, return an uniformly random best action.

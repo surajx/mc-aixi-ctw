@@ -75,6 +75,12 @@ class Agent {
   // Init Planner
   bool initPlanner();
 
+  void incAgentAge();
+
+  ContextTree* getModel();
+
+  void printCurentModelContext(void) const;
+
   // Get planned action
   action_t getPlannedAction(percept_t prev_obs,
                             percept_t prev_rew,

@@ -137,8 +137,18 @@ double ContextTree::predict(symbol_list_t& symbol_list) {
   return exp(logProbWeightedPrime - logProbWeighted);
 }
 
+void ContextTree::printCurrentContext(){
+  std::cout << "Context: ";
+  for (int i = sequenceHistory.size() - maxTreeDepth;
+       i < sequenceHistory.size(); i++) {
+    std::cout << sequenceHistory[i] << ", ";
+  }
+  std::cout << std::endl;  
+}
+
 symbol_t ContextTree::predictSymbol() {
-  return rand01() < predict(SYMBOL_1) ? SYMBOL_1 : SYMBOL_0;
+  // std::cout << "Next symbol 1 prob: " << predict(SYMBOL_1) << std::endl;
+  return predict(SYMBOL_1) > 0.5 ? SYMBOL_1 : SYMBOL_0;
 }
 
 void ContextTree::genNextSymbols(symbol_list_t& predictedSymbols, uint_t num) {
