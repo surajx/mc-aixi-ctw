@@ -5,23 +5,86 @@
 
 #include "../common/types.hpp"
 
-class SearchNode;
+typedef unsigned long long visits_t;
 
-// MCTS constants
-static unsigned int numActions; // number of actions
-static unsigned int numPercepts; // number of percepts
-static unsigned int obsBits; // number of observation bits
-static unsigned int rewBits; // number of reward bits
-static double C; // exploration-exploitation constant C
-static unsigned int m; // also known as horizon, or max tree depth.
-static SearchNode*  root_ptr; // pointer to the root node
+class SearchNode {
+ private:
+  bool m_chance_node;  // true if this node is a chance node, false if action
+  unsigned int m_children;  // chance (action) nodes have |X| (|A|) children
+  double m_mean;            // the expected reward of this node
+  visits_t m_visits;        // number of times the search node has been visited
+  std::vector<SearchNode*> children;
 
-// map an (o,r) pair to a unique index 
-percept_t perceptIndex(percept_t obs, percept_t rew);
+  unsigned int numActions;          // number of actions
+  unsigned int numPercepts;         // number of percepts
+  unsigned int numObservationBits;  // number of observation bits
+  unsigned int numRewardBits;       // number of reward bits
+  double C;                         // exploration-exploitation constant C
+  unsigned int m;                   // also known as horizon, or max tree depth.
 
-// determine the best action by searching ahead
-extern action_t search(Agent &agent, percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+  Agent* agent;
 
-static reward_t playout(Agent &agent, unsigned int playout_len, int test_arg);
+ public:
+  /**
+  * TODO: Documentation
+  * Constructor
+  */
+  SearchNode(Agent* ai, bool is_chance_node, unsigned int num_children);
 
-#endif // __SEARCH_HPP__
+  double getSampleMean(){ return m_mean; }
+
+  /**
+  * Returns best action.
+  * If more than one, return an uniformly random best action.
+  */
+  action_t bestAction() const;
+
+  /**
+  * Select action based on UCT
+  */
+  SearchNode* selectAction(unsigned int horiz);
+
+  /**
+  * Performs a sample run through this node and its children returning the
+  * accumulated reward from this sample run.
+  */
+  reward_t sample(unsigned int horiz);
+
+  // number of times the search node has been visited
+  visits_t visits(void) const { return m_visits; }
+
+  // determine the expected reward from this node
+  reward_t expectation(void) const { return m_mean; }
+
+  // vector with children
+  std::vector<SearchNode*> getChildren(void) const { return children; }
+
+  /**
+  * Recursively destruct the SearchNode and its children.
+  * Do not destruct the newly assigned root node.
+  */
+  ~SearchNode(void);
+};
+
+class SearchTree {
+ private:
+  SearchNode* rootNode;
+  unsigned int numActions;          // number of actions
+  unsigned int numPercepts;         // number of percepts
+  unsigned int numObservationBits;  // number of observation bits
+  unsigned int numRewardBits;       // number of reward bits
+  double C;                         // exploration-exploitation constant C
+  unsigned int m;                   // also known as horizon, or max tree depth.
+  Agent* agent;
+  bool isFirst = true;
+
+ public:
+  SearchTree(Agent* agent);
+  action_t search(percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+  reward_t playout(unsigned int playout_len);
+  void pruneTree(percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+  SearchNode* getRootNode() { return rootNode; }
+  ~SearchTree(void);
+};
+
+#endif  // __SEARCH_HPP__
