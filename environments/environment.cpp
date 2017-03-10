@@ -873,6 +873,23 @@ void Pacman::performAction(action_t action) {
 	// Combine all the observations
 	m_observation = wall_obs + ghost_obs + smell_obs + pellat_obs + power_obs;
 
+	// Remove extra ghosts
+	for (int j = 0; j < 21; ++j)
+	        {
+		for (int i = 0; i < 19; ++i)
+	    {
+	    	if (complete_game_state[i][j] == 4 || complete_game_state[i][j] == 12 || complete_game_state[i][j] == 14 || complete_game_state[i][j] == 16 ) {
+	    		if (!((ghost1.x == i && ghost1.y == j) || (ghost2.x == i && ghost2.y == j) || (ghost3.x == i && ghost3.y == j) || (ghost4.x == i && ghost4.y == j))) {
+	    			complete_game_state[i][j] = 0;
+	    		}
+	    	} else if (complete_game_state[i][j] == 18 || complete_game_state[i][j] == 20 || complete_game_state[i][j] == 22 || complete_game_state[i][j] == 8 ) {
+	    		if (!((ghost1.x == i && ghost1.y == j) || (ghost2.x == i && ghost2.y == j) || (ghost3.x == i && ghost3.y == j) || (ghost4.x == i && ghost4.y == j))) {
+	    			complete_game_state[i][j] = 2;
+	    		}
+	    	}
+	    }
+	   }
+
 	// Printing the screen
 	for (int j = 0; j < 21; ++j)
 	        {
@@ -887,7 +904,7 @@ void Pacman::performAction(action_t action) {
         	} else if (complete_game_state[i][j] == 1) {
         		// Wall
         		std::cout << "#" << ' ';
-        	} else if (complete_game_state[i][j] == 4 || complete_game_state[i][j] == 12 || complete_game_state[i][j] == 14 || complete_game_state[i][j] == 16 || complete_game_state[i][j] == 8 ) {
+        	} else if (complete_game_state[i][j] == 4 || complete_game_state[i][j] == 12 || complete_game_state[i][j] == 14 || complete_game_state[i][j] == 16 || complete_game_state[i][j] == 8 || complete_game_state[i][j] == 18 || complete_game_state[i][j] == 20 || complete_game_state[i][j] == 22) {
         		// Ghost
         		std::cout << "G" << ' ';
         	} else if (complete_game_state[i][j] == 2) {
