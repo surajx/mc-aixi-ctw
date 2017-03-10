@@ -1,7 +1,7 @@
 /****************************************************************************************
 ** TODO: Documentation
 **
-** Author: Suraj Narayanan Sasikumar
+** Author: Suraj Narayanan Sasikumar, Baseline code Author
 ***************************************************************************************/
 
 #ifndef __CONTEXTTREE_HPP__
@@ -9,145 +9,188 @@
 
 #include <deque>
 
-#include "../common/constants.hpp"
 #include "../common/types.hpp"
+
+#include "CTNode.hpp"
 
 typedef std::deque<symbol_t> symbol_q_t;
 
-class CTNode {
+class ContextTree {
  private:
-  CTNode* parent;       // Parent Node
-  CTNode* children[2] = {NULL, NULL};  // List of childrens
-
-  double logProbEstimated;  // log KT estimated probability
-  double logProbWeighted;   // log weighted block probability
-
-  // one slot for each symbol (SYMBOL_0, SYMBOL_1)
-  uint_t symbolCount[2];  // a,b in CTW literature
+  symbol_q_t sequenceHistory;  // Stores the entire history
+  uint_t maxTreeDepth;         // the maximum depth of the context tree
+  CTNode* rootNode;            // rootNode of the context trees
 
   /**
-  * Compute the logarithm of the KT-estimator update multiplier
-  * TODO: implement and more documentation
+  * TODO: Consider renaming because it does both update and revert.
+  * Well maybe its okay, revert is kind of an update, think about it!
+  *
+  * Recursively updates/reverts the prediction suffix tree with the
+  * latest symbol
+  *
+  * @param sym The binary symbol.
+  * @param depth The current depth of the context tree during recursion.
+  * @param node The current node that is being updated/reverted.
+  * @param node_action Flag that idicated if its a revert or update.
   */
-  double logKTMul(symbol_t sym);
+  void update(const symbol_t sym,
+              uint_t depth,
+              CTNode* node,
+              const int node_action);
 
   /**
-  * Calculate the logarithm of the weighted block probability.
-  * be careful of numerical issues, use an identity for log(a+b)
-  * so that you can work in logspace instead.
-  * TODO: implement and more documentation
+  * Delete the tree whose root node is given.
+  *
+  * @param node The root node of the tree that needs to be deleted.
   */
-  void updateLogProbability();
-
-  /**
-  * Update the node after having observed a new symbol.
-  * TODO: implement and more documentation
-  */
-  void update(const symbol_t symbol);
-
-  /*
-  * Return the node to its state immediately prior to the last update.
-  * TODO: implement in predict.cpp
-  */
-  void revert(const symbol_t symbol);
+  void deleteTree(CTNode* node);
 
  public:
   /**
-  * Log weighted blocked probability
+  * Constructor to instantiate a Context Tree of specified depth
+  *
+  * @param depth The depth of the context tree.
   */
-  double getLogProbWeighted() { return logProbWeighted; }
-
-  /**
-  * Log KT estimated probability
-  */
-  double getLogProbEstimated() { return logProbEstimated; }
-
-  /**
-  * Number of times this context has been visited
-  */
-  uint_t visits() { return symbolCount[SYMBOL_0] + symbolCount[SYMBOL_1]; }
-
-  /**
-  * Child corresponding to a particular symbol
-  */
-  CTNode* child(symbol_t sym) { return children[sym]; }
-
-  /**
-  * Add child to parent
-  */
-  void addChild(symbol_t sym, CTNode* child, CTNode* parent);
-
-  /**
-  * Number of descendants of a node in the context tree
-  */
-  uint_t descendentsCount();
-
-  CTNode();
-
-  // Destructor
-  ~CTNode();
-};
-
-class ContextTree{
- private:
-  symbol_q_t sequenceHistory;
-  uint_t maxTreeDepth;  // the maximum depth of the context tree
-  CTNode* rootNode;
-
- public:
-  // create a context tree of specified maximum depth
   ContextTree(uint_t depth);
 
-  // clear the entire context tree
+  /**
+  * Resets the context tree statistics
+  */
   void clear();
 
-  // updates the context tree with a new binary symbol
-  void update(const symbol_t sym);  // TODO: implement in predict.cpp
-  // update the context tree with a list of symbols.
+  /**
+  * Update the context tree with a new binary symbol
+  *
+  * @param sym The binary symbol.
+  */
+  void update(const symbol_t sym);
+
+  /**
+  * Update the context tree with a list of binary symbols.
+  *
+  * @param symbol_list vector of binary symbols.
+  */
   void update(const symbol_list_t& symbol_list);
-  // add a symbol to the history without updating the context tree.
+
+  /**
+  * Updates the history statistics, without touching the context tree
+  * use it to update the history of those percept bits that predict an action
+  * bit.
+  *
+  * @param symbol_list vector of binary symbols.
+  */
   void updateHistory(const symbol_list_t& symbol_list);
 
-  // Recalculate the log weighted probability for this node.
-  void updateLogProbability();
-
-  // removes the most recently observed symbol from the context tree
+  /**
+  * Removes the most recently observed symbol from the context tree.
+  */
   void revert();
 
-  // shrinks the history down to a former size
+  /**
+  * Shrinks the history down to a given size.
+  *
+  * @param new_size The new (reduced) size of the history.
+  */
   void revertHistory(uint_t newsize);
 
-  // the estimated probability of observing a particular symbol or sequence
-  double predict(symbol_t sym);               // TODO: implement in predict.cpp
-  double predict(symbol_list_t symbol_list);  // TODO: implement in predict.cpp
+  /**
+  * Shrinks the history down to by one bit.
+  */
+  void revertHistory();
 
-  // generate a specified number of random symbols
-  // distributed according to the context tree statistics
+  /**
+  * Estimates the probability of observing a particular symbol
+  *
+  * @param  sym The given binary symbol
+  *
+  * @return double The probability of observing the given symbol.
+  */
+  double predict(symbol_t sym);
+
+  /**
+  * Estimates the probability of observing a particular sequence of symbols.
+  *
+  * @param  symbol_list The given binary symbol sequence
+  *
+  * @return double The probability of observing the given symbol sequence.
+  */
+  double predict(symbol_list_t& symbol_list);
+
+  /**
+  * Predict what the next symbol would be according to the context tree
+  * statistics.
+  *
+  * @return symbol_t The next symbol according to the Context Tree statistics.
+  */
   symbol_t predictSymbol();
 
-  // generate a specified number of random symbols distributed according to
-  // the context tree statistics and update the context tree with the newly
-  // generated bits
-  void predictMutipleSymbols(uint_t numSymToPredict,
-                             symbol_list_t& predictedSymbols);
+  /**
+  * Generate a specified number of random symbols distributed according to the
+  * context tree statistics.
+  *
+  * @param predictedSymbols Reference to empty symbol list which stores the
+  *                         predicted symbols.
+  * @param num The number of symbols to be generated.
+  */
+  void genNextSymbols(symbol_list_t& predictedSymbols, uint_t num);
 
-  // the logarithm of the block probability of the whole sequence
+  /**
+  * Generate a specified number of random symbols distributed according to the
+  * context tree statistics AND update the context tree with the newly generated
+  * bits.
+  *
+  * @param predictedSymbols Reference to empty symbol list which stores the
+  *                         predicted symbols.
+  * @param num The number of symbols to be generated.
+  */
+  void genNextSymbolsAndUpdate(symbol_list_t& predictedSymbols, uint_t num);
+
+  /**
+  * The logarithm of the block probability of the whole sequence
+  *
+  * @return double The block probability of the sequence seen so far.
+  */
   double getLogBlockProbability();
 
-  // get the n'th history symbol, NULL if doesn't exist
+  /**
+  * Get the n'th history symbol, NULL if doesn't exist
+  *
+  * @param n The position in the observed sequence.
+  *
+  * @return symbol_t* n'th history symbol.
+  */
   symbol_t* nthHistorySymbol(uint_t n);
 
-  // the depth of the context tree
+  /**
+  * The maximum depth of the context tree.
+  *
+  * @return uint_t Context Tree depth.
+  */
   uint_t depth() { return maxTreeDepth; }
 
-  // the size of the stored history
+  /**
+  * The size of the stored history.
+  *
+  * @return uint_t History Size.
+  */
   uint_t historySize() { return sequenceHistory.size(); }
 
-  // number of nodes in the context tree
+  /**
+  * Number of nodes in the context tree.
+  *
+  * @return uint_t Context Tree node count.
+  */
   uint_t size() { return rootNode ? rootNode->descendentsCount() : 0; }
 
-  // Destructor
+  /**
+  * Destructor
+  */
   ~ContextTree();
+
+  // debug
+  symbol_q_t getFullHistory() { return sequenceHistory; }
+
+  void printCurrentContext();
 };
 
 #endif

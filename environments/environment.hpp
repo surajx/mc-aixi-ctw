@@ -79,6 +79,8 @@ public:
 		int y;
 		int manhattan_distance;
 		int action;
+		int oldx;
+		int oldy;
 	};
 
 	// receives the agent's action and calculates the new environment percept
@@ -86,7 +88,9 @@ public:
 
 	virtual void reset_game();
 
-	virtual void ghost_movement(Ghost ghost);
+	virtual Ghost ghost_movement(Ghost);
+
+	//virtual void ghost_movement(Ghost ghost);
 
 private:
 	int pacmanX;
