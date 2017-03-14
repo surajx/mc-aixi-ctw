@@ -1,13 +1,15 @@
+/****************************************************************************************
+** TODO: Documentation
+**
+** Author: Arie Slobbe
+***************************************************************************************/
+
 #include "search.hpp"
 #include "../AIXI/agent.hpp"
 #include "../common/util.hpp"
 
 #include <iostream>
 #include <random>
-
-/**
-* SearchTree Implementation.
-*/
 
 SearchTree::SearchTree(Agent* ai) {
   numActions = ai->getNumActions();  // set number of actions
@@ -30,15 +32,9 @@ reward_t SearchTree::playout(unsigned int searchHorizon) {
     agent->modelUpdate(act);
     percept_t new_obs = agent->genPerceptAndUpdate(numObservationBits);
     percept_t new_rew = agent->genPerceptAndUpdate(numRewardBits);
-    // std::cout <<"After playout aor cycle:" <<std::endl;
-    // agent->printCurentModelContext();
     rew += new_rew;
   }
-  // std::cout <<"Before Model revert" <<std::endl;
-  // agent->printCurentModelContext();
   agent->modelRevert(m);
-  // std::cout <<"After Model revert" <<std::endl;
-  // agent->printCurentModelContext();
   return rew;
 }
 
@@ -73,17 +69,12 @@ action_t SearchTree::search(percept_t prev_obs,
   for (unsigned int sim = 1; sim <= agent->numSimulations(); sim++) {
     reward_t r = rootNode->sample(m);
   }
-  
-  // std::cout << "expected reward[0]: " << rootNode->getChildren()[0]->getSampleMean() <<std::endl;
-  // std::cout << "expected reward [1]: " << rootNode->getChildren()[1]->getSampleMean() <<std::endl;
-  std::cout << "Best Action: " << rootNode->bestAction() << std::endl;
   return rootNode->bestAction();
 }
 
 /**
 * SearchNode Implementation.
 */
-
 SearchNode::SearchNode(Agent* ai,
                        bool is_chance_node,
                        unsigned int num_children) {
@@ -160,8 +151,6 @@ SearchNode* SearchNode::selectAction(unsigned int horiz) {
     SearchNode* ha_ptr = new SearchNode(agent, true, numPercepts);
     children[ran_action] = ha_ptr;
     agent->modelUpdate(ran_action);
-    // std::cout <<"After virtual (new) action:" <<std::endl;
-    // agent->printCurentModelContext();
     return ha_ptr;
   } else {  // find a_max = argmax, return a_max
     action_t a_max = 0;
@@ -179,8 +168,6 @@ SearchNode* SearchNode::selectAction(unsigned int horiz) {
       }
     }
     agent->modelUpdate(a_max);
-    // std::cout <<"After virtual action:" <<std::endl;
-    // agent->printCurentModelContext();
     return children[a_max];
   }
 }
@@ -195,7 +182,6 @@ reward_t SearchNode::sample(unsigned int horiz) {
   } else if (m_chance_node) {
     percept_t new_obs = agent->genPerceptAndUpdate(numObservationBits);
     percept_t new_rew = agent->genPerceptAndUpdate(numRewardBits);
-    // std::cout << "CTW predicts rew = " << new_rew << std::endl;
     percept_t percept_index =
         perceptIndex(new_obs, new_rew, numObservationBits, numRewardBits);
     SearchNode* hor_ptr = new SearchNode(agent, false, numActions);
@@ -211,9 +197,7 @@ reward_t SearchNode::sample(unsigned int horiz) {
     SearchNode* ha_ptr = selectAction(horiz);
     rew = ha_ptr->sample(horiz);
   }
-  // std::cout << "End of sample. old m_mean: " << m_mean << " Rew: " << rew << std::endl;
   m_mean = (1.0 / (m_visits + 1)) * (rew + m_visits * m_mean);
   m_visits++;
-  // std::cout << "End of sample. new m_mean: " << m_mean << std::endl;
   return rew;
 }
