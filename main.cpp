@@ -192,10 +192,10 @@ int main(int argc, char *argv[]) {
 	options_t options;
 
 	// Default configuration values
-	options["ct-depth"] = "7";
+	options["ct-depth"] = "16";
 	options["agent-horizon"] = "7";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "9";
+	options["num-simulations"] = "20";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
@@ -262,8 +262,8 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "robocup-simulation") {
 		env = new RobocupSimulation(options);
-		options["agent-actions"] = "4";
-		options["observation-bits"] = "17";
+		options["agent-actions"] = "12";
+		options["observation-bits"] = "20";
 		options["reward-bits"] = "8";
 	}
 	else {

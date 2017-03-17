@@ -229,22 +229,39 @@ public:
 		int y;
 		int body_facing;
 		int head_facing;
+		int ball_agent_x;
+		int ball_agent_y;
 	};
 
-	struct SoccerBall {
-		int x;
-		int y;
-	};
+	// struct SoccerBall {
+	// 	int x;
+	// 	int y;
+	// };
 
-	virtual void move(int direction, int power, SoccerBall ball, Robot agent);
+	// virtual void move(int direction, int power, SoccerBall ball, Robot agent);
 
-	virtual void turn_body(int direction, Robot agent);
+	// virtual void turn_body(int direction, Robot agent);
 
-	virtual void turn_head(int direction, Robot agent);
+	// virtual void turn_head(int direction, Robot agent);
 
-	virtual void kick(int direction, SoccerBall ball, Robot agent);
+	// virtual void kick(int direction, SoccerBall ball, Robot agent);
 
-	virtual int check_vision(Robot agent, SoccerBall ball);
+	// virtual int check_vision(Robot agent, SoccerBall ball);
+
+
+
+	virtual Robot move(int direction, int power, int ball_x, int ball_y, Robot);
+
+	virtual Robot turn_body(int direction, Robot);
+
+	virtual Robot turn_head(int direction, Robot);
+
+	virtual Robot kick(int direction, int ball_x, int ball_y, Robot);
+
+	virtual int check_vision(Robot agent, int ball_x, int ball_y);
+
+	virtual void reset();
+
 
 	
 
@@ -252,8 +269,17 @@ private:
 	Robot agent;
 	int agent_position_and_heading_and_head[4];
 	//int agent_velocity; //probably vector
-	SoccerBall ball;
+	// SoccerBall ball;
+	int ball_y;
+	int ball_x;
 	int ball_position[2];
+	// int complete_full_field[72][108];
+	// can observe which quarter, then complete_full_field* = [36][54]
+	// can observe which quarter of that, then complete_full_field** = [18][27]
+	// can observe which half of that, then complete_full_field*** = [9][27]
+	// can observe which nin-th of that, then complete_full_field**** = [3][9]
+	// can observe which nin-th of that, then complete_full_field***** = [1][3]
+	// total observation bits = 4+4+2+(3+1)+(3+1)+2 = 20
 	int full_field[11][19];
 	int home_goal[2];
 	int opponent_goal[2];

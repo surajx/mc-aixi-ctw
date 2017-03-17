@@ -1382,8 +1382,10 @@ RobocupSimulation::RobocupSimulation(options_t &options) {
 		}
 	}
 
-	ball.x = 5;  // (x,y) position of ball
-	ball.y = 9;
+	ball_x = 5;  // (x,y) position of ball
+	ball_y = 9;
+	agent.ball_agent_x = 5;
+	agent.ball_agent_y = 9;
 	full_field[5][9] = 1;
 
 
@@ -1398,13 +1400,13 @@ RobocupSimulation::RobocupSimulation(options_t &options) {
 	home_goal[0] = 4; //Home goal positions
 	home_goal[1] = 6;
 	for (int i = home_goal[0]; i <= home_goal[1]; i++) {
-		full_field[0][i] = 3;
+		full_field[i][0] = 3;
 	}
 
 	opponent_goal[0] = 4; //opponent goal positions
 	opponent_goal[1] = 6;
 	for (int i = opponent_goal[0]; i <= opponent_goal[1]; i++) {
-		full_field[11][i] = 4;
+		full_field[i][18] = 4;
 	}
 
 
@@ -1421,7 +1423,55 @@ RobocupSimulation::RobocupSimulation(options_t &options) {
 // 
 
 
-void RobocupSimulation::turn_body(int direction, Robot agent) {
+void RobocupSimulation::reset() {
+	// Set up initial field
+	// Set up initial field as 0
+	// Ball is 1
+	// Agent is 2
+	// HomeGoals are 3
+	// OpponentGoals are 4
+	// ?Other robots are 5
+	for (int k = 0; k < 19; k++) {
+		for (int j = 0; j < 11; j++) {
+			full_field[j][k] = 0;
+		}
+	}
+
+	ball_x = 5;  // (x,y) position of ball
+	ball_y = 9;
+	agent.ball_agent_x = 5;
+	agent.ball_agent_y = 9;
+	full_field[5][9] = 1;
+
+
+
+
+	agent.x = 5; // (x,y,theta,phi) position and heading of agent, 
+	agent.y = 7;
+	agent.body_facing = 1; // theta in {towardsOpponents,towardsHome,left,right} = {1,2,3,4}
+	agent.head_facing = 1; // phi in {forward,left,right} = {1,2,3}
+	full_field[5][7] = 2;
+
+	for (int i = home_goal[0]; i <= home_goal[1]; i++) {
+		full_field[i][0] = 3;
+	}
+
+	for (int i = opponent_goal[0]; i <= opponent_goal[1]; i++) {
+		full_field[i][18] = 4;
+	}
+
+
+	// Set up the initial observation
+	// Position
+	bodyfacing_observation = (pow(2,0)*(agent.body_facing%2)) + (pow(2,1)*((3*agent.body_facing)%2));
+	headfacing_observation = (pow(2,2)*(agent.head_facing%2)) + (pow(2,3)*((3*agent.head_facing)%2));
+	vision_observation = pow(2,4)*19; // 0 if no ball, else 1 to 24 from top left going across then down
+	position_observation = (pow(2,10)*agent.x) + (pow(2,15)*agent.y);
+	m_observation = bodyfacing_observation + headfacing_observation + vision_observation + position_observation; // BodyFacing + HeadFacing + Vision + Position 
+}
+
+
+RobocupSimulation::Robot RobocupSimulation::turn_body(int direction, Robot agent) {
 	//stuff
 	if (direction == 1) {
 		// turning left
@@ -1443,10 +1493,11 @@ void RobocupSimulation::turn_body(int direction, Robot agent) {
 		}
 	}
 	m_reward = 99;
+	return agent;
 }
 
 
-void RobocupSimulation::turn_head(int direction, Robot agent) {
+RobocupSimulation::Robot RobocupSimulation::turn_head(int direction, Robot agent) {
 	//stuff
 	m_reward = 99;
 	if (direction == 1) {
@@ -1476,32 +1527,33 @@ void RobocupSimulation::turn_head(int direction, Robot agent) {
 			agent.head_facing += 1;
 		}
 	}
+	return agent;
 }
 
 
-void RobocupSimulation::kick(int direction, SoccerBall ball, Robot agent) {
+RobocupSimulation::Robot RobocupSimulation::kick(int direction, int ball_x, int ball_y, Robot agent) {
 	// check if ball is in front
 	// if it is, move it in direction, else negative reward
 	bool ball_in_front = false;
 
 	if (agent.body_facing == 1) {
 		// Check if agent is facing forward
-		if ((agent.x + 1 == ball.x) && (agent.y == ball.y)) {
+		if ((agent.x + 1 == ball_x) && (agent.y == ball_y)) {
 			ball_in_front = true;
 		}
 	} else if (agent.body_facing == 2) {
 		// check if agent facing back
-		if ((agent.x - 1 == ball.x) && (agent.y == ball.y)) {
+		if ((agent.x - 1 == ball_x) && (agent.y == ball_y)) {
 			ball_in_front = true;
 		}
 	} else if (agent.body_facing == 3) {
 		// check if agent facing left
-		if ((agent.x == ball.x) && (agent.y - 1 == ball.y)) {
+		if ((agent.x == ball_x) && (agent.y - 1 == ball_y)) {
 			ball_in_front = true;
 		}
 	} else {
 		// check if agent facing down
-		if ((agent.x == ball.x) && (agent.y + 1 == ball.y)) {
+		if ((agent.x == ball_x) && (agent.y + 1 == ball_y)) {
 			ball_in_front = true;
 		}
 	}
@@ -1509,23 +1561,27 @@ void RobocupSimulation::kick(int direction, SoccerBall ball, Robot agent) {
 	if (ball_in_front) {
 		// move in direction
 		if (agent.body_facing == 1) {
-			ball.x += 3;
+			ball_x += 3;
 		} else if (agent.body_facing == 2) {
-			ball.x -= 3;
+			ball_x -= 3;
 		} else if (agent.body_facing == 3) {
-			ball.y -= 3;
+			ball_y -= 3;
 		} else {
-			ball.y -= 3;
+			ball_y -= 3;
 		}
 		m_reward = 120;
 	} else {
 		// negative reward
-		m_reward = 90;
+		m_reward = 99;
 	}
+
+	agent.ball_agent_x = ball_x;
+	agent.ball_agent_y = ball_y;
+	
+	return agent;
 }
 
-
-void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot agent) {
+RobocupSimulation::Robot RobocupSimulation::move(int direction, int power, int ball_x, int ball_y, Robot agent) {
 	// set up switch based on agent body facing
 	// 8 possible movements, 2 in any direction, 1 in any direction
 	int movement_direction;
@@ -1583,12 +1639,12 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 		switch(movement_direction) {
 			case 1:
 				// if it is forward, check the amount of power
-				if (agent.x + 1 == ball.x && agent.y == ball.y) {
-					ball.x += 2;
+				if (agent.x + 1 == ball_x && agent.y == ball_y) {
+					ball_x += 2;
 					// Moved the ball
 					m_reward = 110;
-				} else if (agent.x + 2 == ball.x && agent.y == ball.y) {
-					ball.x += 1;
+				} else if (agent.x + 2 == ball_x && agent.y == ball_y) {
+					ball_x += 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1596,12 +1652,12 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 			case 2:
 				// if it is backward, check the amount of power
-				if (agent.x - 1 == ball.x && agent.y == ball.y) {
-					ball.x -= 2;
+				if (agent.x - 1 == ball_x && agent.y == ball_y) {
+					ball_x -= 2;
 					// Moved the ball
 					m_reward = 110;
-				} else if (agent.x - 2 == ball.x && agent.y == ball.y) {
-					ball.x -= 1;
+				} else if (agent.x - 2 == ball_x && agent.y == ball_y) {
+					ball_x -= 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1609,12 +1665,12 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 			case 3:
 				// if it is left, check the amount of power
-				if (agent.x == ball.x && agent.y - 1 == ball.y) {
-					ball.y -= 2;
+				if (agent.x == ball_x && agent.y - 1 == ball_y) {
+					ball_y -= 2;
 					// Moved the ball
 					m_reward = 110;
-				} else if (agent.x == ball.x && agent.y - 2 == ball.y) {
-					ball.y -= 1;
+				} else if (agent.x == ball_x && agent.y - 2 == ball_y) {
+					ball_y -= 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1622,12 +1678,12 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 			case 4:
 				// if it is right, check the amount of power
-				if (agent.x == ball.x && agent.y + 1 == ball.y) {
-					ball.y += 2;
+				if (agent.x == ball_x && agent.y + 1 == ball_y) {
+					ball_y += 2;
 					// Moved the ball
 					m_reward = 110;
-				} else if (agent.x == ball.x && agent.y + 2 == ball.y) {
-					ball.y += 1;
+				} else if (agent.x == ball_x && agent.y + 2 == ball_y) {
+					ball_y += 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1638,8 +1694,8 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 		switch(movement_direction) {
 			case 1:
 				// if it is forward, check the amount of power
-				if (agent.x + 1 == ball.x && agent.y == ball.y) {
-					ball.x += 1;
+				if (agent.x + 1 == ball_x && agent.y == ball_y) {
+					ball_x += 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1647,8 +1703,8 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 			case 2:
 				// if it is backward, check the amount of power
-				if (agent.x - 1 == ball.x && agent.y == ball.y) {
-					ball.x -= 1;
+				if (agent.x - 1 == ball_x && agent.y == ball_y) {
+					ball_x -= 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1656,8 +1712,8 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 			case 3:
 				// if it is left, check the amount of power
-				if (agent.x == ball.x && agent.y - 1 == ball.y) {
-					ball.y -= 1;
+				if (agent.x == ball_x && agent.y - 1 == ball_y) {
+					ball_y -= 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1665,8 +1721,8 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 			case 4:
 				// if it is right, check the amount of power
-				if (agent.x == ball.x && agent.y + 1 == ball.y) {
-					ball.y += 1;
+				if (agent.x == ball_x && agent.y + 1 == ball_y) {
+					ball_y += 1;
 					// Moved the ball
 					m_reward = 110;
 				}
@@ -1674,10 +1730,14 @@ void RobocupSimulation::move(int direction, int power, SoccerBall ball, Robot ag
 				break;
 		}
 	}
+	agent.ball_agent_x = ball_x;
+	agent.ball_agent_y = ball_y;
+
+	return agent;
 
 }
 
-int RobocupSimulation::check_vision(Robot agent, SoccerBall ball) {
+int RobocupSimulation::check_vision(Robot agent, int ball_x, int ball_y) {
 	// Return the vision number according to where the ball is
 	// According to the cone
 	//  # # # # # # #
@@ -1694,33 +1754,33 @@ int RobocupSimulation::check_vision(Robot agent, SoccerBall ball) {
 	
 	int vision_number = 0;
 	if (agent.body_facing == 1) {
-		if ((ball.x == agent.x + 6) && (ball.y ==  agent.y - 3)) {
+		if ((ball_x == agent.x + 6) && (ball_y ==  agent.y - 3)) {
 			ball_vision_number = 1;
-		} else if ((ball.x == agent.x + 6) && (ball.y ==  agent.y + 3)) {
+		} else if ((ball_x == agent.x + 6) && (ball_y ==  agent.y + 3)) {
 			ball_vision_number = 2;
-		} else if ((ball.x <= agent.x + 6) && (ball.y <=  agent.y + 2) && (ball.x >= agent.x + 4) && (ball.y >=  agent.y - 2)) {
+		} else if ((ball_x <= agent.x + 6) && (ball_y <=  agent.y + 2) && (ball_x >= agent.x + 4) && (ball_y >=  agent.y - 2)) {
 			int counter = 3;
 			for (int j = 4; j<=6;j++) {
 				for (int i = -2; i <= 2; i++) {
-					if ((ball.x == agent.x + j) && (ball.y ==  agent.y + i)) {
+					if ((ball_x == agent.x + j) && (ball_y ==  agent.y + i)) {
 						vision_number = counter;
 					}
 					counter++;
 				}
 			}
-		} else if ((ball.x == agent.x + 3) && (ball.y ==  agent.y - 1)) {
+		} else if ((ball_x == agent.x + 3) && (ball_y ==  agent.y - 1)) {
 			vision_number = 18;
-		} else if ((ball.x == agent.x + 3) && (ball.y ==  agent.y)) {
+		} else if ((ball_x == agent.x + 3) && (ball_y ==  agent.y)) {
 			vision_number = 19;
-		} else if ((ball.x == agent.x + 3) && (ball.y ==  agent.y + 1)) {
+		} else if ((ball_x == agent.x + 3) && (ball_y ==  agent.y + 1)) {
 			vision_number = 20;
-		} else if ((ball.x == agent.x + 2) && (ball.y ==  agent.y - 1)) {
+		} else if ((ball_x == agent.x + 2) && (ball_y ==  agent.y - 1)) {
 			vision_number = 21;
-		} else if ((ball.x == agent.x + 2) && (ball.y ==  agent.y)) {
+		} else if ((ball_x == agent.x + 2) && (ball_y ==  agent.y)) {
 			vision_number = 22;
-		} else if ((ball.x == agent.x + 2) && (ball.y ==  agent.y + 1)) {
+		} else if ((ball_x == agent.x + 2) && (ball_y ==  agent.y + 1)) {
 			vision_number = 23;
-		} else if ((ball.x == agent.x + 3) && (ball.y ==  agent.y)) {
+		} else if ((ball_x == agent.x + 3) && (ball_y ==  agent.y)) {
 			vision_number = 24;
 		}
 	}
@@ -1744,56 +1804,78 @@ void RobocupSimulation::performAction(action_t action) {
 
 	// move(direction,amount);
 
+	full_field[ball_x][ball_y] = 0;
+	full_field[agent.x][agent.y] = 0;
+
 
 	switch (action) {
+		case 0:
+			agent = move(1,1,ball_x,ball_y,agent);
+			break;
 		case 1:
-			move(1,1,ball,agent);
+			// Move forward 2
+			agent = move(1,2,ball_x,ball_y,agent);
 			break;
 		case 2:
-			// Move forward 2
-			move(1,2,ball,agent);
+			// Move back 1
+			agent = move(2,1,ball_x,ball_y,agent);
 			break;
 		case 3:
-			// Move back 1
-			move(2,1,ball,agent);
+			// Move left 1
+			agent = move(3,1,ball_x,ball_y,agent);
 			break;
 		case 4:
-			// Move left 1
-			move(3,1,ball,agent);
+			// Move right 1
+			agent = move(4,1,ball_x,ball_y,agent);
 			break;
 		case 5:
-			// Move right 1
-			move(4,1,ball,agent);
+			// Turn body left
+			agent = turn_body(1,agent);
 			break;
 		case 6:
-			// Turn body left
-			turn_body(1,agent);
+			// Turn body right
+			agent = turn_body(2,agent);
 			break;
 		case 7:
-			// Turn body right
-			turn_body(2,agent);
+			// Turn head left
+			agent = turn_head(1,agent);
 			break;
 		case 8:
-			// Turn head left
-			turn_head(1,agent);
+			// Turn head right
+			agent = turn_head(2,agent);
 			break;
 		case 9:
-			// Turn head right
-			turn_head(2,agent);
+			// kick foward
+			agent = kick(1,ball_x,ball_y,agent);
 			break;
 		case 10:
-			// kick foward
-			kick(1,ball,agent);
+			// kick left
+			agent = kick(1,ball_x,ball_y,agent);
 			break;
 		case 11:
-			// kick left
-			kick(1,ball,agent);
-			break;
-		case 12:
 			// kick right
-			kick(1,ball,agent);
+			agent = kick(1,ball_x,ball_y,agent);
 			break;
 	}
+
+
+	std::cout << ball_x << std::endl;
+	ball_x = agent.ball_agent_x;
+	ball_y = agent.ball_agent_y;
+
+	//std::cout << "Agent x: " << agent.x << "Agent y: " << agent.y << std::endl;
+
+	if (agent.x < 0 || agent.x > 10 || agent.y < 0 || agent.y > 18) {
+		m_reward = 80;
+		//full_field[agent.x][agent.y] = 0;
+		agent.x = 5; // (x,y,theta,phi) position and heading of agent, 
+		agent.y = 7;
+		agent.body_facing = 1; // theta in {towardsOpponents,towardsHome,left,right} = {1,2,3,4}
+		agent.head_facing = 1; // phi in {forward,left,right} = {1,2,3}
+		full_field[5][7] = 2;
+	}
+
+	
 
 	// Observations
 	// Current position (x,y) in ([-53,-35],[53,35])
@@ -1830,7 +1912,7 @@ void RobocupSimulation::performAction(action_t action) {
 	// | Position | * | BodyFacing | * | HeadFacing | * | Vision | = 2^46
 
 
-	ball_vision_number = check_vision(agent,ball);
+	ball_vision_number = check_vision(agent,ball_x,ball_y);
 
 	// Reward 
 	// -1 for just moving
@@ -1842,10 +1924,17 @@ void RobocupSimulation::performAction(action_t action) {
 	// +100 for scoring a goal (against the opponents)
 	// |R| = 200 ~ 256 = 2^8
 
-	if ((ball.x >= home_goal[0]) && (ball.x <= home_goal[1]) && (ball.y >= 19) ) {
+	if ((ball_x >= home_goal[0]) && (ball_x <= home_goal[1]) && (ball_y >= 19) ) {
 		ball_in_opponent_goals = 1;
-	} else if ((ball.x >= home_goal[0]) && (ball.x <= home_goal[1]) && (ball.y < 0) ) {
+	} else if ((ball_x >= home_goal[0]) && (ball_x <= home_goal[1]) && (ball_y < 0) ) {
 		ball_in_agent_goals = 1;
+	} else if (agent.ball_agent_x < 0 || agent.ball_agent_x > 10 || agent.ball_agent_y < 0 || agent.ball_agent_y > 18) {
+		m_reward = 80;
+		//full_field[agent.x][agent.y] = 0;
+		agent.ball_agent_x = 5;
+		agent.ball_agent_y = 9;
+		
+		full_field[5][9] = 1;
 	}
 
 
@@ -1856,10 +1945,49 @@ void RobocupSimulation::performAction(action_t action) {
 	vision_observation = pow(2,4)*ball_vision_number; // 0 if no ball, else 1 to 24 from top left going across then down
 	position_observation = (pow(2,10)*agent.x) + (pow(2,15)*agent.y);
 	m_observation = bodyfacing_observation + headfacing_observation + vision_observation + position_observation;
-	if (ball_in_opponent_goals) {
+	if (ball_in_opponent_goals == 1) {
 		m_reward = 200;
-	} else if (ball_in_agent_goals) {
+		ball_in_opponent_goals = 0;
+		reset();
+	} else if (ball_in_agent_goals == 1) {
 		m_reward = 0;
+		ball_in_agent_goals = 0;
+		reset();
 	}
+
+	
+	// for (int i = home_goal[0]; i <= home_goal[1]; i++) {
+	// 	full_field[i][0] = 3;
+	// }
+	
+	// for (int i = opponent_goal[0]; i <= opponent_goal[1]; i++) {
+	// 	full_field[i][18] = 4;
+	// }
+
+	// moving the agent and ball on the field
+	full_field[ball_x][ball_y] = 1;
+
+	full_field[agent.x][agent.y] = 2;
+
+
+	// Printing the screen
+	for (int j = 0; j < 19; ++j)
+	        {
+		for (int i = 0; i < 11; ++i)
+	    {
+        	std::cout << full_field[i][j] << ' ';
+            //std::cout << complete_game_state[i][j] << ' ';
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "Action: " << action << std::endl;
+
+    // Trying different rewards and to see what works
+    // reward = reward*normalised distance from ball
+    // m_reward = (int) m_reward * (30.0 / ( (abs(agent.x - ball_x) + abs(agent.y - ball_y) ) + 28 ) );
+
+    // Distance of ball from opponent side
+    // m_reward = (int) m_reward * ((ball_y+0.0 )/ 20 );
+
 }
 
