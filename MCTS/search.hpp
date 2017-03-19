@@ -44,6 +44,9 @@ class SearchNode {
   */
   SearchNode(Agent* ai, bool is_chance_node, unsigned int num_children);
 
+  //Node count
+  static uint_t node_count;
+
 
   /**
   * Returns best action.

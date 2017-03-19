@@ -79,6 +79,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		} else {
 			// std::cout<< "CTW history size: " << ctw->historySize() <<std::endl;
 			action = ai.getPlannedAction(observation, reward, action);
+			// action = ai.genRandomAction();
 		}
 
 		// Send an action to the environment
@@ -193,9 +194,9 @@ int main(int argc, char *argv[]) {
 
 	// Default configuration values
 	options["ct-depth"] = "7";
-	options["agent-horizon"] = "7";
+	options["agent-horizon"] = "3";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "9";
+	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 

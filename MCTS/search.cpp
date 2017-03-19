@@ -69,6 +69,7 @@ action_t SearchTree::search(percept_t prev_obs,
   for (unsigned int sim = 1; sim <= agent->numSimulations(); sim++) {
     reward_t r = rootNode->sample(m);
   }
+
   return rootNode->bestAction();
 }
 
@@ -96,7 +97,10 @@ SearchNode::SearchNode(Agent* ai,
   m = ai->horizon();
 
   agent = ai;
+  node_count += 1;
 }
+
+uint_t SearchNode::node_count = 0;
 
 SearchNode::~SearchNode(void) {
   // if there are children recursively delete all offspring
@@ -105,6 +109,8 @@ SearchNode::~SearchNode(void) {
       delete children[i];
     }
   }
+
+  node_count -= 1;
 }
 
 // return unif random one of the best actions
@@ -184,8 +190,9 @@ reward_t SearchNode::sample(unsigned int horiz) {
     percept_t new_rew = agent->genPerceptAndUpdate(numRewardBits);
     percept_t percept_index =
         perceptIndex(new_obs, new_rew, numObservationBits, numRewardBits);
-    SearchNode* hor_ptr = new SearchNode(agent, false, numActions);
+    SearchNode* hor_ptr;
     if (children[percept_index] == NULL) {
+      hor_ptr = new SearchNode(agent, false, numActions);
       children[percept_index] = hor_ptr;
     } else {
       hor_ptr = children[percept_index];
