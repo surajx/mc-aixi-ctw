@@ -239,9 +239,9 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		env = new BiasedRockPaperSciessor(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "3";
+		options["agent-actions"] = "3";
+		options["observation-bits"] = "2";
+		options["reward-bits"] = "2";
 	}
 	else if (environment_name == "kuhn-poker") {
 		env = new KuhnPoker(options);

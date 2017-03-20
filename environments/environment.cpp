@@ -1119,27 +1119,36 @@ void BiasedRockPaperSciessor::performAction(action_t action) {
 	// 2 is scisors
 	// Opponent chooses last rounds action if they won
 	// Or random action otherwise
-
 	if (opponent_won_last_round) {
 		opponent_action = opponent_last_round_action;
 	} else {
-		opponent_action = (rand01() < (1.0/3.0) ) ? ((rand01() < 0.5 ) ? 2 : 1) : 0;
+		//opponent_action = (rand01() > (1.0/3.0) ) ? ((rand01() < 0.5 ) ? 2 : 1) : 0;
+		double a = rand01();
+		if (a < 1.0/3.0) {
+			opponent_action = 0;
+		} else if (a < 2.0/3.0) {
+			opponent_action = 1;
+		} else {
+			opponent_action = 2;
+		}
+		//opponent_action = (int)((3*rand01()) % 3);
 	}
+
+	std::cout << "Opponent Action : " << opponent_action << std::endl;
 
 	// If same actions then draw, if agent wins +1 reward, if looses -1 reward
 	if (opponent_action == action) {
 		m_reward = 1;
-		m_observation = opponent_action;
 		opponent_won_last_round = 0;
 	} else if ((opponent_action == 0 && action == 1) || (opponent_action == 1 && action == 2) || (opponent_action == 2 && action == 0)) {
 		m_reward = 2;
-		m_observation = opponent_action;
 		opponent_won_last_round = 0;
 	} else {
 		m_reward = 0;
-		m_observation = opponent_action;
 		opponent_won_last_round = 1;
+		opponent_last_round_action = opponent_action;
 	}
+	m_observation = opponent_action;
 }
 
 
