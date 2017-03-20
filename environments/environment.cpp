@@ -382,7 +382,7 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 
 	// change the square the ghost moved out of
 
-	std::cout << "Ghost " << " X: " << ghost.x << " Y: " << ghost.y << std::endl;
+	//std::cout << "Ghost " << " X: " << ghost.x << " Y: " << ghost.y << std::endl;
 
 	switch(ghost.action) {
 		case 1:
@@ -408,7 +408,13 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 
 	}
 
-	std::cout << "Ghost " << " X: " << ghost.x << " Y: " << ghost.y << std::endl;
+	//std::cout << "Ghost " << " X: " << ghost.x << " Y: " << ghost.y << std::endl;
+
+	// Make sure ghosts stay within boundries
+	if ((ghost.x < 0) || (ghost.y < 0 ) || (ghost.x > 19) || (ghost.y > 21) ) {
+		ghost.x = 10;
+		ghost.y = 9;
+	}
 
 	// check and change the square the ghost is moving into
 	if (complete_game_state[ghost.x][ghost.y] == 2) {
@@ -511,13 +517,34 @@ void Pacman::performAction(action_t action) {
 		case 0:
 			//the new position is a blank space, pacman moves into it
 			if (action == 0){
-				pacmanX += 1;
+				if (pacmanX + 1 > 19) {
+					// If pacman 'leaks'
+					reset_game();
+				} else {
+					pacmanX += 1;
+				}
 			} else if (action == 1){
-				pacmanX -= 1;
+				if (pacmanX - 1 < 0) {
+					// If pacman 'leaks'
+					reset_game();
+				} else {
+					pacmanX -= 1;
+				}
 			} else if (action == 2){
-				pacmanY += 1;
+				if (pacmanY +1 > 21) {
+					// If pacman 'leaks'
+					reset_game();
+				} else {
+					pacmanY += 1;
+				}
 			} else {
-				pacmanY -= 1;
+				if (pacmanY - 1 < 0) {
+					// If pacman 'leaks'
+					reset_game();
+				} else {
+					pacmanY -= 1;
+				}
+				
 			}
 			m_reward = 59;
 			break;
