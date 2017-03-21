@@ -180,16 +180,6 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	// Set up logging
-	std::string log_file = argc < 3 ? "log" : argv[2];
-	logger.open((log_file + ".log").c_str());
-	compactLog.open((log_file + ".csv").c_str());
-
-	// Print header to compactLog
-	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
-
-
-	// Load configuration options
 	options_t options;
 
 	// Default configuration values
@@ -209,10 +199,24 @@ int main(int argc, char *argv[]) {
 	processOptions(conf, options);
 	conf.close();
 
+	std::string environment_name = options["environment"];
+
+	// Set up logging
+	std::string log_file = argc < 3 ? "log" : argv[2];
+	logger.open((log_file +"_" + environment_name + ".log").c_str());
+	compactLog.open((log_file + "_" + environment_name + ".csv").c_str());
+
+	// Print header to compactLog
+	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
+
+
+	// Load configuration options
+	
+
 	// Set up the environment
 	Environment *env;
 
-	std::string environment_name = options["environment"];
+	//std::string environment_name = options["environment"];
 	if (environment_name == "coin-flip") {
 		env = new CoinFlip(options);
 		options["agent-actions"] = "2";
@@ -239,9 +243,9 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		env = new BiasedRockPaperSciessor(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "3";
+		options["agent-actions"] = "3";
+		options["observation-bits"] = "2";
+		options["reward-bits"] = "2";
 	}
 	else if (environment_name == "kuhn-poker") {
 		env = new KuhnPoker(options);
