@@ -79,6 +79,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		} else {
 			// std::cout<< "CTW history size: " << ctw->historySize() <<std::endl;
 			action = ai.getPlannedAction(observation, reward, action);
+			// action = ai.genRandomAction();
 		}
 
 		// Send an action to the environment
@@ -119,12 +120,53 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		if (explore) explore_rate *= explore_decay;
 
 		ai.incAgentAge();
-	}	
+	}
 
 	// Print summary to standard output
-	std::cout << std::endl << std::endl << "SUMMARY" << std::endl;
+	std::cout << std::endl << std::endl << "Training SUMMARY" << std::endl;
 	std::cout << "agent lifetime: " << ai.lifetime() << std::endl;
 	std::cout << "average reward: " << ai.averageReward() << std::endl;
+
+	logger << "info: Starting evaluation." << std::endl;
+
+	percept_t eval_tot_reward = 0.0;
+
+	for (unsigned int cycle = 1; cycle<=5000; cycle++) {
+
+		// Get a percept from the environment
+		observation = env.getObservation();
+		reward = env.getReward();
+		std::cout << "Evaluation Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
+
+		eval_tot_reward += reward;
+
+		// Update agent's environment model with the new percept
+		ai.modelUpdate(observation, reward);
+
+		// Determine best exploitive action
+		action = ai.getPlannedAction(observation, reward, action);
+
+		// Send an action to the environment
+		env.performAction(action);
+
+		// Update agent's environment model with the chosen action
+		ai.modelUpdate(action);
+
+		// Print to standard output when cycle == 2^n
+		if ((cycle & (cycle - 1)) == 0) {
+			std::cout << "Evaluation cycle: " << cycle << std::endl;
+			std::cout << "average reward: " << eval_tot_reward/(double)cycle << std::endl;
+		}
+	}
+
+	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
+	std::cout << "Cycles Evaluated: " << 5000 << std::endl;
+	std::cout << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
+
+	logger << "Evaluation SUMMARY" << std::endl;
+	logger << "Cycles Evaluated: " << 5000 << std::endl;
+	logger << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
+
 }
 
 
@@ -179,23 +221,13 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	// Set up logging
-	std::string log_file = argc < 3 ? "log" : argv[2];
-	logger.open((log_file + ".log").c_str());
-	compactLog.open((log_file + ".csv").c_str());
-
-	// Print header to compactLog
-	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
-
-
-	// Load configuration options
 	options_t options;
 
 	// Default configuration values
-	options["ct-depth"] = "16";
-	options["agent-horizon"] = "7";
+	options["ct-depth"] = "7";
+	options["agent-horizon"] = "3";
 	options["exploration-exploitation-ratio"] = "1";
-	options["num-simulations"] = "20";
+	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
@@ -208,10 +240,24 @@ int main(int argc, char *argv[]) {
 	processOptions(conf, options);
 	conf.close();
 
+	std::string environment_name = options["environment"];
+
+	// Set up logging
+	std::string log_file = argc < 3 ? "log" : argv[2];
+	logger.open((log_file +"_" + environment_name + ".log").c_str());
+	compactLog.open((log_file + "_" + environment_name + ".csv").c_str());
+
+	// Print header to compactLog
+	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
+
+
+	// Load configuration options
+	
+
 	// Set up the environment
 	Environment *env;
 
-	std::string environment_name = options["environment"];
+	//std::string environment_name = options["environment"];
 	if (environment_name == "coin-flip") {
 		env = new CoinFlip(options);
 		options["agent-actions"] = "2";
@@ -238,9 +284,9 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		env = new BiasedRockPaperSciessor(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "3";
+		options["agent-actions"] = "3";
+		options["observation-bits"] = "2";
+		options["reward-bits"] = "2";
 	}
 	else if (environment_name == "kuhn-poker") {
 		env = new KuhnPoker(options);
