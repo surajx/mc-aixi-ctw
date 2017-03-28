@@ -69,7 +69,8 @@ action_t SearchTree::search(percept_t prev_obs,
   for (unsigned int sim = 1; sim <= agent->numSimulations(); sim++) {
     reward_t r = rootNode->sample(m);
   }
-
+  std::cout << "Best Action: " << rootNode->bestAction() << std::endl;
+  std::cout << "Search Node Count: " << SearchNode::node_count << std::endl;
   return rootNode->bestAction();
 }
 
