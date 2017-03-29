@@ -310,7 +310,7 @@ int main(int argc, char *argv[]) {
 		env = new RobocupSimulation(options);
 		options["agent-actions"] = "12";
 		options["observation-bits"] = "20";
-		options["reward-bits"] = "8";
+		options["reward-bits"] = "4";
 	}
 	else {
 		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
