@@ -27,6 +27,9 @@ class CTNode {
   */
   CTNode();
 
+  //Node count
+  static uint_t node_count;
+
   /**
   * Add child to parent
   * TODO: More Documentation

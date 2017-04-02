@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string>
 
+#include <cstdlib>
+#include <time.h>
+
 
 #include "AIXI/agent.hpp"
 #include "environments/environment.hpp"
@@ -63,7 +66,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		// Get a percept from the environment
 		observation = env.getObservation();
 		reward = env.getReward();
-		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
+		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << " , Exp rate " << explore_rate << std::endl;
 		// Update agent's environment model with the new percept
 		ai.modelUpdate(observation, reward);
 		// Determine best exploitive action, or explore
@@ -220,6 +223,9 @@ int main(int argc, char *argv[]) {
 		std::cerr << "The first argument should indicate the location of the configuration file and the second (optional) argument should indicate the file to log to." << std::endl;
 		return -1;
 	}
+
+	//initialize random seed
+	srand(time(NULL));
 
 	options_t options;
 
