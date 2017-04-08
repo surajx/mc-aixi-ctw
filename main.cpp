@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string>
 
+#include <cstdlib>
+#include <time.h>
+
 
 #include "AIXI/agent.hpp"
 #include "environments/environment.hpp"
@@ -63,7 +66,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		// Get a percept from the environment
 		observation = env.getObservation();
 		reward = env.getReward();
-		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
+		std::cout << "Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << " , Exp rate " << explore_rate << std::endl;
 		// Update agent's environment model with the new percept
 		ai.modelUpdate(observation, reward);
 		// Determine best exploitive action, or explore
@@ -120,12 +123,53 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		if (explore) explore_rate *= explore_decay;
 
 		ai.incAgentAge();
-	}	
+	}
 
 	// Print summary to standard output
-	std::cout << std::endl << std::endl << "SUMMARY" << std::endl;
+	std::cout << std::endl << std::endl << "Training SUMMARY" << std::endl;
 	std::cout << "agent lifetime: " << ai.lifetime() << std::endl;
 	std::cout << "average reward: " << ai.averageReward() << std::endl;
+
+	logger << "info: Starting evaluation." << std::endl;
+
+	percept_t eval_tot_reward = 0.0;
+
+	for (unsigned int cycle = 1; cycle<=5000; cycle++) {
+
+		// Get a percept from the environment
+		observation = env.getObservation();
+		reward = env.getReward();
+		std::cout << "Evaluation Cycle "  << cycle  << " , Obs " << observation << " , Rew " << reward << std::endl;
+
+		eval_tot_reward += reward;
+
+		// Update agent's environment model with the new percept
+		ai.modelUpdate(observation, reward);
+
+		// Determine best exploitive action
+		action = ai.getPlannedAction(observation, reward, action);
+
+		// Send an action to the environment
+		env.performAction(action);
+
+		// Update agent's environment model with the chosen action
+		ai.modelUpdate(action);
+
+		// Print to standard output when cycle == 2^n
+		if ((cycle & (cycle - 1)) == 0) {
+			std::cout << "Evaluation cycle: " << cycle << std::endl;
+			std::cout << "average reward: " << eval_tot_reward/(double)cycle << std::endl;
+		}
+	}
+
+	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
+	std::cout << "Cycles Evaluated: " << 5000 << std::endl;
+	std::cout << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
+
+	logger << "Evaluation SUMMARY" << std::endl;
+	logger << "Cycles Evaluated: " << 5000 << std::endl;
+	logger << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
+
 }
 
 
@@ -179,6 +223,9 @@ int main(int argc, char *argv[]) {
 		std::cerr << "The first argument should indicate the location of the configuration file and the second (optional) argument should indicate the file to log to." << std::endl;
 		return -1;
 	}
+
+	//initialize random seed
+	srand(time(NULL));
 
 	options_t options;
 

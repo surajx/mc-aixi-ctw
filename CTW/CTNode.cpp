@@ -18,12 +18,18 @@ CTNode::CTNode() {
   logProbWeighted = 0.0;
   symbolCount[SYMBOL_0] = 0;
   symbolCount[SYMBOL_1] = 0;
+
+  node_count += 1;
 }
+
+uint_t CTNode::node_count = 0;
 
 CTNode::~CTNode() {
   for (CTNode* child : children) {
     delete child;
   }
+
+  node_count += 1;
 }
 
 void CTNode::addChild(symbol_t sym, CTNode* child, CTNode* parent) {
