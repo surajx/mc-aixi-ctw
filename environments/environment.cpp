@@ -1189,7 +1189,7 @@ ExtendedTiger::ExtendedTiger(options_t &options) {
 
 	// Set up which door is which
 	gold_door = (rand01() < 0.5) ? 1 : 2;
-	tiger_door = ((gold_door + 1) % 2) + 1;
+	tiger_door = ((gold_door + 1) % 2) + 2;
 }
 
 
@@ -1206,44 +1206,52 @@ void ExtendedTiger::performAction(action_t action) {
 			// When action is standing, if already standing, take less reward for invalid action
 			if (state == 1) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
+				m_observation = m_observation;
+				//m_observation = (pow(2,2)*state);
 			} else{
 				state = 1;
 				m_reward = 99;
-				m_observation = (pow(2,2)*state);
+				m_observation = (m_observation < (pow(2,2)*state)) ? m_observation + (pow(2,2)*state) : m_observation;
 			}
 			break;
 		case 1:
 			// When action is listen, take less reward if invalid action (while standing), else gain observation
-			if (state == 1) {
+			if ((state == 1) || (m_observation != 0) ) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
-			} else{
-				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door ) + (pow(2,2)*state);
+				m_observation = m_observation;
+				//m_observation = (pow(2,2)*state);
+			} else {
+				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door);
 				m_reward = 99;
-				state = 0;
+				//state = 0;
 			}
 			break;
 		case 2:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
+				m_observation = m_observation;
+				// m_observation = (pow(2,2)*state);
 			} else {
 				m_reward = (1 == gold_door) ? 130 : 0;
-				m_observation = (pow(2,2)*state);
+				m_observation = 0; //(pow(2,2)*state);
 				state = 0;
+				gold_door = (rand01() < 0.5) ? 1 : 2;
+				tiger_door = ((gold_door + 1) % 2) + 2;
 			}
 			break;
 		case 3:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
+				m_observation = m_observation;
+				// m_observation = (pow(2,2)*state);
 			} else {
 				m_reward = (2 == gold_door) ? 130 : 0;
-				m_observation = (pow(2,2)*state);
+				m_observation = 0; //(pow(2,2)*state);
 				state = 0;
+				gold_door = (rand01() < 0.5) ? 1 : 2;
+				tiger_door = ((gold_door + 1) % 2) + 2;
 			}
 			break;
 	}
