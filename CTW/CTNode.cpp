@@ -25,11 +25,16 @@ CTNode::CTNode() {
 uint_t CTNode::node_count = 0;
 
 CTNode::~CTNode() {
-  for (CTNode* child : children) {
-    delete child;
+  if (children[SYMBOL_0] != NULL) {
+    delete children[SYMBOL_0];
+    children[SYMBOL_0] = NULL;
+  }
+  if (children[SYMBOL_1] != NULL) {
+    delete children[SYMBOL_1];
+    children[SYMBOL_1] = NULL;
   }
 
-  node_count += 1;
+  node_count -= 1;
 }
 
 void CTNode::addChild(symbol_t sym, CTNode* child, CTNode* parent) {
@@ -61,6 +66,7 @@ void CTNode::updateLogKT(const symbol_t symbol, const int node_action) {
                    "any symbol."
                 << std::endl;
       std::cout << "DEBUG: Revert cancelled (nothing to revert)." << std::endl;
+      std::cout << "DEBUG: Node: " << this << std::endl;
       std::cout << "DEBUG: symbolCount[symbol]=" << symbolCount[symbol]
                 << std::endl;
       std::cout << "DEBUG: logProbKT=" << logProbKT << std::endl;

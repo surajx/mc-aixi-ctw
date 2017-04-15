@@ -7,6 +7,8 @@
 #ifndef __CTNODE_HPP__
 #define __CTNODE_HPP__
 
+#include <iostream>
+
 #include "../common/types.hpp"
 #include "../common/constants.hpp"
 
@@ -27,7 +29,7 @@ class CTNode {
   */
   CTNode();
 
-  //Node count
+  // Node count
   static uint_t node_count;
 
   /**
@@ -40,7 +42,7 @@ class CTNode {
   * Number of descendants of a node in the context tree
   * TODO: More Documentation
   */
-  uint_t descendentsCount();  
+  uint_t descendentsCount();
 
   /**
   * Compute the logarithm of the KT-estimator update multiplier
@@ -59,7 +61,6 @@ class CTNode {
   * TODO: More Documentation
   */
   void update(const symbol_t symbol, const int node_action);
-
 
   /**
   * Update just the leaf node with the observed symbol.
@@ -87,10 +88,25 @@ class CTNode {
   */
   uint_t visits() { return symbolCount[SYMBOL_0] + symbolCount[SYMBOL_1]; }
 
+  void nullifyChild(CTNode* node) {
+    if (node == children[SYMBOL_0]) {
+      children[SYMBOL_0] = NULL;
+    } else if (node == children[SYMBOL_1]) {
+      children[SYMBOL_1] = NULL;
+    } else
+      std::cout << "WARNING: " << node << " not a child node, not nullified."
+                << std::endl;
+  }
+
   /**
   * Child corresponding to a particular symbol
   */
   CTNode* child(symbol_t sym) { return children[sym]; }
+
+  /**
+  * Return the parent node.
+  */
+  CTNode* getParent() { return parent; }
 
   // The Destructor
   ~CTNode();
