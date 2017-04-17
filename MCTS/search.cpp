@@ -166,7 +166,7 @@ SearchNode* SearchNode::selectAction(unsigned int horiz) {
       if (children[a] != NULL) {
         double curr_val =
             (1.0 / (horiz * (agent->maxReward() - agent->minReward()))) *
-                children[a]->visits() +
+                children[a]->expectation() +
             C * sqrt(log10(m_visits) / children[a]->visits());
         if (curr_val > best_val) {
           a_max = a;
