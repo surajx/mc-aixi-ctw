@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <random>
+#include <unordered_map>
 
 SearchTree::SearchTree(Agent* ai) {
   numActions = ai->getNumActions();  // set number of actions
@@ -19,7 +20,7 @@ SearchTree::SearchTree(Agent* ai) {
                               numRewardBits);  // set number of percepts
   C = ai->getExploreExploitRatio();
   m = ai->horizon();
-  rootNode = new SearchNode(ai, false, numActions);
+  rootNode = new SearchNode(ai, false);
   agent = ai;
 }
 
@@ -47,11 +48,11 @@ void SearchTree::pruneTree(percept_t prev_obs,
       (int)perceptIndex(prev_obs, prev_rew, numObservationBits, numRewardBits);
   SearchNode* chance_child = rootNode->getChildren()[prev_act];
   if (chance_child == NULL) {
-    chance_child = new SearchNode(agent, true, numPercepts);
+    chance_child = new SearchNode(agent, true);
   }
   SearchNode* action_child = chance_child->getChildren()[prev_obs_rew_index];
   if (action_child == NULL) {
-    action_child = new SearchNode(agent, false, numActions);
+    action_child = new SearchNode(agent, false);
   }
   rootNode = action_child;
   delete old_root_ptr;
@@ -77,18 +78,10 @@ action_t SearchTree::search(percept_t prev_obs,
 /**
 * SearchNode Implementation.
 */
-SearchNode::SearchNode(Agent* ai,
-                       bool is_chance_node,
-                       unsigned int num_children) {
+SearchNode::SearchNode(Agent* ai, bool is_chance_node) {
   m_visits = 0;
   m_mean = 0;
-  m_children = num_children;
   m_chance_node = is_chance_node;
-  children.resize(m_children);
-  for (int i = 0; i < m_children; i++) {
-    children[i] = NULL;
-  }
-
   numActions = ai->getNumActions();  // set number of actions
   numObservationBits = ai->getNumObservationBits();
   numRewardBits = ai->getNumRewardBits();
@@ -104,38 +97,36 @@ SearchNode::SearchNode(Agent* ai,
 uint_t SearchNode::node_count = 0;
 
 SearchNode::~SearchNode(void) {
-  // if there are children recursively delete all offspring
-  for (int i = 0; i < m_children; i++) {
-    if (children[i] != NULL && children[i] != agent->getPlannerRootNode()) {
-      delete children[i];
+  for ( auto it = children.begin(); it != children.end(); ++it ) {
+    if (it->second != NULL && it->second != agent->getPlannerRootNode()) {
+      delete it->second;
     }
   }
-
   node_count -= 1;
 }
 
 // return unif random one of the best actions
-action_t SearchNode::bestAction() const {
+action_t SearchNode::bestAction() {
+  // find best mean value
   std::vector<action_t> best_children;
   double best_mean;
-  for (action_t i = 0; i < m_children; i++) {
-    if (children[i] != NULL) {
-      best_children.push_back(i);
-      best_mean = children[i]->expectation();
+  for ( auto it = children.begin(); it != children.end(); ++it ) {
+    if (it->second != NULL) {
+      best_children.push_back(it->first);
+      best_mean = it->second->expectation();
       break;
     }
   }
+  // find all children that attain best mean value
   unsigned int num_best_children = 1;
-  for (action_t i = 0; i < m_children; i++) {
-    if (children[i] != NULL) {
-      if (children[i]->expectation() > best_mean) {  // new best
-        best_children = {i};
-        best_mean = children[i]->expectation();
+  for ( auto it = children.begin(); it != children.end(); ++it ) {
+    if (it->second != NULL) {
+      if (it->second->expectation() > best_mean) { // new best
+        best_children = {it->first};
+        best_mean = it->second->expectation();
         num_best_children = 1;
-      } else if (children[i]->expectation() ==
-                     children[best_children[0]]->expectation() &&
-                 i != best_children[0]) {  // more than one best child
-        best_children.push_back(i);
+      } else if (it->second->expectation() == children[best_children[0]]->expectation() && it->first != best_children[0]) { // more than one best child
+        best_children.push_back(it->first);
         num_best_children++;
       }
       // if current child is worse, do nothing
@@ -146,16 +137,17 @@ action_t SearchNode::bestAction() const {
 
 // select action based on UCT
 SearchNode* SearchNode::selectAction(unsigned int horiz) {
+  // create vector of unvisited nodes
   std::vector<action_t> unvisited;
   for (action_t a = 0; a < numActions; a++) {
-    if (children[a] == NULL) {
+    if (children.count(a) == 0) {
       unvisited.push_back(a);
     }
   }
-  if (unvisited.size() > 0) {  // select unvisited action uniformly at random
+  if (unvisited.size() > 0) {  // return an unvisited action uniformly at random
     int ran_index = randRange(unvisited.size());
     action_t ran_action = unvisited[ran_index];
-    SearchNode* ha_ptr = new SearchNode(agent, true, numPercepts);
+    SearchNode* ha_ptr = new SearchNode(agent, true);
     children[ran_action] = ha_ptr;
     agent->modelUpdate(ran_action);
     return ha_ptr;
@@ -192,8 +184,8 @@ reward_t SearchNode::sample(unsigned int horiz) {
     percept_t percept_index =
         perceptIndex(new_obs, new_rew, numObservationBits, numRewardBits);
     SearchNode* hor_ptr;
-    if (children[percept_index] == NULL) {
-      hor_ptr = new SearchNode(agent, false, numActions);
+    if (children.count(percept_index) == 0) {
+      hor_ptr = new SearchNode(agent, false);
       children[percept_index] = hor_ptr;
     } else {
       hor_ptr = children[percept_index];

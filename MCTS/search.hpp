@@ -10,8 +10,9 @@
 #define __SEARCH_HPP__
 
 #include "../AIXI/agent.hpp"
-
 #include "../common/types.hpp"
+
+#include <unordered_map>
 
 typedef unsigned long long visits_t;
 
@@ -21,7 +22,7 @@ class SearchNode {
   unsigned int m_children;  // chance (action) nodes have |X| (|A|) children
   double m_mean;            // the expected reward of this node
   visits_t m_visits;        // number of times the search node has been visited
-  std::vector<SearchNode*> children;
+  std::unordered_map<action_t, SearchNode*> children;
 
   unsigned int numActions;          // number of actions
   unsigned int numPercepts;         // number of percepts
@@ -40,9 +41,8 @@ class SearchNode {
   * @param Agent* ai The agent using the SearchNode for its planning
   * @param bool is_chance_node Specifies whether the searchnode is an action node
   *        or a chance node.
-  * @param unsigned int num_children The number of child nodes.
   */
-  SearchNode(Agent* ai, bool is_chance_node, unsigned int num_children);
+  SearchNode(Agent* ai, bool is_chance_node);
 
   //Node count
   static uint_t node_count;
@@ -54,7 +54,7 @@ class SearchNode {
   *
   * @return action (One of) the action(s) with the highest expected reward.
   */
-  action_t bestAction() const;
+  action_t bestAction();
 
   /**
   * Select action based on the UCT algorithm for Monte Carlo Tree Search.
@@ -94,10 +94,10 @@ class SearchNode {
   /**
   * Select action based on the UCT algorithm for Monte Carlo Tree Search
   *
-  * @return vector<SearchNode*> Vector with pointers to child nodes (and NULL
-  *         pointers to noninitialized child nodes).
+  * @return unordered_map<action_t, SearchNode*> Unordered map with actions as
+  *         keys and pointers to child nodes as values.
   */
-  std::vector<SearchNode*> getChildren(void) const { return children; }
+  std::unordered_map<action_t, SearchNode*> getChildren(void) const { return children; }
 
   /**
   * Recursively destruct the SearchNode and its children.
@@ -116,7 +116,7 @@ class SearchTree {
   double C;                         // exploration-exploitation constant C
   unsigned int m;                   // also known as horizon, or max tree depth.
   Agent* agent;
-  bool isFirst = true;
+  bool isFirst = true;              // Do not prune during very fist search
 
  public:
   SearchTree(Agent* agent);
