@@ -12,6 +12,8 @@
 #include <random>
 #include <unordered_map>
 
+Agent*  SearchNode::agent;
+
 SearchTree::SearchTree(Agent* ai) {
   numActions = ai->getNumActions();  // set number of actions
   numObservationBits = ai->getNumObservationBits();
@@ -20,7 +22,8 @@ SearchTree::SearchTree(Agent* ai) {
                               numRewardBits);  // set number of percepts
   C = ai->getExploreExploitRatio();
   m = ai->horizon();
-  rootNode = new SearchNode(ai, false);
+  SearchNode::agent = ai;
+  rootNode = new SearchNode(false);
   agent = ai;
 }
 
@@ -48,11 +51,11 @@ void SearchTree::pruneTree(percept_t prev_obs,
       (int)perceptIndex(prev_obs, prev_rew, numObservationBits, numRewardBits);
   SearchNode* chance_child = rootNode->getChildren()[prev_act];
   if (chance_child == NULL) {
-    chance_child = new SearchNode(agent, true);
+    chance_child = new SearchNode(true);
   }
   SearchNode* action_child = chance_child->getChildren()[prev_obs_rew_index];
   if (action_child == NULL) {
-    action_child = new SearchNode(agent, false);
+    action_child = new SearchNode(false);
   }
   rootNode = action_child;
   delete old_root_ptr;
@@ -78,19 +81,18 @@ action_t SearchTree::search(percept_t prev_obs,
 /**
 * SearchNode Implementation.
 */
-SearchNode::SearchNode(Agent* ai, bool is_chance_node) {
+SearchNode::SearchNode(bool is_chance_node) {
   m_visits = 0;
   m_mean = 0;
   m_chance_node = is_chance_node;
-  numActions = ai->getNumActions();  // set number of actions
-  numObservationBits = ai->getNumObservationBits();
-  numRewardBits = ai->getNumRewardBits();
+  numActions = agent->getNumActions();  // set number of actions
+  numObservationBits = agent->getNumObservationBits();
+  numRewardBits = agent->getNumRewardBits();
   numPercepts = countPercepts(numObservationBits,
                               numRewardBits);  // set number of percepts
-  C = ai->getExploreExploitRatio();
-  m = ai->horizon();
+  C = agent->getExploreExploitRatio();
+  m = agent->horizon();
 
-  agent = ai;
   node_count += 1;
 }
 
@@ -147,7 +149,7 @@ SearchNode* SearchNode::selectAction(unsigned int horiz) {
   if (unvisited.size() > 0) {  // return an unvisited action uniformly at random
     int ran_index = randRange(unvisited.size());
     action_t ran_action = unvisited[ran_index];
-    SearchNode* ha_ptr = new SearchNode(agent, true);
+    SearchNode* ha_ptr = new SearchNode(true);
     children[ran_action] = ha_ptr;
     agent->modelUpdate(ran_action);
     return ha_ptr;
@@ -185,7 +187,7 @@ reward_t SearchNode::sample(unsigned int horiz) {
         perceptIndex(new_obs, new_rew, numObservationBits, numRewardBits);
     SearchNode* hor_ptr;
     if (children.count(percept_index) == 0) {
-      hor_ptr = new SearchNode(agent, false);
+      hor_ptr = new SearchNode(false);
       children[percept_index] = hor_ptr;
     } else {
       hor_ptr = children[percept_index];
