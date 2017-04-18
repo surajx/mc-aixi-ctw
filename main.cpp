@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
 	// Default configuration values
 	options["ct-depth"] = "7";
 	options["agent-horizon"] = "3";
-	options["exploration-exploitation-ratio"] = "1";
+	options["exploration-exploitation-ratio"] = "1.4";
 	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay

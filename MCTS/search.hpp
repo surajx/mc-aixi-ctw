@@ -31,8 +31,6 @@ class SearchNode {
   double C;                         // exploration-exploitation constant C
   unsigned int m;                   // also known as horizon, or max tree depth.
 
-  Agent* agent;
-
  public:
   /**
   * Constructor to initialize a SearchNode for a given agent. SearchNodes
@@ -42,10 +40,13 @@ class SearchNode {
   * @param bool is_chance_node Specifies whether the searchnode is an action node
   *        or a chance node.
   */
-  SearchNode(Agent* ai, bool is_chance_node);
+  SearchNode(bool is_chance_node);
 
-  //Node count
+  // Node count
   static uint_t node_count;
+
+  // Set the agent instance as static
+  static Agent* agent;
 
 
   /**
