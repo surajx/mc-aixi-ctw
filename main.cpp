@@ -51,7 +51,6 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		action = ai.genRandomAction();
 		ai.modelUpdate(observation, reward);
 		ai.modelUpdate(action);
-		std::cout << "agent lifetime: " << ai.lifetime() << std::endl;		
 	}
 
         // Agent/environment interaction loop
@@ -71,18 +70,13 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		ai.modelUpdate(observation, reward);
 		// Determine best exploitive action, or explore
 
-		// std::cout << "[start of cycle] CTW current contex: " << std::endl;
-		// ctw->printCurrentContext();
-
 		bool explored = false;
 		if (explore && rand01() < explore_rate) {
 			std::cout << "exploring" << std::endl;
 			explored = true;
 			action = ai.genRandomAction();
 		} else {
-			// std::cout<< "CTW history size: " << ctw->historySize() <<std::endl;
 			action = ai.getPlannedAction(observation, reward, action);
-			// action = ai.genRandomAction();
 		}
 
 		// Send an action to the environment
@@ -90,9 +84,6 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		// Update agent's environment model with the chosen action
 		ai.modelUpdate(action);
-		// Print current context 
-		// std::cout << "[end of cycle] CTW current contex: " << std::endl;
-		// ctw->printCurrentContext();
 
 
 		// Log this turn
@@ -232,7 +223,7 @@ int main(int argc, char *argv[]) {
 	// Default configuration values
 	options["ct-depth"] = "7";
 	options["agent-horizon"] = "3";
-	options["exploration-exploitation-ratio"] = "1";
+	options["exploration-exploitation-ratio"] = "1.4";
 	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
