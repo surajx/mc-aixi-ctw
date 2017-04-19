@@ -591,6 +591,7 @@ void Pacman::performAction(action_t action) {
 				pacmanY -= 1;
 			}
 			complete_game_state[pacmanX][pacmanY] = 0;
+			m_reward = 59;
 			break;
 		case 8:
 			// food pellat and ghost
@@ -628,6 +629,7 @@ void Pacman::performAction(action_t action) {
 				pacmanY -= 1;
 			}
 			complete_game_state[pacmanX][pacmanY] = 4;
+			m_reward = 59;
 			break;
 	}
 
