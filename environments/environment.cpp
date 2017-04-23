@@ -262,6 +262,7 @@ Pacman::Pacman(options_t &options) {
 	//Also stuff
 	
 	reset_game();
+	m_reward = 60;
 
 	// Set up the initial observation
 	// wall_obs = (left_wall * pow(2,0)) + (right_wall * pow(2,1)) + (up_wall * pow(2,2)) + (down_wall * pow(2,3));
