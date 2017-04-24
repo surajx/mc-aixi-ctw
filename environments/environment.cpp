@@ -956,10 +956,6 @@ void Pacman::performAction(action_t action) {
     std::cout << "Ghost3 X and Y: " << ghost3.x << " , " << ghost3.y << std::endl;
     std::cout << "Ghost4 X and Y: " << ghost4.x << " , " << ghost4.y << std::endl;
 
-    if (m_reward > 200) {
-    	m_reward = 60;
-    }
-
 }
 
 
