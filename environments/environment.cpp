@@ -262,7 +262,6 @@ Pacman::Pacman(options_t &options) {
 	//Also stuff
 	
 	reset_game();
-	m_reward = 60;
 
 	// Set up the initial observation
 	// wall_obs = (left_wall * pow(2,0)) + (right_wall * pow(2,1)) + (up_wall * pow(2,2)) + (down_wall * pow(2,3));
@@ -279,6 +278,7 @@ Pacman::Pacman(options_t &options) {
 
 	// Combine all the observations
 	m_observation = wall_obs + ghost_obs + smell_obs + pellat_obs + power_obs;
+	m_reward = 60;
 }
 
 Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
@@ -955,6 +955,10 @@ void Pacman::performAction(action_t action) {
     std::cout << "Ghost2 X and Y: " << ghost2.x << " , " << ghost2.y << std::endl;
     std::cout << "Ghost3 X and Y: " << ghost3.x << " , " << ghost3.y << std::endl;
     std::cout << "Ghost4 X and Y: " << ghost4.x << " , " << ghost4.y << std::endl;
+
+    if (m_reward > 200) {
+    	m_reward = 60;
+    }
 
 }
 
