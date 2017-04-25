@@ -27,12 +27,13 @@ void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int p
 // The main agent/environment interaction loop
 void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &options) {
 
-	int eval_cycles,eval_freq,mid_eval_val;
+	int eval_cycles,eval_freq,mid_eval_val, finaleval_cycles;
 	bool isMidEvalEnabled=false;
 	// Evaluation details
-	strExtract(options["eval-cycles"], eval_cycles);
-	strExtract(options["eval-frequency"], eval_freq);
+	strExtract(options["mideval-cycles"], eval_cycles);
+	strExtract(options["mideval-frequency"], eval_freq);
 	strExtract(options["mideval-enable"], mid_eval_val);
+	strExtract(options["final-eval-cycles"], finaleval_cycles);	
 	isMidEvalEnabled = mid_eval_val==1;
 
 	// Determine exploration options
@@ -144,9 +145,9 @@ void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &optio
 	logger << "info: Starting evaluation." << std::endl;
 
 	if(&xd_env == nullptr)
-		evalLoop(ai, env, options, eval_cycles, 1);
+		evalLoop(ai, env, options, finaleval_cycles, 1);
 	else
-		evalLoop(ai, xd_env, options, eval_cycles, 1);
+		evalLoop(ai, xd_env, options, finaleval_cycles, 1);
 }
 
 
@@ -379,9 +380,10 @@ int main(int argc, char *argv[]) {
 	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
-	options["eval-cycles"] = "50"; // number of cycles to evaluate
-	options["eval-frequency"] = "50"; // in how many cycles eval to be triggered
+	options["mideval-cycles"] = "50"; // number of cycles to evaluate
+	options["mideval-frequency"] = "50"; // in how many cycles eval to be triggered
 	options["mideval-enable"] = "0"; //Enable eval during middle of trining. 0:False, 1:True
+	options["final-eval-cycles"] = "5000"; //Enable eval during middle of trining. 0:False, 1:True
 
 	// Read configuration options
 	std::ifstream conf(cl_options.getFlagValue("-c"));
@@ -424,6 +426,19 @@ int main(int argc, char *argv[]) {
 
 	logger.close();
 	compactLog.close();
+	eval_logger.close();
+
+
+	if(cl_options.flagExists("-x")){
+		logger.open((log_file +"_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + ".log").c_str());
+		compactLog.open((log_file + "_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + ".csv").c_str());
+		eval_logger.open((log_file +"_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + "_eval.log").c_str());
+		xd_env=nullptr;
+		mainLoop(ai, *env, *xd_env, options);
+		logger.close();
+		compactLog.close();
+		eval_logger.close();		
+	}		
 
 	return 0;
 }
