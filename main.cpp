@@ -434,6 +434,9 @@ int main(int argc, char *argv[]) {
 		compactLog.open((log_file + "_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + ".csv").c_str());
 		eval_logger.open((log_file +"_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + "_eval.log").c_str());
 		xd_env=nullptr;
+		lifetime_t terminate_lifetime;
+		strExtract(options["terminate-lifetime"], terminate_lifetime);
+		options["terminate-lifetime"] = 2*terminate_lifetime;
 		mainLoop(ai, *env, *xd_env, options);
 		logger.close();
 		compactLog.close();
