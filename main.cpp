@@ -20,11 +20,17 @@
 // Streams for logging
 std::ofstream logger;        // A verbose human-readable log
 std::ofstream compactLog; // A compact comma-separated value log
+std::ofstream eval_logger;        // SeparateLogger for evaluation
 
-void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles);
+void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int phase);
 
 // The main agent/environment interaction loop
 void mainLoop(Agent &ai, Environment &env, options_t &options) {
+
+	int eval_cycles,eval_freq;
+	// Evaluation details
+	strExtract(options["eval-cycles"], eval_cycles);
+	strExtract(options["eval-frequency"], eval_freq);
 
 	// Determine exploration options
 	bool explore = options.count("exploration") > 0;
@@ -118,6 +124,9 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		if (explore) explore_rate *= explore_decay;
 
 		ai.incAgentAge();
+
+		if(cycle%eval_freq == 0)
+			evalLoop(ai, env, options, eval_cycles, (int)cycle/eval_freq);
 	}
 
 	// Print summary to standard output
@@ -127,11 +136,11 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 	logger << "info: Starting evaluation." << std::endl;
 
-	evalLoop(ai, env, options, 50);
+	evalLoop(ai, env, options, 50, 1);
 }
 
 
-void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles){
+void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int phase){
 
 	percept_t observation;
 	percept_t reward;
@@ -139,7 +148,7 @@ void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles){
 
 	percept_t eval_tot_reward = 0.0;
 
-	for (unsigned int cycle = 1; cycle<=cycles; cycle++) {
+	for (unsigned int cycle = cycles*(phase-1)+1; cycle<=cycles*phase; cycle++) {
 
 		// Get a percept from the environment
 		observation = env.getObservation();
@@ -160,6 +169,8 @@ void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles){
 		// Update agent's environment model with the chosen action
 		ai.modelUpdate(action);
 
+		eval_logger << cycle << ", " << reward << ", " << eval_tot_reward/(double)cycle << std::endl;
+
 		// Print to standard output when cycle == 2^n
 		if ((cycle & (cycle - 1)) == 0) {
 			std::cout << "Evaluation cycle: " << cycle << std::endl;
@@ -169,11 +180,11 @@ void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles){
 
 	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
 	std::cout << "Cycles Evaluated: " << cycles << std::endl;
-	std::cout << "Average Reward per cycle: " << eval_tot_reward/(1.0*cycles) << std::endl;
+	std::cout << "Average Reward per cycle: " << eval_tot_reward/(double)cycles << std::endl;
 
 	logger << "Evaluation SUMMARY" << std::endl;
 	logger << "Cycles Evaluated: " << cycles << std::endl;
-	logger << "Average Reward per cycle: " << eval_tot_reward/(1.0*cycles) << std::endl;	
+	logger << "Average Reward per cycle: " << eval_tot_reward/(double)cycles << std::endl;
 }
 
 
@@ -285,6 +296,8 @@ int main(int argc, char *argv[]) {
 	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
+	options["eval-cycles"] = "50"; // number of cycles to evaluate
+	options["eval-frequency"] = "50"; // in how many cycles eval to be triggered
 
 	// Read configuration options
 	std::ifstream conf(cl_options.getFlagValue("-c"));
@@ -301,6 +314,7 @@ int main(int argc, char *argv[]) {
 	std::string log_file = cl_options.flagExists("-l")? cl_options.getFlagValue("-l"): "log";
 	logger.open((log_file +"_" + environment_name + ".log").c_str());
 	compactLog.open((log_file + "_" + environment_name + ".csv").c_str());
+	eval_logger.open((log_file +"_" + environment_name + "_eval.log").c_str());
 
 	// Print header to compactLog
 	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
