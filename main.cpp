@@ -25,12 +25,15 @@ std::ofstream eval_logger;        // SeparateLogger for evaluation
 void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int phase);
 
 // The main agent/environment interaction loop
-void mainLoop(Agent &ai, Environment &env, options_t &options) {
+void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &options) {
 
-	int eval_cycles,eval_freq;
+	int eval_cycles,eval_freq,mid_eval_val;
+	bool isMidEvalEnabled=false;
 	// Evaluation details
 	strExtract(options["eval-cycles"], eval_cycles);
 	strExtract(options["eval-frequency"], eval_freq);
+	strExtract(options["mideval-enable"], mid_eval_val);
+	isMidEvalEnabled = mid_eval_val==1;
 
 	// Determine exploration options
 	bool explore = options.count("exploration") > 0;
@@ -125,8 +128,12 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		ai.incAgentAge();
 
-		if(cycle%eval_freq == 0)
-			evalLoop(ai, env, options, eval_cycles, (int)cycle/eval_freq);
+		if(isMidEvalEnabled && cycle%eval_freq == 0){
+			if(&xd_env == nullptr)
+				evalLoop(ai, env, options, eval_cycles, (int)cycle/eval_freq);
+			else
+				evalLoop(ai, xd_env, options, eval_cycles, (int)cycle/eval_freq);
+		}
 	}
 
 	// Print summary to standard output
@@ -136,7 +143,10 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 	logger << "info: Starting evaluation." << std::endl;
 
-	evalLoop(ai, env, options, 50, 1);
+	if(&xd_env == nullptr)
+		evalLoop(ai, env, options, eval_cycles, 1);
+	else
+		evalLoop(ai, xd_env, options, eval_cycles, 1);
 }
 
 
@@ -267,6 +277,79 @@ void printUsage(){
 	std::cout << "-l <log file prefix>: Give a prefix to the output log file. Useful when running multiple trials. (Optional)" << std::endl;	
 }
 
+Environment* environmentFactory(std::string environment_name, options_t& options, bool only_env){
+
+	//std::string environment_name = options["environment"];
+	if (environment_name == "coin-flip") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "1";
+			options["reward-bits"] = "1";
+		}
+		return new CoinFlip(options);
+	}
+	else if (environment_name == "ctw-test") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "1";
+			options["reward-bits"] = "1";
+		}
+		return new CTWTest(options);
+	}
+	else if (environment_name == "extended-tiger") {
+		if(!only_env){		
+			options["agent-actions"] = "4";
+			options["observation-bits"] = "3";
+			options["reward-bits"] = "7";
+		}
+		return new ExtendedTiger(options);
+	}
+	else if (environment_name == "tictactoe") {
+		if(!only_env){
+			options["agent-actions"] = "9";
+			options["observation-bits"] = "18";
+			options["reward-bits"] = "4";
+		}
+		return new TicTacToe(options);
+	}
+	else if (environment_name == "biased-rock-paper-scissor") {
+		if(!only_env){	
+			options["agent-actions"] = "3";
+			options["observation-bits"] = "2";
+			options["reward-bits"] = "2";
+		}
+		return new BiasedRockPaperSciessor(options);
+	}
+	else if (environment_name == "kuhn-poker") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "4";
+			options["reward-bits"] = "4";
+		}
+		return new KuhnPoker(options);
+	}
+	else if (environment_name == "pacman") {
+		if(!only_env){
+			options["agent-actions"] = "4";
+			options["observation-bits"] = "16";
+			options["reward-bits"] = "8";
+		}
+		return new Pacman(options);
+	}
+	else if (environment_name == "ctwtest") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "1";
+			options["reward-bits"] = "1";
+		}
+		return new CTWTest(options);
+	}
+	else {
+		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
+		return NULL;
+	}
+}
+
 int main(int argc, char *argv[]) {
 
 	CmdLineParser cl_options(argc, argv);
@@ -281,7 +364,7 @@ int main(int argc, char *argv[]) {
 		std::cerr << "The -c <configuration file> argument is mandatory. It indicates the location of the configuration file." << std::endl << std::endl;
 		printUsage();
 		return -1;
-	}	
+	}
 
 
 	//initialize random seed
@@ -298,6 +381,7 @@ int main(int argc, char *argv[]) {
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 	options["eval-cycles"] = "50"; // number of cycles to evaluate
 	options["eval-frequency"] = "50"; // in how many cycles eval to be triggered
+	options["mideval-enable"] = "0"; //Enable eval during middle of trining. 0:False, 1:True
 
 	// Read configuration options
 	std::ifstream conf(cl_options.getFlagValue("-c"));
@@ -324,67 +408,19 @@ int main(int argc, char *argv[]) {
 	
 
 	// Set up the environment
-	Environment *env;
+	Environment *env, *xd_env=nullptr;
+	env = environmentFactory(environment_name, options, false);
 
-	//std::string environment_name = options["environment"];
-	if (environment_name == "coin-flip") {
-		env = new CoinFlip(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "1";
-		options["reward-bits"] = "1";
+	if(cl_options.flagExists("-x")) {
+		xd_env = environmentFactory(cl_options.getFlagValue("-x"), options, true);
 	}
-	else if (environment_name == "ctw-test") {
-		env = new CTWTest(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "1";
-		options["reward-bits"] = "1";
-	}
-	else if (environment_name == "extended-tiger") {
-		env = new ExtendedTiger(options);
-		options["agent-actions"] = "4";
-		options["observation-bits"] = "3";
-		options["reward-bits"] = "7";
-	}
-	else if (environment_name == "tictactoe") {
-		env = new TicTacToe(options);
-		options["agent-actions"] = "9";
-		options["observation-bits"] = "18";
-		options["reward-bits"] = "4";
-	}
-	else if (environment_name == "biased-rock-paper-scissor") {
-		env = new BiasedRockPaperSciessor(options);
-		options["agent-actions"] = "3";
-		options["observation-bits"] = "2";
-		options["reward-bits"] = "2";
-	}
-	else if (environment_name == "kuhn-poker") {
-		env = new KuhnPoker(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "4";
-	}
-	else if (environment_name == "pacman") {
-		env = new Pacman(options);
-		options["agent-actions"] = "4";
-		options["observation-bits"] = "16";
-		options["reward-bits"] = "8";
-	}
-	else if (environment_name == "ctwtest") {
-		env = new CTWTest(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "1";
-		options["reward-bits"] = "1";
-	}
-	else {
-		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
-		return -1;
-	}
+
 
 	// Set up the agent
 	Agent ai(options);
 	ai.initPlanner();
 	// Run the main agent/environment interaction loop
-	mainLoop(ai, *env, options);
+	mainLoop(ai, *env, *xd_env, options);
 
 	logger.close();
 	compactLog.close();
