@@ -21,6 +21,8 @@
 std::ofstream logger;        // A verbose human-readable log
 std::ofstream compactLog; // A compact comma-separated value log
 
+void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles);
+
 // The main agent/environment interaction loop
 void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
@@ -125,9 +127,19 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 	logger << "info: Starting evaluation." << std::endl;
 
+	evalLoop(ai, env, options, 50);
+}
+
+
+void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles){
+
+	percept_t observation;
+	percept_t reward;
+	action_t action;
+
 	percept_t eval_tot_reward = 0.0;
 
-	for (unsigned int cycle = 1; cycle<=5000; cycle++) {
+	for (unsigned int cycle = 1; cycle<=cycles; cycle++) {
 
 		// Get a percept from the environment
 		observation = env.getObservation();
@@ -156,13 +168,12 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 	}
 
 	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
-	std::cout << "Cycles Evaluated: " << 5000 << std::endl;
-	std::cout << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
+	std::cout << "Cycles Evaluated: " << cycles << std::endl;
+	std::cout << "Average Reward per cycle: " << eval_tot_reward/(1.0*cycles) << std::endl;
 
 	logger << "Evaluation SUMMARY" << std::endl;
-	logger << "Cycles Evaluated: " << 5000 << std::endl;
-	logger << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
-
+	logger << "Cycles Evaluated: " << cycles << std::endl;
+	logger << "Average Reward per cycle: " << eval_tot_reward/(1.0*cycles) << std::endl;	
 }
 
 
