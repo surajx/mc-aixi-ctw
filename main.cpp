@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <time.h>
 
+#include <algorithm>
+
 
 #include "AIXI/agent.hpp"
 #include "environments/environment.hpp"
@@ -208,12 +210,57 @@ void processOptions(std::ifstream &in, options_t &options) {
 	}
 }
 
+class CmdLineParser {
+ private:
+  std::vector<std::string> options;
+
+ public:
+  CmdLineParser(int& argc, char** argv) {
+    for (int i = 1; i < argc; ++i)
+      this->options.push_back(std::string(argv[i]));
+  }
+  const std::string& getFlagValue(const std::string& flag) const {
+    std::vector<std::string>::const_iterator itr;
+    itr = std::find(this->options.begin(), this->options.end(), flag);
+    if (itr != this->options.end() && ++itr != this->options.end()) {
+      return *itr;
+    }
+    static const std::string empty_string("");
+    return empty_string;
+  }
+  bool flagExists(const std::string& option) const {
+    return std::find(this->options.begin(), this->options.end(), option) !=
+           this->options.end();
+  }
+};
+
+void printUsage(){
+	std::cout << "Usage:" << std::endl;
+	std::cout << "./bin/aixi -c domain_config_file [-x cross_domain_name] [-l log_file_prefix]" << std::endl;
+	std::cout << "./bin/aixi -h" << std::endl;
+	std::cout << "-h : Prints this Help Message" << std::endl;
+	std::cout << "-c <file>: Tells AIXI which domain and configuration to use. (Mandatory)" << std::endl;
+	std::cout << "-x <file>: Evaluate in a different domain. (Optional)" << std::endl;
+	std::cout << "\tValid Domain Names: coin-flip, extended-tiger, tictactoe, biased-rock-paper-scissor, kuhn-poker, pacman." << std::endl;
+	std::cout << "-l <log file prefix>: Give a prefix to the output log file. Useful when running multiple trials. (Optional)" << std::endl;	
+}
+
 int main(int argc, char *argv[]) {
-	if (argc < 2 || argc > 3) {
+
+	CmdLineParser cl_options(argc, argv);
+
+    if(cl_options.flagExists("-h")){
+		printUsage();
+		return 0;
+    }
+
+	if(!cl_options.flagExists("-c")){
 		std::cerr << "ERROR: Incorrect number of arguments" << std::endl;
-		std::cerr << "The first argument should indicate the location of the configuration file and the second (optional) argument should indicate the file to log to." << std::endl;
+		std::cerr << "The -c <configuration file> argument is mandatory. It indicates the location of the configuration file." << std::endl << std::endl;
+		printUsage();
 		return -1;
-	}
+	}	
+
 
 	//initialize random seed
 	srand(time(NULL));
@@ -229,9 +276,9 @@ int main(int argc, char *argv[]) {
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
 
 	// Read configuration options
-	std::ifstream conf(argv[1]);
+	std::ifstream conf(cl_options.getFlagValue("-c"));
 	if (!conf.is_open()) {
-		std::cerr << "ERROR: Could not open file '" << argv[1] << "' now exiting" << std::endl;
+		std::cerr << "ERROR: Could not open file '" << cl_options.getFlagValue("-c") << "' now exiting" << std::endl;
 		return -1;
 	}
 	processOptions(conf, options);
@@ -240,7 +287,7 @@ int main(int argc, char *argv[]) {
 	std::string environment_name = options["environment"];
 
 	// Set up logging
-	std::string log_file = argc < 3 ? "log" : argv[2];
+	std::string log_file = cl_options.flagExists("-l")? cl_options.getFlagValue("-l"): "log";
 	logger.open((log_file +"_" + environment_name + ".log").c_str());
 	compactLog.open((log_file + "_" + environment_name + ".csv").c_str());
 
