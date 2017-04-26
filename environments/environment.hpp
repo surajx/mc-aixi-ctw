@@ -215,6 +215,29 @@ private:
 };
 
 
+class TrueKuhnPoker : public Environment {
+public:
+
+	// set up the initial environment percept
+	TrueKuhnPoker(options_t &options);
+
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+	virtual void reset_game();
+
+private:
+	int opponent_card;
+	int agent_card;
+	int agent_chips_put_in;
+	int chips_in_play;
+	double alpha;
+	int opponent_action;
+	int opponent_chips_put_in;
+	//more stuff
+};
+
+
 
 
 
