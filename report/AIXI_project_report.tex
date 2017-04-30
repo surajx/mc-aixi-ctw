@@ -150,6 +150,7 @@ Choosing the best action requires the CTW method to simulate paths through the f
 \subsection{Kuhn Poker}
 Kuhn Poker is a simplified version of poker from \citep{kuhn1950simplified}. It involves a deck of 3 cards (King, Queen, Jack). First the cards will be given out, and each player bets 1, then the opponent will choose to bet or pass, after looking at his card, the agent will then choose to bet 1 or pass. If the actions taken are equal (both bet or both pass) then the player with the higher card wins the round (King>Queen>Jack). If instead the agent chose to pass, the opponent wins the round. If the opponent passed then the agent bet 1, the opponent then has the choice to bet or pass again, if they pass the agent wins, if they bet 1 then the player with the highest card wins. The opponent will always play the Nash Strategy, to represent this at the start of the round the opponent chooses an $\alpha$ at random between 0 and $\frac{1}{3}$, if they drew a Jack, they will bet with probability $\alpha$, if they drew a queen they will bet with probability 0, if they drew a queen, they will bet 1 with probability $3\alpha$. If they have a second round of betting, they will choose to bet 1 with probability $\alpha+\frac{1}{3}$ regardless of their card. If the agent wins, they get reward equal to the number of chips in play. If the agent loses they will get a reward equal to the negative of the number of chips they bet.
 
+
 \subsection{Biased Rock Paper Scissors}
 Biased Rock Paper Scissors is very similar to regular rock paper scissors, with one exception in how the opponent will choose to play. Both the agent and the opponent will choose either Rock, Paper or Scissors. Rock beats Scissors, Paper beats Rock, Scissors beats Paper. If the agent beats the opponent, the agent will receive a reward of 1, if the agent loses it will receive a reward of 0, if it is a draw, that is both opponent and agent make the same choice, then the agent receives a reward of 0. The opponent repeats its choice of the previous round if it resulted in a win, and picks a move randomly otherwise. 
 
@@ -183,6 +184,11 @@ The MCTS folder contains the SearchTree and SearchNode classes which implement t
 
 The CTW folder contains the CTNode and ContextTree classes which implement the CTW method for predicting and simulating the environment.
 
+
+\subsection{Software Architecture}
+  \begin{figure}
+\includegraphics[height=5.5cm]{soft_arch_crop}
+\end{figure}
 
 
 \subsection{How to compile and run}
@@ -223,28 +229,181 @@ After execution, the two files logfile.log and logfile.csv will contain data on 
 
 
 \section{Experimental Results}
+\begin{itemize}
+    \item{Objective: Test the agent's learning capability in an environment with no prior knowledge.}
+    \item{Easy Game: Biased Rock-Paper-Scissors, Kuhn-Poker}
+    \item{Hard Game: TicTacToe, Pacman, Extended Tiger}
+    \item{The learnt policy is evaluated at the end of the training phase.}
+\end{itemize}
+
+
+ \begin{align*}
+     D &= \text{ CTW Depth} \\
+     m &= \text{ Horizon} \\
+     \epsilon &= \text{ Exploration} \\
+     \gamma &= \text{ Exploration Decay} \\
+     \text{Cycles } &= \text{ Number of cycles } \times 10^3 \\
+ \end{align*}
+
+\newpage
+
+\subsection{Biased Rock Paper Scissors}
+\begin{tabular}{lllllll}
+\centering
+Environment & D & m & $\epsilon$ & $\gamma$ & Cycles & Average Reward \\
+BRPS        & 32        & 4           & 0.999       & 0.9995            & 30     & 0.2293375        \\
+BRPS        & 96        & 8           & 0.999       & 0.9991            & 12     & 0.2419375       \\
+BRPS        & 256       & 4           & 0.999       & 0.9991            & 13     & 0.21425        \\
+BRPS        & 256       & 8           & 0.999       & 0.999             & 7      & 0.246525        
+\end{tabular}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[width=9cm]{RvVvU_Biased_RPS}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{BT_Biased_RPS}
+\end{figure}
+
+
+\newpage
+
+\subsection{Old Kuhn Poker}
+
+\begin{tabular}{lllllll}
+\centering
+Environment & D & m & $\epsilon$ & $\gamma$ & Cycles & Average Reward \\
+Kuhn Poker  & 42        & 2           & 0.99        & 0.9999            & 2000   & 1.2024625        \\
+Kuhn Poker  & 96        & 4           & 0.9999      & 0.9995            & 24     & 1.258875         \\
+Kuhn Poker  & 256       & 4           & 0.999       & 0.9991            & 13     & 1.23595         \\
+%Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7      &               
+\end{tabular}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{RvU_Kuhn_Poker}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{BT_Kuhn_Poker_2}
+\end{figure}
+
+\newpage
+
+\subsection{True Kuhn Poker}
+\begin{tabular}{lllllll}
+\centering
+Environment & D & m & $\epsilon$ & $\gamma$ & Cycles & Average Reward \\
+Kuhn Poker  & 42        & 2           & 0.99        & 0.9999            & 2000   & 0.0719        \\
+Kuhn Poker  & 96        & 4           & 0.9999      & 0.9995            & 24     & 0.01415         \\
+Kuhn Poker  & 256       & 4           & 0.999       & 0.9991            & 13     & 0.0611         \\
+Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7      & 0.056              
+\end{tabular}
 
 
 
 
+\newpage
 
+\subsection{TicTacToe}
+\begin{tabular}{lllllll}
+ \centering
+Environment & D & m & $\epsilon$ & $\gamma$ & Cycles & Average Reward \\
+TicTacToe   & 64        & 9           & 0.9999      & 0.99991           & 145    & 0.0661625         \\
+TicTacToe   & 96        & 9           & 0.9999      & 0.9995            & 24     & -0.636375         \\
+% TicTacToe   & 256       & 9           & 0.9999      & 0.9991            & 13     &                \\
+TicTacToe   & 128       & 10          & 0.9999      & 0.9991            & 12     & -0.83726875        
+\end{tabular}
+
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{RvVvU_TicTacToe}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{BT_TicTacToe}
+\end{figure}
+
+
+\newpage
+
+\subsection{Extended Tiger}
+ \begin{tabular}{lllllll}
+  \centering
+Environment    & D & m & $\epsilon$ & $\gamma$ & Cycles & Average Reward \\
+Extended Tiger & 96        & 4           & 0.999       & 0.99991           & 130    & -7.77525        \\
+Extended Tiger & 64        & 4           & 0.999       & 0.999             & 12     & -7.08699       \\
+Extended Tiger & 42        & 8           & 0.999       & 0.9991            & 13     & -10             \\
+Extended Tiger & 256       & 4           & 0.999       & 0.9991            & 13     & -7.519       
+\end{tabular}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{RvVvU_Extended_Tiger}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{BT_Extended_Tiger}
+\end{figure}
+
+\newpage
+
+\subsection{Pacman}
+ \begin{tabular}{lllllll}
+ \centering
+Environment & D & m & $\epsilon$ & $\gamma$ & Cycles & Average Reward \\
+Pacman      & 256       & 8           & 0.999       & 0.999             & 12     & -0.994        \\
+%Pacman      & 512       & 10          & 0.9999      & 0.999             & 7      &                \\
+Pacman      & 256       & 4           & 0.999       & 0.9991            & 13     & -1.0055625       \\
+Pacman      & 92        & 4           & 0.999       & 0.999             & 7      &    -1.000225           
+\end{tabular}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{RvVvU_Pacman}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{BT_Pacman}
+\end{figure}
 
 \section{Discussion}
 
 
-
+Python Implementation
 
 
 
 
 \section{Conclusion}
+\begin{itemize}
+\item We achieved superior results to random for every environment
+\item Some environments were not consistent with (Veness et al. 2011)
+   \item We were able to achieve comparable results to (Veness et al. 2011) for all consistent environments.
+   \item MC-AIXI-CTW can achieve near optimal to optimal solutions on small domains, however runs into difficulty for larger domains
+\end{itemize}
+ 
 
 
 
 
 
+\section{Future Work}
+
+  Mentioned in \cite{Ven11}, the set up need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$.
 
 
+  Another possible speedup could come from reward scaling.  e.g. for extended tiger, scaling rewards of 0,90,99,130 to 0,9,10,13. This would reduce the reward bits from 8 to 4, and be a significant improvement to computation time.
+  
+  Lastly, an enhancement may come from using Context Tree Switching instead of Context Tree Weighting. Context Tree Switching \cite{Ven12} has shown to have consistent improvement over Context Tree Weighting
+  
 
 \printbibliography
 
