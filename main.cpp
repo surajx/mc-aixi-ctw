@@ -9,6 +9,7 @@
 #include <time.h>
 
 #include <algorithm>
+#include <cmath>
 
 
 #include "AIXI/agent.hpp"
@@ -18,23 +19,24 @@
 #include "common/types.hpp"
 
 // Streams for logging
-std::ofstream logger;        // A verbose human-readable log
-std::ofstream compactLog; // A compact comma-separated value log
-std::ofstream eval_logger;        // SeparateLogger for evaluation
+std::ofstream logger;              // A verbose human-readable log
+std::ofstream csvLogger;           // A compact comma-separated value log
+std::ofstream csvFinalEvalLogger;  // SeparateLogger for evaluation
+std::ofstream csvMidEvalLogger;    // SeparateLogger for evaluation
 
-void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int phase);
+void evalLoop(Agent &ai, Environment &env, int cycles, int phase, int log_mode);
 
 // The main agent/environment interaction loop
 void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &options) {
 
-	int eval_cycles,eval_freq,mid_eval_val, finaleval_cycles;
+	int eval_cycles, eval_freq, mid_eval_enabled, finaleval_cycles;
 	bool isMidEvalEnabled=false;
 	// Evaluation details
-	strExtract(options["mideval-cycles"], eval_cycles);
-	strExtract(options["mideval-frequency"], eval_freq);
-	strExtract(options["mideval-enable"], mid_eval_val);
+	strExtract(options["eval-cycles"], eval_cycles);
+	strExtract(options["eval-frequency"], eval_freq);
+	strExtract(options["eval-enable"], mid_eval_enabled);
 	strExtract(options["final-eval-cycles"], finaleval_cycles);	
-	isMidEvalEnabled = mid_eval_val==1;
+	isMidEvalEnabled = mid_eval_enabled==1;
 
 	// Determine exploration options
 	bool explore = options.count("exploration") > 0;
@@ -68,11 +70,12 @@ void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &optio
 	}
 
         // Agent/environment interaction loop
-	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
+	for (unsigned int cycle = ai.lifetime()+1, eff_cycle = ai.lifetime()+1; !env.isFinished(); cycle++, eff_cycle++) {
 
 		// check for agent termination
 		if (terminate_check && ai.lifetime() > terminate_lifetime) {
-			logger << "info: terminating lifetiment" << std::endl;
+			logger << "info: terminating agent training, EOTT" << std::endl;
+			std::cout << "AI lifetime: " << ai.lifetime() << ", " << "terminate_lifetime: " << terminate_lifetime << std::endl;
 			break;
 		}
 
@@ -111,7 +114,7 @@ void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &optio
 		logger << "average reward: " << ai.averageReward() << std::endl;
 
 		// Log the data in a more compact form
-		compactLog << cycle << ", " << observation << ", " << reward << ", "
+		csvLogger << cycle << ", " << observation << ", " << reward << ", "
 				<< action << ", " << explored << ", " << explore_rate << ", "
 				<< ai.reward() << ", " << ai.averageReward() << std::endl;
 
@@ -129,11 +132,10 @@ void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &optio
 
 		ai.incAgentAge();
 
-		if(isMidEvalEnabled && cycle%eval_freq == 0){
-			if(&xd_env == nullptr)
-				evalLoop(ai, env, options, eval_cycles, (int)cycle/eval_freq);
-			else
-				evalLoop(ai, xd_env, options, eval_cycles, (int)cycle/eval_freq);
+		if(isMidEvalEnabled && (eff_cycle)%eval_freq == 0){
+			evalLoop(ai, env, eval_cycles, (int)eff_cycle/eval_freq, 0);
+			// if (explore) explore_rate *= std::pow(explore_decay,(ai.lifetime()-cycle));
+			cycle = ai.lifetime();
 		}
 	}
 
@@ -144,14 +146,14 @@ void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &optio
 
 	logger << "info: Starting evaluation." << std::endl;
 
-	if(&xd_env == nullptr)
-		evalLoop(ai, env, options, finaleval_cycles, 1);
-	else
-		evalLoop(ai, xd_env, options, finaleval_cycles, 1);
+	if(&xd_env != nullptr)
+		evalLoop(ai, xd_env, finaleval_cycles, 1, 1);
+	// else
+	// 	evalLoop(ai, env, finaleval_cycles, 1, int log_mode);		
 }
 
 
-void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int phase){
+void evalLoop(Agent &ai, Environment &env, int cycles, int phase, int log_mode){
 
 	percept_t observation;
 	percept_t reward;
@@ -179,14 +181,28 @@ void evalLoop(Agent &ai, Environment &env, options_t &options, int cycles, int p
 
 		// Update agent's environment model with the chosen action
 		ai.modelUpdate(action);
+		
+		if(log_mode==0){
+			csvLogger << ai.lifetime() + 1 << ", " << observation << ", "
+						<< reward << ", " << action << ", "
+						<< 0 << ", " << 0 << ", "
+						<< ai.reward() << ", " << ai.averageReward()
+						<< std::endl;
+		}
+		else{
+			csvFinalEvalLogger << cycle << ", " << reward << ", " << eval_tot_reward/(double)cycle << std::endl;
+		}
 
-		eval_logger << cycle << ", " << reward << ", " << eval_tot_reward/(double)cycle << std::endl;
+		ai.incAgentAge();
 
 		// Print to standard output when cycle == 2^n
 		if ((cycle & (cycle - 1)) == 0) {
 			std::cout << "Evaluation cycle: " << cycle << std::endl;
 			std::cout << "average reward: " << eval_tot_reward/(double)cycle << std::endl;
 		}
+	}
+	if(log_mode==0){
+		csvMidEvalLogger << phase << ", " << eval_tot_reward/(double)cycles << std::endl;
 	}
 
 	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
@@ -380,9 +396,9 @@ int main(int argc, char *argv[]) {
 	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
-	options["mideval-cycles"] = "50"; // number of cycles to evaluate
-	options["mideval-frequency"] = "50"; // in how many cycles eval to be triggered
-	options["mideval-enable"] = "0"; //Enable eval during middle of trining. 0:False, 1:True
+	options["eval-cycles"] = "50"; // number of cycles to evaluate
+	options["eval-frequency"] = "50"; // in how many cycles eval to be triggered
+	options["eval-enable"] = "0"; //Enable eval during middle of trining. 0:False, 1:True
 	options["final-eval-cycles"] = "5000"; //Enable eval during middle of trining. 0:False, 1:True
 
 	// Read configuration options
@@ -399,15 +415,18 @@ int main(int argc, char *argv[]) {
 	// Set up logging
 	std::string log_file = cl_options.flagExists("-l")? cl_options.getFlagValue("-l"): "log";
 	logger.open((log_file +"_" + environment_name + ".log").c_str());
-	compactLog.open((log_file + "_" + environment_name + ".csv").c_str());
-	eval_logger.open((log_file +"_" + environment_name + "_eval.log").c_str());
+	csvLogger.open((log_file + "_" + environment_name + ".csv").c_str());
+	if(cl_options.flagExists("-x")) {
+		csvFinalEvalLogger.open((log_file +"_" + cl_options.getFlagValue("-x") + "_final_xd_eval.csv").c_str());
+		csvFinalEvalLogger << "cycle, reward, average reward" << std::endl;
+	}
+	// else
+	// 	csvFinalEvalLogger.open((log_file +"_" + environment_name + "_final_eval.csv").c_str());
+	csvMidEvalLogger.open((log_file +"_" + environment_name + "_mid_eval.csv").c_str());
 
-	// Print header to compactLog
-	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
+	// Print header to csvLogger
+	csvLogger << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;	
 
-
-	// Load configuration options
-	
 
 	// Set up the environment
 	Environment *env, *xd_env=nullptr;
@@ -425,23 +444,25 @@ int main(int argc, char *argv[]) {
 	mainLoop(ai, *env, *xd_env, options);
 
 	logger.close();
-	compactLog.close();
-	eval_logger.close();
+	csvLogger.close();	
+	csvMidEvalLogger.close();
 
 
 	if(cl_options.flagExists("-x")){
-		logger.open((log_file +"_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + ".log").c_str());
-		compactLog.open((log_file + "_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + ".csv").c_str());
-		eval_logger.open((log_file +"_" + environment_name + "_xd_" + cl_options.getFlagValue("-x") + "_eval.log").c_str());
+		csvFinalEvalLogger.close();
+
+		logger.open((log_file +"_" + environment_name + "_xd_reverse.log").c_str());
+		csvLogger.open((log_file + "_" + environment_name + "_xd_reverse.csv").c_str());		
+		csvMidEvalLogger.open((log_file +"_" + environment_name + "_xd_reverse_mid_eval.csv").c_str());
 		xd_env=nullptr;
 		lifetime_t terminate_lifetime;
 		strExtract(options["terminate-lifetime"], terminate_lifetime);
-		options["terminate-lifetime"] = 2*terminate_lifetime;
+		options["terminate-lifetime"] = std::to_string(2*terminate_lifetime);
 		mainLoop(ai, *env, *xd_env, options);
 		logger.close();
-		compactLog.close();
-		eval_logger.close();		
-	}		
+		csvLogger.close();
+		csvMidEvalLogger.close();
+	}
 
 	return 0;
 }
