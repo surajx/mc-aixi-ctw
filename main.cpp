@@ -291,6 +291,12 @@ int main(int argc, char *argv[]) {
 		options["observation-bits"] = "4";
 		options["reward-bits"] = "4";
 	}
+	else if (environment_name == "true-kuhn-poker") {
+		env = new TrueKuhnPoker(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "4";
+	}
 	else if (environment_name == "pacman") {
 		env = new Pacman(options);
 		options["agent-actions"] = "4";
