@@ -160,6 +160,7 @@ void evalLoop(Agent &ai, Environment &env, int cycles, int phase, int log_mode){
 	action_t action;
 
 	percept_t eval_tot_reward = 0.0;
+	unsigned int eval_timestep = ai.lifetime();
 
 	for (unsigned int cycle = cycles*(phase-1)+1; cycle<=cycles*phase; cycle++) {
 
@@ -202,7 +203,7 @@ void evalLoop(Agent &ai, Environment &env, int cycles, int phase, int log_mode){
 		}
 	}
 	if(log_mode==0){
-		csvMidEvalLogger << phase << ", " << eval_tot_reward/(double)cycles << std::endl;
+		csvMidEvalLogger << eval_timestep << ", " << eval_tot_reward/(double)cycles << std::endl;
 	}
 
 	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
