@@ -345,6 +345,14 @@ Environment* environmentFactory(std::string environment_name, options_t& options
 		}
 		return new KuhnPoker(options);
 	}
+	else if (environment_name == "true-kuhn-poker") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "4";
+			options["reward-bits"] = "4";
+		}
+		return new TrueKuhnPoker(options);
+	}
 	else if (environment_name == "pacman") {
 		if(!only_env){
 			options["agent-actions"] = "4";
