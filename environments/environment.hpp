@@ -129,7 +129,6 @@ private:
 	int up_wall;
 	int food_pellats;
 
-	//more stuff
 };
 
 
@@ -145,8 +144,6 @@ public:
 	virtual void reset_game();
 
 private:
-
-	//more stuff
 	int state;
 	int random_choice;
 	int board[3][3];
@@ -170,7 +167,6 @@ private:
 	int opponent_action;
 	int opponent_won_last_round;
 	int opponent_last_round_action;
-	//more stuff
 };
 
 
@@ -188,7 +184,6 @@ private:
 	int state;
 	int tiger_door;
 	int gold_door;
-	//more stuff
 };
 
 
@@ -211,7 +206,28 @@ private:
 	int chips_in_play;
 	double alpha;
 	int opponent_action;
-	//more stuff
+};
+
+
+class TrueKuhnPoker : public Environment {
+public:
+
+	// set up the initial environment percept
+	TrueKuhnPoker(options_t &options);
+
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+	virtual void reset_game();
+
+private:
+	int opponent_card;
+	int agent_card;
+	int agent_chips_put_in;
+	int chips_in_play;
+	double alpha;
+	int opponent_action;
+	int opponent_chips_put_in;
 };
 
 

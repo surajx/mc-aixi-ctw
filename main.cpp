@@ -8,6 +8,9 @@
 #include <cstdlib>
 #include <time.h>
 
+#include <algorithm>
+#include <cmath>
+
 
 #include "AIXI/agent.hpp"
 #include "environments/environment.hpp"
@@ -16,11 +19,24 @@
 #include "common/types.hpp"
 
 // Streams for logging
-std::ofstream logger;        // A verbose human-readable log
-std::ofstream compactLog; // A compact comma-separated value log
+std::ofstream logger;              // A verbose human-readable log
+std::ofstream csvLogger;           // A compact comma-separated value log
+std::ofstream csvFinalEvalLogger;  // SeparateLogger for evaluation
+std::ofstream csvMidEvalLogger;    // SeparateLogger for evaluation
+
+void evalLoop(Agent &ai, Environment &env, int cycles, int phase, int log_mode);
 
 // The main agent/environment interaction loop
-void mainLoop(Agent &ai, Environment &env, options_t &options) {
+void mainLoop(Agent &ai, Environment &env, Environment &xd_env, options_t &options) {
+
+	int eval_cycles, eval_freq, mid_eval_enabled, finaleval_cycles;
+	bool isMidEvalEnabled=false;
+	// Evaluation details
+	strExtract(options["eval-cycles"], eval_cycles);
+	strExtract(options["eval-frequency"], eval_freq);
+	strExtract(options["eval-enable"], mid_eval_enabled);
+	strExtract(options["final-eval-cycles"], finaleval_cycles);	
+	isMidEvalEnabled = mid_eval_enabled==1;
 
 	// Determine exploration options
 	bool explore = options.count("exploration") > 0;
@@ -54,11 +70,12 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 	}
 
         // Agent/environment interaction loop
-	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
+	for (unsigned int cycle = ai.lifetime()+1, eff_cycle = ai.lifetime()+1; !env.isFinished(); cycle++, eff_cycle++) {
 
 		// check for agent termination
 		if (terminate_check && ai.lifetime() > terminate_lifetime) {
-			logger << "info: terminating lifetiment" << std::endl;
+			logger << "info: terminating agent training, EOTT" << std::endl;
+			std::cout << "AI lifetime: " << ai.lifetime() << ", " << "terminate_lifetime: " << terminate_lifetime << std::endl;
 			break;
 		}
 
@@ -97,7 +114,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		logger << "average reward: " << ai.averageReward() << std::endl;
 
 		// Log the data in a more compact form
-		compactLog << cycle << ", " << observation << ", " << reward << ", "
+		csvLogger << cycle << ", " << observation << ", " << reward << ", "
 				<< action << ", " << explored << ", " << explore_rate << ", "
 				<< ai.reward() << ", " << ai.averageReward() << std::endl;
 
@@ -114,6 +131,12 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		if (explore) explore_rate *= explore_decay;
 
 		ai.incAgentAge();
+
+		if(isMidEvalEnabled && (eff_cycle)%eval_freq == 0){
+			evalLoop(ai, env, eval_cycles, (int)eff_cycle/eval_freq, 0);
+			// if (explore) explore_rate *= std::pow(explore_decay,(ai.lifetime()-cycle));
+			cycle = ai.lifetime();
+		}
 	}
 
 	// Print summary to standard output
@@ -123,9 +146,23 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 	logger << "info: Starting evaluation." << std::endl;
 
-	percept_t eval_tot_reward = 0.0;
+	if(&xd_env != nullptr)
+		evalLoop(ai, xd_env, finaleval_cycles, 1, 1);
+	// else
+	// 	evalLoop(ai, env, finaleval_cycles, 1, int log_mode);		
+}
 
-	for (unsigned int cycle = 1; cycle<=5000; cycle++) {
+
+void evalLoop(Agent &ai, Environment &env, int cycles, int phase, int log_mode){
+
+	percept_t observation;
+	percept_t reward;
+	action_t action;
+
+	percept_t eval_tot_reward = 0.0;
+	unsigned int eval_timestep = ai.lifetime();
+
+	for (unsigned int cycle = cycles*(phase-1)+1; cycle<=cycles*phase; cycle++) {
 
 		// Get a percept from the environment
 		observation = env.getObservation();
@@ -145,6 +182,19 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		// Update agent's environment model with the chosen action
 		ai.modelUpdate(action);
+		
+		if(log_mode==0){
+			csvLogger << ai.lifetime() + 1 << ", " << observation << ", "
+						<< reward << ", " << action << ", "
+						<< 0 << ", " << 0 << ", "
+						<< ai.reward() << ", " << ai.averageReward()
+						<< std::endl;
+		}
+		else{
+			csvFinalEvalLogger << cycle << ", " << reward << ", " << eval_tot_reward/(double)cycle << std::endl;
+		}
+
+		ai.incAgentAge();
 
 		// Print to standard output when cycle == 2^n
 		if ((cycle & (cycle - 1)) == 0) {
@@ -152,15 +202,17 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			std::cout << "average reward: " << eval_tot_reward/(double)cycle << std::endl;
 		}
 	}
+	if(log_mode==0){
+		csvMidEvalLogger << eval_timestep << ", " << eval_tot_reward/(double)cycles << std::endl;
+	}
 
 	std::cout << std::endl << std::endl << "Evaluation SUMMARY" << std::endl;
-	std::cout << "Cycles Evaluated: " << 5000 << std::endl;
-	std::cout << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
+	std::cout << "Cycles Evaluated: " << cycles << std::endl;
+	std::cout << "Average Reward per cycle: " << eval_tot_reward/(double)cycles << std::endl;
 
 	logger << "Evaluation SUMMARY" << std::endl;
-	logger << "Cycles Evaluated: " << 5000 << std::endl;
-	logger << "Average Reward per cycle: " << eval_tot_reward/5000.0 << std::endl;
-
+	logger << "Cycles Evaluated: " << cycles << std::endl;
+	logger << "Average Reward per cycle: " << eval_tot_reward/(double)cycles << std::endl;
 }
 
 
@@ -208,12 +260,138 @@ void processOptions(std::ifstream &in, options_t &options) {
 	}
 }
 
+class CmdLineParser {
+ private:
+  std::vector<std::string> options;
+
+ public:
+  CmdLineParser(int& argc, char** argv) {
+    for (int i = 1; i < argc; ++i)
+      this->options.push_back(std::string(argv[i]));
+  }
+  const std::string& getFlagValue(const std::string& flag) const {
+    std::vector<std::string>::const_iterator itr;
+    itr = std::find(this->options.begin(), this->options.end(), flag);
+    if (itr != this->options.end() && ++itr != this->options.end()) {
+      return *itr;
+    }
+    static const std::string empty_string("");
+    return empty_string;
+  }
+  bool flagExists(const std::string& option) const {
+    return std::find(this->options.begin(), this->options.end(), option) !=
+           this->options.end();
+  }
+};
+
+void printUsage(){
+	std::cout << "Usage:" << std::endl;
+	std::cout << "./bin/aixi -c domain_config_file [-x cross_domain_name] [-l log_file_prefix]" << std::endl;
+	std::cout << "./bin/aixi -h" << std::endl;
+	std::cout << "-h : Prints this Help Message" << std::endl;
+	std::cout << "-c <file>: Tells AIXI which domain and configuration to use. (Mandatory)" << std::endl;
+	std::cout << "-x <file>: Evaluate in a different domain. (Optional)" << std::endl;
+	std::cout << "\tValid Domain Names: coin-flip, extended-tiger, tictactoe, biased-rock-paper-scissor, kuhn-poker, pacman." << std::endl;
+	std::cout << "-l <log file prefix>: Give a prefix to the output log file. Useful when running multiple trials. (Optional)" << std::endl;	
+}
+
+Environment* environmentFactory(std::string environment_name, options_t& options, bool only_env){
+
+	//std::string environment_name = options["environment"];
+	if (environment_name == "coin-flip") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "1";
+			options["reward-bits"] = "1";
+		}
+		return new CoinFlip(options);
+	}
+	else if (environment_name == "ctw-test") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "1";
+			options["reward-bits"] = "1";
+		}
+		return new CTWTest(options);
+	}
+	else if (environment_name == "extended-tiger") {
+		if(!only_env){		
+			options["agent-actions"] = "4";
+			options["observation-bits"] = "3";
+			options["reward-bits"] = "7";
+		}
+		return new ExtendedTiger(options);
+	}
+	else if (environment_name == "tictactoe") {
+		if(!only_env){
+			options["agent-actions"] = "9";
+			options["observation-bits"] = "18";
+			options["reward-bits"] = "4";
+		}
+		return new TicTacToe(options);
+	}
+	else if (environment_name == "biased-rock-paper-scissor") {
+		if(!only_env){	
+			options["agent-actions"] = "3";
+			options["observation-bits"] = "2";
+			options["reward-bits"] = "2";
+		}
+		return new BiasedRockPaperSciessor(options);
+	}
+	else if (environment_name == "kuhn-poker") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "4";
+			options["reward-bits"] = "4";
+		}
+		return new KuhnPoker(options);
+	}
+	else if (environment_name == "true-kuhn-poker") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "4";
+			options["reward-bits"] = "4";
+		}
+		return new TrueKuhnPoker(options);
+	}
+	else if (environment_name == "pacman") {
+		if(!only_env){
+			options["agent-actions"] = "4";
+			options["observation-bits"] = "16";
+			options["reward-bits"] = "8";
+		}
+		return new Pacman(options);
+	}
+	else if (environment_name == "ctwtest") {
+		if(!only_env){
+			options["agent-actions"] = "2";
+			options["observation-bits"] = "1";
+			options["reward-bits"] = "1";
+		}
+		return new CTWTest(options);
+	}
+	else {
+		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
+		return NULL;
+	}
+}
+
 int main(int argc, char *argv[]) {
-	if (argc < 2 || argc > 3) {
+
+	CmdLineParser cl_options(argc, argv);
+
+    if(cl_options.flagExists("-h")){
+		printUsage();
+		return 0;
+    }
+
+	if(!cl_options.flagExists("-c")){
 		std::cerr << "ERROR: Incorrect number of arguments" << std::endl;
-		std::cerr << "The first argument should indicate the location of the configuration file and the second (optional) argument should indicate the file to log to." << std::endl;
+		std::cerr << "The -c <configuration file> argument is mandatory. It indicates the location of the configuration file." << std::endl << std::endl;
+		printUsage();
 		return -1;
 	}
+
 
 	//initialize random seed
 	srand(time(NULL));
@@ -227,11 +405,15 @@ int main(int argc, char *argv[]) {
 	options["num-simulations"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
+	options["eval-cycles"] = "50"; // number of cycles to evaluate
+	options["eval-frequency"] = "50"; // in how many cycles eval to be triggered
+	options["eval-enable"] = "0"; //Enable eval during middle of trining. 0:False, 1:True
+	options["final-eval-cycles"] = "5000"; //Enable eval during middle of trining. 0:False, 1:True
 
 	// Read configuration options
-	std::ifstream conf(argv[1]);
+	std::ifstream conf(cl_options.getFlagValue("-c"));
 	if (!conf.is_open()) {
-		std::cerr << "ERROR: Could not open file '" << argv[1] << "' now exiting" << std::endl;
+		std::cerr << "ERROR: Could not open file '" << cl_options.getFlagValue("-c") << "' now exiting" << std::endl;
 		return -1;
 	}
 	processOptions(conf, options);
@@ -240,82 +422,56 @@ int main(int argc, char *argv[]) {
 	std::string environment_name = options["environment"];
 
 	// Set up logging
-	std::string log_file = argc < 3 ? "log" : argv[2];
+	std::string log_file = cl_options.flagExists("-l")? cl_options.getFlagValue("-l"): "log";
 	logger.open((log_file +"_" + environment_name + ".log").c_str());
-	compactLog.open((log_file + "_" + environment_name + ".csv").c_str());
+	csvLogger.open((log_file + "_" + environment_name + ".csv").c_str());
+	if(cl_options.flagExists("-x")) {
+		csvFinalEvalLogger.open((log_file +"_" + cl_options.getFlagValue("-x") + "_final_xd_eval.csv").c_str());
+		csvFinalEvalLogger << "cycle, reward, average reward" << std::endl;
+	}
+	// else
+	// 	csvFinalEvalLogger.open((log_file +"_" + environment_name + "_final_eval.csv").c_str());
+	csvMidEvalLogger.open((log_file +"_" + environment_name + "_mid_eval.csv").c_str());
 
-	// Print header to compactLog
-	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
+	// Print header to csvLogger
+	csvLogger << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;	
 
-
-	// Load configuration options
-	
 
 	// Set up the environment
-	Environment *env;
+	Environment *env, *xd_env=nullptr;
+	env = environmentFactory(environment_name, options, false);
 
-	//std::string environment_name = options["environment"];
-	if (environment_name == "coin-flip") {
-		env = new CoinFlip(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "1";
-		options["reward-bits"] = "1";
+	if(cl_options.flagExists("-x")) {
+		xd_env = environmentFactory(cl_options.getFlagValue("-x"), options, true);
 	}
-	else if (environment_name == "ctw-test") {
-		env = new CTWTest(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "1";
-		options["reward-bits"] = "1";
-	}
-	else if (environment_name == "extended-tiger") {
-		env = new ExtendedTiger(options);
-		options["agent-actions"] = "4";
-		options["observation-bits"] = "3";
-		options["reward-bits"] = "7";
-	}
-	else if (environment_name == "tictactoe") {
-		env = new TicTacToe(options);
-		options["agent-actions"] = "9";
-		options["observation-bits"] = "18";
-		options["reward-bits"] = "4";
-	}
-	else if (environment_name == "biased-rock-paper-scissor") {
-		env = new BiasedRockPaperSciessor(options);
-		options["agent-actions"] = "3";
-		options["observation-bits"] = "2";
-		options["reward-bits"] = "2";
-	}
-	else if (environment_name == "kuhn-poker") {
-		env = new KuhnPoker(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "4";
-		options["reward-bits"] = "4";
-	}
-	else if (environment_name == "pacman") {
-		env = new Pacman(options);
-		options["agent-actions"] = "4";
-		options["observation-bits"] = "16";
-		options["reward-bits"] = "8";
-	}
-	else if (environment_name == "ctwtest") {
-		env = new CTWTest(options);
-		options["agent-actions"] = "2";
-		options["observation-bits"] = "1";
-		options["reward-bits"] = "1";
-	}
-	else {
-		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;
-		return -1;
-	}
+
 
 	// Set up the agent
 	Agent ai(options);
 	ai.initPlanner();
 	// Run the main agent/environment interaction loop
-	mainLoop(ai, *env, options);
+	mainLoop(ai, *env, *xd_env, options);
 
 	logger.close();
-	compactLog.close();
+	csvLogger.close();	
+	csvMidEvalLogger.close();
+
+
+	if(cl_options.flagExists("-x")){
+		csvFinalEvalLogger.close();
+
+		logger.open((log_file +"_" + environment_name + "_xd_reverse.log").c_str());
+		csvLogger.open((log_file + "_" + environment_name + "_xd_reverse.csv").c_str());		
+		csvMidEvalLogger.open((log_file +"_" + environment_name + "_xd_reverse_mid_eval.csv").c_str());
+		xd_env=nullptr;
+		lifetime_t terminate_lifetime;
+		strExtract(options["terminate-lifetime"], terminate_lifetime);
+		options["terminate-lifetime"] = std::to_string(2*terminate_lifetime);
+		mainLoop(ai, *env, *xd_env, options);
+		logger.close();
+		csvLogger.close();
+		csvMidEvalLogger.close();
+	}
 
 	return 0;
 }
