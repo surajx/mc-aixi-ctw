@@ -101,7 +101,7 @@
 
 
 \title{MC-AIXI-CTW Report}
-
+\author{Elliot Catt, Suraj Narayanan, Arie Slobbe}
 \begin{document}
 \maketitle
 
@@ -234,15 +234,7 @@ After execution, the two files logfile.log and logfile.csv will contain data on 
 
 \section{Experimental Results}
 
-\todo{Clean up}
-
-\begin{itemize}
-    \item{Objective: Test the agent's learning capability in an environment with no prior knowledge.}
-    \item{Easy Game: Biased Rock-Paper-Scissors, Kuhn-Poker}
-    \item{Hard Game: TicTacToe, Pacman, Extended Tiger}
-    \item{The learnt policy is evaluated at the end of the training phase.}
-\end{itemize}
-
+Our experimental results for the environments are as follows, we use the following notation,
 
  \begin{align*}
      D &= \text{ CTW Depth} \\
@@ -251,6 +243,11 @@ After execution, the two files logfile.log and logfile.csv will contain data on 
      \gamma &= \text{ Exploration Decay} \\
      \text{Cycles } &= \text{ Number of cycles } \times 10^3 \\
  \end{align*}
+ 
+Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. For the environments, some are easy such as Biased Rock-Paper-Scissors, and Kuhn-Poker. The other environments TicTacToe, Pacman, Extended Tiger are harder games to learn.
+
+
+
 
 \newpage
 
@@ -311,7 +308,15 @@ Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7     
 \end{tabular}
 
 
-\todo{Add graphs}
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{RvVvU_True_Kuhn_Poker}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9cm]{BT_True_Kuhn_Poker}
+\end{figure}
 
 \newpage
 
@@ -381,34 +386,22 @@ Pacman      & 92        & 4           & 0.999       & 0.999             & 7     
     \includegraphics[width=9cm]{BT_Pacman}
 \end{figure}
 
+\newpage
+
 \section{Discussion}
 
 
-One goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we choose. In this regard we were able to achieve our goal. Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal.
+The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. In this regard we were able to achieve our goal, however our graphs do not match the \citep{veness2011monte} results, this is due to our graph reflecting the average over the cycle, wheres in \citep{veness2011monte} intermediate evaluation was used. This average causes our graph to describe a $\frac{1}{x}$ graph of the reward. After training, our evaluation was comparable to \citep{veness2011monte}. Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. Mentioned in \citep{veness2011monte}, the set up need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$. Another possible speedup could come from reward scaling.  e.g. for extended tiger, scaling rewards of 0,90,99,130 to 0,9,10,13. This would reduce the reward bits from 8 to 4, and be an improvement to computation time.
 
-\todo{Finish}
 
 \section{Conclusion}
-\todo{Turn items and results into conclusion}
-\begin{itemize}
-\item We achieved superior results to random for every environment
-   \item We were able to achieve comparable results to (Veness et al. 2011) for all consistent environments.
-   \item MC-AIXI-CTW can achieve near optimal to optimal solutions on small domains, however runs into difficulty for larger domains
-\end{itemize}
- 
+In all the environments we tested our MC-AIXI-CTW agent was able to outperform a random agent. Additionally, we were able to achieve comparable results to (Veness et al. 2011) for all environments. Our MC-AIXI-CTW agent can achieve near optimal to optimal solutions on small domains, however runs into difficulty for larger domains, this comes into play especially for TicTacToe, Pacman and Extended tiger.
 
 
 
 
-
-\section{Future Work}
-
-  Mentioned in \citep{veness2011monte}, the set up need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$.
-
-
-  Another possible speedup could come from reward scaling.  e.g. for extended tiger, scaling rewards of 0,90,99,130 to 0,9,10,13. This would reduce the reward bits from 8 to 4, and be a significant improvement to computation time.
   
-  Lastly, an enhancement may come from using Context Tree Switching instead of Context Tree Weighting. Context Tree Switching \citep{veness2012context} has shown to have consistent improvement over Context Tree Weighting
+  
   
 
 \printbibliography
