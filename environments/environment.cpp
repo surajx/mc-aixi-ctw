@@ -29,7 +29,7 @@ void CoinFlip::performAction(action_t action) {
 	m_reward = action == m_observation ? 1 : 0;
 }
 
-// Describe the function
+// The main function for the CTWTest Environment
 CTWTest::CTWTest(options_t &options) {
 	cycle = 0;
 	// Set up the initial observation
@@ -37,7 +37,7 @@ CTWTest::CTWTest(options_t &options) {
 	m_reward = 0;
 }
 
-// Describe the function
+// The perform action function for the CTWTest Environment
 void CTWTest::performAction(action_t action) {
 	//Observations
 	// Check if the cycle is 0 or not
@@ -55,7 +55,8 @@ void CTWTest::performAction(action_t action) {
 }
 
 
-// Describe the function
+// The void reset game function for the Pacman environment
+// Resets the world, includign the positions fo the ghosts, pacman and pellets
 void Pacman::reset_game() {
 	for (int i=0;i<19;i++){
 		for (int j=0;j<21;j++) {
@@ -234,7 +235,8 @@ void Pacman::reset_game() {
 }
 
 
-// Describe the function
+// The main, or initial function for the Pacman enrivonment
+// Starts with resetting the game, and returns pacmans observations for his current position and a 0 reward
 Pacman::Pacman(options_t &options) {
 	
 	reset_game();
@@ -252,7 +254,10 @@ Pacman::Pacman(options_t &options) {
 	m_reward = 60;
 }
 
-// Describe the function
+// Performs the movement of the ghosts in the Pacman environment
+// This function takes in a ghost and performs movement
+// Movement is random if the ghost is not close to pacman
+// Otherwise will aggresivly pursue pacman
 Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 	// check if distance is less then or equal to 5
 	ghost.oldx = ghost.x;
@@ -451,7 +456,15 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 	return ghost;
 }
 
-// Describe the function
+// The perform action function for the Pacman environment
+// Takes in the action for pacman, up down left or right, 
+// Reduce powerpill time by 1, or keeps it at 0
+// Moves the ghosts, using the ghost_movement function
+// Performs the movement of the action, getting reward based on action reward,
+// Checks if Pacman killed any ghosts
+// Checks if pacman was killed by any ghosts, getting death reward and reseting if so
+// Checks all observations for the agent
+// Prints game state world to console
 void Pacman::performAction(action_t action) {
 	// Rewards normalised for -70
 
@@ -602,9 +615,6 @@ void Pacman::performAction(action_t action) {
 			m_reward = 59;
 			break;
 	}
-
-
-	
 	//check if caught by ghosts
 
 	// Initial ghost positions
@@ -924,7 +934,9 @@ void Pacman::performAction(action_t action) {
 
 }
 
-// Describe the function
+// The TicTacToe reset game function
+// Makes the state and board to be empty
+// Resets the open squares to be every square
 void TicTacToe::reset_game() {
 	// reset the board
 	state = 0;
@@ -950,7 +962,8 @@ void TicTacToe::reset_game() {
 	}
 }
 
-// Describe the function
+// The initial tictactoe function
+// Sets the game up initially
 TicTacToe::TicTacToe(options_t &options) {
 	// Initial state reward and observation, state is integer = observation
 	state = 0;
@@ -977,14 +990,19 @@ TicTacToe::TicTacToe(options_t &options) {
 	}
 }
 
-// Describe the function
+// The TicTacToe perform action function
+// Takes in an action, ie the position of the board that the agent wishes to play on
+// If the move is illegal, low reward
+// otherwise, check if the game is won by the agent from that mvoe
+// The opponent make a random move in a possible square
+// check if the game is won by the opponent
+// then the observation if the state of the board
 void TicTacToe::performAction(action_t action) {
 	//Agent move is added to state
 	//If he wins game ends, if illegal lose points
 	// All positive rewards, normalised at 3
 
 	// to find the nth number base 2 in the state, b = state/pow(2,n-1) % 4
-
 
 	// std::cout << "Action / 3: " << action / 3 <<  " Action mod 3: " << action % 3 << std::endl;
 	// std::cout << "Board[above][above]: " << board[action / 3][action % 3] << std::endl;
@@ -1041,7 +1059,6 @@ void TicTacToe::performAction(action_t action) {
 		std::uniform_int_distribution<int> dist(0, open_squares.size() - 1);
 		
 		int random_choice = open_squares[dist(engine)];
-
 		*/
 
 		std::random_shuffle ( open_squares.begin(), open_squares.end() );
@@ -1074,7 +1091,6 @@ void TicTacToe::performAction(action_t action) {
 			reset_game();
 			m_reward = 4;
 		}
-		
 	}
 	m_observation = state;
 
@@ -1095,7 +1111,8 @@ void TicTacToe::performAction(action_t action) {
 
 }
 
-// Describe the function
+// Initial Biased Rock Paper Scissors function
+// Sets initial observation and reward for the agent
 BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {
 	// Set up the initial observation and reward
 	m_reward = 0;
@@ -1104,7 +1121,12 @@ BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {
 	
 }
 
-// Describe the function
+// The Perform action function for Biased Rock paper scissors
+// Inputs agents action, rock paper or scissors
+// Computes opponent action, based on if it won last round
+// Compares the actions, and check who won
+// Agent recieves reward based on if they won, drew or lost
+// And observation of the opponents action
 void BiasedRockPaperSciessor::performAction(action_t action) {
 	//Observations
 	// 0 is rock
@@ -1144,7 +1166,9 @@ void BiasedRockPaperSciessor::performAction(action_t action) {
 	m_observation = opponent_action;
 }
 
-// Describe the function
+// Initial function for the extended tiger environment
+// Sets up initial observation and reward
+// Decides which door is tiger and which is gold
 ExtendedTiger::ExtendedTiger(options_t &options) {
 	//Initial state of 0 is sitting, 1 is standing
 	state = 0;
@@ -1158,7 +1182,9 @@ ExtendedTiger::ExtendedTiger(options_t &options) {
 	tiger_door = ((gold_door + 1) % 2) + 2;
 }
 
-// Describe the function
+// Perform action function of Extended tiger environment
+// Agent recieves reward and observation based on action and game state
+// If game inished (door is opened) game state resets and tiger door is randomsied again
 void ExtendedTiger::performAction(action_t action) {
 	// Rewards are normalised to 100 to be positive
 	// Actions
@@ -1220,7 +1246,11 @@ void ExtendedTiger::performAction(action_t action) {
 
 }
 
-// Describe the function
+// The Kuhn Poker reset game function
+// Resets the cards of the agent and the opponent,
+// Resets the chips put in
+// Performs opponent initial action
+// Agent observes current card
 void KuhnPoker::reset_game() {
 	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
 
@@ -1263,7 +1293,11 @@ void KuhnPoker::reset_game() {
 	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
-// Describe the function
+// The initial Kuhn Poker function
+// Starts the initial round by determining the cards for each player
+// the chips put in
+// Performs opponent initial action
+// Agent observes current card
 KuhnPoker::KuhnPoker(options_t &options) {
 
 	m_reward = 0;
@@ -1311,7 +1345,11 @@ KuhnPoker::KuhnPoker(options_t &options) {
 	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
-// Describe the function
+// Perform action function for Kuhn poker
+// Puts and additional chip in for each player
+// then comapres agent and opponent actions
+// As well as agent and opponent cards
+// Agent recieves reward accordingly, and the game resets
 void KuhnPoker::performAction(action_t action) {
 
 	// Using normalized reward to 4
@@ -1373,7 +1411,11 @@ void KuhnPoker::performAction(action_t action) {
 
 
 
-// Describe the function
+// The True Kuhn Poker reset game function
+// Resets the cards of the agent and the opponent,
+// Resets the chips put in
+// Performs opponent initial action
+// Agent observes current card
 void TrueKuhnPoker::reset_game() {
 	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
 
@@ -1419,7 +1461,11 @@ void TrueKuhnPoker::reset_game() {
 	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
-// Describe the function
+// The initial True Kuhn Poker function
+// Starts the initial round by determining the cards for each player
+// the chips put in
+// Performs opponent initial action
+// Agent observes current card
 TrueKuhnPoker::TrueKuhnPoker(options_t &options) {
 	//Also stuff
 
@@ -1471,7 +1517,11 @@ TrueKuhnPoker::TrueKuhnPoker(options_t &options) {
 	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
-// Describe the function
+// Perform action function for True Kuhn poker
+// Puts and additional chip in for each player
+// then comapres agent and opponent actions
+// As well as agent and opponent cards
+// Agent recieves reward accordingly, and the game resets
 void TrueKuhnPoker::performAction(action_t action) {
 
 	// Using normalized reward to 4
