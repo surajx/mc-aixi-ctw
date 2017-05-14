@@ -2,6 +2,7 @@
 #include <deque>
 
 #include "../CTW/ContextTree.hpp"
+#include "../CTW/CTNode.hpp"
 #include "../MCTS/search.hpp"
 #include "../common/util.hpp"
 
@@ -46,7 +47,9 @@ void Agent::incAgentAge(){
 action_t Agent::getPlannedAction(percept_t prev_obs,
                                  percept_t prev_rew,
                                  action_t prev_act) {
-  return planner->search(prev_obs, prev_rew, prev_act);
+  action_t plannedAction = planner->search(prev_obs, prev_rew, prev_act);
+  std::cout << "CTW Node Count: " << CTNode::node_count << std::endl;
+  return plannedAction;
 }
 
 SearchTree* Agent::getPlanner() {

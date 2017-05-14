@@ -70,6 +70,11 @@ void ContextTree::update(const symbol_t sym,
   // Recursion bottomed-out.
   if (depth == maxTreeDepth) {
     node->updateLeaf(sym, node_action);
+    if (node_action == NODE_REVERT && node->visits() == 0) {
+      node->getParent()->nullifyChild(node);
+      delete node;
+      node = NULL;
+    }
     return;
   }
 
@@ -77,7 +82,7 @@ void ContextTree::update(const symbol_t sym,
   symbol_t childSym = sequenceHistory[sequenceHistory.size() - 1 - depth];
 
   // Create node for context if it doesnt exist.
-  if (!node->child(childSym)) {
+  if (node->child(childSym) == NULL) {
     CTNode* child = new CTNode();
     node->addChild(childSym, child, node);
   }
@@ -87,6 +92,11 @@ void ContextTree::update(const symbol_t sym,
 
   // Actually update node on the way back after bottoming out.
   node->update(sym, node_action);
+  if (node_action == NODE_REVERT && node->visits() == 0) {
+    node->getParent()->nullifyChild(node);
+    delete node;
+    node = NULL;
+  }
 }
 
 void ContextTree::updateHistory(const symbol_list_t& symbol_list) {
@@ -137,13 +147,14 @@ double ContextTree::predict(symbol_list_t& symbol_list) {
   return exp(logProbWeightedPrime - logProbWeighted);
 }
 
-void ContextTree::printCurrentContext(){
+void ContextTree::printCurrentContext() {
   std::cout << "Context: ";
   for (int i = sequenceHistory.size() - maxTreeDepth;
        i < sequenceHistory.size(); i++) {
-    std::cout << sequenceHistory[i] << ", ";
+    std::cout << "@" << sequenceHistory.size() - i << ": " << sequenceHistory[i]
+              << ", ";
   }
-  std::cout << std::endl;  
+  std::cout << std::endl;
 }
 
 symbol_t ContextTree::predictSymbol() {

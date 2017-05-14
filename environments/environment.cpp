@@ -29,17 +29,15 @@ void CoinFlip::performAction(action_t action) {
 	m_reward = action == m_observation ? 1 : 0;
 }
 
-
+// Describe the function
 CTWTest::CTWTest(options_t &options) {
-	//Also stuff
 	cycle = 0;
 	// Set up the initial observation
-	//Stuff
 	m_observation = 0;
 	m_reward = 0;
 }
 
-
+// Describe the function
 void CTWTest::performAction(action_t action) {
 	//Observations
 	// Check if the cycle is 0 or not
@@ -57,6 +55,7 @@ void CTWTest::performAction(action_t action) {
 }
 
 
+// Describe the function
 void Pacman::reset_game() {
 	for (int i=0;i<19;i++){
 		for (int j=0;j<21;j++) {
@@ -90,7 +89,6 @@ void Pacman::reset_game() {
 	complete_game_state[0][19] = complete_game_state[0][20] = complete_game_state[18][19] = complete_game_state[18][20] = 1;
 	//complete_game_state[]
 
-	//TODO add all the walls
 	// Walls of the game, line by line (literally), each line is a bloack
 	complete_game_state[2][2] = complete_game_state[3][2] = 1;
 	complete_game_state[5][2] = complete_game_state[6][2] = complete_game_state[7][2] = 1;
@@ -199,28 +197,6 @@ void Pacman::reset_game() {
 	}
 
 
-	/*
-	Static pellet positiosn
-	complete_game_state[3][1] = complete_game_state[4][1] = complete_game_state[2][1] = complete_game_state[13][1] = complete_game_state[14][1] = complete_game_state[15][1] = complete_game_state[16][1] = complete_game_state[12][1] = 2;
-	complete_game_state[1][2] = complete_game_state[8][2] = complete_game_state[17][2] = 2;
-	complete_game_state[7][3] = complete_game_state[8][3] = complete_game_state[9][3] = complete_game_state[10][3] = complete_game_state[12][3] = complete_game_state[15][3] = 2;
-	complete_game_state[1][4] = complete_game_state[12][4] = 2;
-	complete_game_state[1][5] = complete_game_state[2][5] = complete_game_state[4][5] = complete_game_state[6][5] = complete_game_state[7][5] = 2;
-	complete_game_state[4][6] = complete_game_state[14][6] = 2;
-	complete_game_state[14][7] = 2;
-	complete_game_state[4][10] = 2;
-	complete_game_state[4][11] = 2;
-	complete_game_state[12][12] = 2;
-	complete_game_state[4][13] = complete_game_state[5][13] = complete_game_state[7][13] = complete_game_state[11][13] = complete_game_state[13][13] = complete_game_state[14][13] = complete_game_state[15][13] = complete_game_state[16][13] = complete_game_state[17][13] = 2;
-	complete_game_state[8][14] = complete_game_state[14][14] = 2;
-	complete_game_state[2][15] = complete_game_state[4][15] = complete_game_state[11][15] = complete_game_state[13][15] = complete_game_state[14][15] = 2;
-	complete_game_state[2][16] = complete_game_state[4][16] = complete_game_state[14][16] = 2;
-	complete_game_state[3][17] = complete_game_state[7][17] = complete_game_state[8][17] = complete_game_state[10][17] = complete_game_state[11][17] = complete_game_state[12][17] = 2;
-	complete_game_state[10][18] = 2;
-	complete_game_state[1][19] = complete_game_state[2][19] = complete_game_state[6][19] = complete_game_state[7][19] = complete_game_state[8][19] = complete_game_state[11][19] = complete_game_state[15][19] = complete_game_state[16][19] = complete_game_state[17][19] = 2;
-	*/
-
-
 	// 6 is for power pill
 	complete_game_state[1][3] = complete_game_state[17][3] = complete_game_state[1][15] = complete_game_state[17][15] = 6;
 
@@ -258,17 +234,12 @@ void Pacman::reset_game() {
 }
 
 
+// Describe the function
 Pacman::Pacman(options_t &options) {
-	//Also stuff
 	
 	reset_game();
 
 	// Set up the initial observation
-	// wall_obs = (left_wall * pow(2,0)) + (right_wall * pow(2,1)) + (up_wall * pow(2,2)) + (down_wall * pow(2,3));
-	// ghost_obs = (left_ghost * pow(2,4)) + (right_ghost * pow(2,5)) + (up_ghost * pow(2,6)) + (down_ghost * pow(2,7));
-	// smell_obs = (pellat_within_2 * pow(2,8)) + (pellat_within_3 * pow(2,9)) + (pellat_within_4 * pow(2,10));
-	// pellat_obs = (left_food * pow(2,11)) + (right_food * pow(2,12)) + (up_food * pow(2,13)) + (down_food * pow(2,14));
-	// power_obs = (power_pill * pow(2,15));
 
 	wall_obs = (0 * pow(2,0)) + (0 * pow(2,1)) + (1 * pow(2,2)) + (1 * pow(2,3));
 	ghost_obs = (0 * pow(2,4)) + (0 * pow(2,5)) + (0 * pow(2,6)) + (0 * pow(2,7));
@@ -278,10 +249,11 @@ Pacman::Pacman(options_t &options) {
 
 	// Combine all the observations
 	m_observation = wall_obs + ghost_obs + smell_obs + pellat_obs + power_obs;
+	m_reward = 60;
 }
 
+// Describe the function
 Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
-	// stuff
 	// check if distance is less then or equal to 5
 	ghost.oldx = ghost.x;
 	ghost.oldy = ghost.y;
@@ -289,7 +261,6 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 	// Pursue pacman
 	if (ghost.manhattan_distance <= 5) {
 		//pursue pacman
-		// TODO turn into a function
 		// Check which quadrant pacman is in, TopLeft, etc
 		if (ghost.x > pacmanX)  {
 			if (ghost.y > pacmanY) {
@@ -378,7 +349,6 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 			ghost.action = 4;
 		}
 	}
-	// ghost.action = (random_number < 0.25) ? 1 : ((random_number < 0.5) ? 2 : ((random_number < 0.75) ? 3 : 4));
 
 	// change the square the ghost moved out of
 
@@ -481,7 +451,7 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 	return ghost;
 }
 
-
+// Describe the function
 void Pacman::performAction(action_t action) {
 	// Rewards normalised for -70
 
@@ -591,6 +561,7 @@ void Pacman::performAction(action_t action) {
 				pacmanY -= 1;
 			}
 			complete_game_state[pacmanX][pacmanY] = 0;
+			m_reward = 59;
 			break;
 		case 8:
 			// food pellat and ghost
@@ -628,6 +599,7 @@ void Pacman::performAction(action_t action) {
 				pacmanY -= 1;
 			}
 			complete_game_state[pacmanX][pacmanY] = 4;
+			m_reward = 59;
 			break;
 	}
 
@@ -671,7 +643,6 @@ void Pacman::performAction(action_t action) {
 			}
 		} else {
 			m_reward = 10;
-			// End the game somehow?
 			//game ends
 			reset_game();
 		}
@@ -706,7 +677,6 @@ void Pacman::performAction(action_t action) {
 			}
 		} else {
 			m_reward = 10;
-			// End the game somehow?
 			//game ends
 			reset_game();
 		}
@@ -785,7 +755,6 @@ void Pacman::performAction(action_t action) {
 
 	// 3-bit observation on whether or not a pellat is within 2,3,4 manhattan distance from pacman
 
-	// TODO implement as a tree style search under a while loop, only need one to be true
 	// Pellat is within 2
 	pellat_within_2 = (complete_game_state[pacmanX+2][pacmanY] == 2 || pellat_within_2) ? 1 : 0;
 	pellat_within_2 = (complete_game_state[pacmanX-2][pacmanY] == 2 || pellat_within_2) ? 1 : 0;
@@ -955,7 +924,7 @@ void Pacman::performAction(action_t action) {
 
 }
 
-
+// Describe the function
 void TicTacToe::reset_game() {
 	// reset the board
 	state = 0;
@@ -981,7 +950,7 @@ void TicTacToe::reset_game() {
 	}
 }
 
-
+// Describe the function
 TicTacToe::TicTacToe(options_t &options) {
 	// Initial state reward and observation, state is integer = observation
 	state = 0;
@@ -1008,7 +977,7 @@ TicTacToe::TicTacToe(options_t &options) {
 	}
 }
 
-
+// Describe the function
 void TicTacToe::performAction(action_t action) {
 	//Agent move is added to state
 	//If he wins game ends, if illegal lose points
@@ -1022,7 +991,6 @@ void TicTacToe::performAction(action_t action) {
 	// std::cout << "Open tile size: " << open_squares.size() << std::endl;
 
 	if ( board[action / 3][action % 3] != 0) {
-		// (fmod((state/pow(4, action)),2) == 1) || (fmod((state/(pow(4, action)*2) ),2) == 1) 
 		// If the agent performs an illegal move
 		m_reward = 0;
 		// std::cout << "Cannot place tile here " << std::endl;
@@ -1062,9 +1030,7 @@ void TicTacToe::performAction(action_t action) {
 		// std::cout << "Game draw!" << std::endl;
 		// std::cout << "Open squares: " << open_squares.size() << std::endl;
 	} else {
-		// find how many moves are possible, then make random move
-		// number_of_open_sqaures = open_squares.size();
-		
+		// find how many moves are possible, then make random move		
 
 		/*
 		// Alternative randomisation
@@ -1129,7 +1095,7 @@ void TicTacToe::performAction(action_t action) {
 
 }
 
-
+// Describe the function
 BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {
 	// Set up the initial observation and reward
 	m_reward = 0;
@@ -1138,7 +1104,7 @@ BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {
 	
 }
 
-
+// Describe the function
 void BiasedRockPaperSciessor::performAction(action_t action) {
 	//Observations
 	// 0 is rock
@@ -1178,7 +1144,7 @@ void BiasedRockPaperSciessor::performAction(action_t action) {
 	m_observation = opponent_action;
 }
 
-
+// Describe the function
 ExtendedTiger::ExtendedTiger(options_t &options) {
 	//Initial state of 0 is sitting, 1 is standing
 	state = 0;
@@ -1189,10 +1155,10 @@ ExtendedTiger::ExtendedTiger(options_t &options) {
 
 	// Set up which door is which
 	gold_door = (rand01() < 0.5) ? 1 : 2;
-	tiger_door = ((gold_door + 1) % 2) + 1;
+	tiger_door = ((gold_door + 1) % 2) + 2;
 }
 
-
+// Describe the function
 void ExtendedTiger::performAction(action_t action) {
 	// Rewards are normalised to 100 to be positive
 	// Actions
@@ -1206,50 +1172,55 @@ void ExtendedTiger::performAction(action_t action) {
 			// When action is standing, if already standing, take less reward for invalid action
 			if (state == 1) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
+				m_observation = m_observation;
 			} else{
 				state = 1;
 				m_reward = 99;
-				m_observation = (pow(2,2)*state);
+				m_observation = (m_observation < (pow(2,2)*state)) ? m_observation + (pow(2,2)*state) : m_observation;
 			}
 			break;
 		case 1:
 			// When action is listen, take less reward if invalid action (while standing), else gain observation
-			if (state == 1) {
+			if ((state == 1) || (m_observation != 0) ) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
-			} else{
-				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door ) + (pow(2,2)*state);
+				m_observation = m_observation;
+			} else {
+				m_observation = ((rand01() < 0.85) ? tiger_door : gold_door);
 				m_reward = 99;
-				state = 0;
+				//state = 0;
 			}
 			break;
 		case 2:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
+				m_observation = m_observation;
 			} else {
 				m_reward = (1 == gold_door) ? 130 : 0;
-				m_observation = (pow(2,2)*state);
+				m_observation = 0; 
 				state = 0;
+				gold_door = (rand01() < 0.5) ? 1 : 2;
+				tiger_door = ((gold_door + 1) % 2) + 2;
 			}
 			break;
 		case 3:
 			// When action is open door, less reward if sitting, then check if door is gold or tiger
 			if (state == 0) {
 				m_reward = 90;
-				m_observation = (pow(2,2)*state);
+				m_observation = m_observation;
 			} else {
 				m_reward = (2 == gold_door) ? 130 : 0;
-				m_observation = (pow(2,2)*state);
+				m_observation = 0; 
 				state = 0;
+				gold_door = (rand01() < 0.5) ? 1 : 2;
+				tiger_door = ((gold_door + 1) % 2) + 2;
 			}
 			break;
 	}
 
 }
 
+// Describe the function
 void KuhnPoker::reset_game() {
 	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
 
@@ -1292,9 +1263,8 @@ void KuhnPoker::reset_game() {
 	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
-
+// Describe the function
 KuhnPoker::KuhnPoker(options_t &options) {
-	//Also stuff
 
 	m_reward = 0;
 	// Players are delt cards
@@ -1341,7 +1311,7 @@ KuhnPoker::KuhnPoker(options_t &options) {
 	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
 }
 
-
+// Describe the function
 void KuhnPoker::performAction(action_t action) {
 
 	// Using normalized reward to 4
@@ -1399,8 +1369,167 @@ void KuhnPoker::performAction(action_t action) {
 			reset_game();
 		}
 	}
-	// m_observation = 0;
+}
+
+
+
+// Describe the function
+void TrueKuhnPoker::reset_game() {
+	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
+
+	// agent is delt card
+	agent_card  = rand01() < 0.5 ? ((opponent_card + 1 )%3) : ((opponent_card + 2 )%3);
 	
+
+	// Both parties bet
+	agent_chips_put_in = 1;
+	opponent_chips_put_in = 1;
+	chips_in_play = 2;
+
+
+	// Opponent takes action, pass or bet, using a nash stratergy
+	// 1 is to bet, 0 is to pass
+	// for the nash stratergy, first choose any alpha between 0 and 1/3
+	// this is the probability the opponent bets on a jack
+	// the opponent will always pass on a queen
+	// and bet with a probabiliy of 3alpha with a king
+	alpha = rand01() / 3.0;
+	if (opponent_card == 0) {
+		if (rand01() < alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+			opponent_chips_put_in += 1;
+		} else {
+			opponent_action = 0;
+		}
+	} else if (opponent_card == 1) {
+		opponent_action = 0;
+	} else {
+		if (rand01() < 3*alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+			opponent_chips_put_in += 1;
+		} else {
+			opponent_action = 0;
+		}
+	}
+
+	// observations are current card, and opponents choice (to bet or pass)
+	// 3 bits on agent card?, 1 bit on opponent actions
+	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
+}
+
+// Describe the function
+TrueKuhnPoker::TrueKuhnPoker(options_t &options) {
+	//Also stuff
+
+	m_reward = 0;
+	// Players are delt cards
+	// 2 is king, 1 is queen, 0 is jack
+	// First opponent is delt a card
+	opponent_card  = rand01() < 1/3.0 ? 2 : (rand01() < 0.5 ? 1 : 0);
+
+	// agent is delt card
+	agent_card  = rand01() < 0.5 ? ((opponent_card + 1 )%3) : ((opponent_card + 2 )%3);
+	
+
+	// Both parties bet
+	agent_chips_put_in = 1;
+	opponent_chips_put_in = 1;
+	chips_in_play = 2;
+
+
+	// Opponent takes action, pass or bet, using a nash stratergy
+	// 1 is to bet, 0 is to pass
+	// for the nash stratergy, first choose any alpha between 0 and 1/3
+	// this is the probability the opponent bets on a jack
+	// the opponent will always pass on a queen
+	// and bet with a probabiliy of 3alpha with a king
+	alpha = rand01() / 3.0;
+	if (opponent_card == 0) {
+		if (rand01() < alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+			opponent_chips_put_in += 1;
+		} else {
+			opponent_action = 0;
+		}
+	} else if (opponent_card == 1) {
+		opponent_action = 0;
+	} else {
+		if (rand01() < 3*alpha) {
+			opponent_action = 1;
+			chips_in_play += 1;
+			opponent_chips_put_in += 1;
+		} else {
+			opponent_action = 0;
+		}
+	}
+
+	// observations are current card, and opponents choice (to bet or pass)
+	// 3 bits on agent card?, 1 bit on opponent actions
+	m_observation = (opponent_action ? pow(2,3): 0) + ((agent_card < 2) ? ((agent_card < 1) ? pow(2,0): pow(2,1)) : pow(2,2));
+}
+
+// Describe the function
+void TrueKuhnPoker::performAction(action_t action) {
+
+	// Using normalized reward to 4
+
+	// Agent takes action, 1 to bet or 0 to pass
+
+	// amount of chips put in, and amoutn of chips in play both increase if agent bets
+	if (action == 1) {
+		agent_chips_put_in += action;
+		chips_in_play += action;
+	}
+
+	// if actions are equal showdown occurs, 
+	// else if opponents bets he wins, 
+	// else opponent has choice to bet and showdown occurs or pass and let agent win
+
+	if (opponent_action == action) {
+		//showdown
+		if (agent_card > opponent_card) {
+			//agent wins
+			m_reward = 2 + opponent_chips_put_in;
+			// Reset the game
+			reset_game();
+		} else {
+			//opponent wins
+			m_reward = 2 - agent_chips_put_in; 
+			// Reset the game
+			reset_game();
+		}
+
+	} else if (opponent_action == 1) {
+		//opponent wins
+		m_reward = 2 - agent_chips_put_in; 
+		// Reset the game
+		reset_game();
+	} else {
+		if (rand01() < alpha + 1/3.0) {
+			// opponent calls then showdown
+			chips_in_play += 1;
+			if (agent_card > opponent_card) {
+				//agent wins
+				m_reward = 2 + opponent_chips_put_in;
+				// Reset the game
+				reset_game();
+			} else {
+				//opponent wins
+				m_reward = 2 - agent_chips_put_in; 
+				// Reset the game
+				reset_game();
+			}
+
+		} else {
+			//opponent folds and agent wins
+			m_reward = 2 + opponent_chips_put_in;
+			// Reset the game
+			reset_game();
+		}
+	}	
 }
 
 
