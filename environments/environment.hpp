@@ -153,6 +153,28 @@ private:
 	int game_finished;
 };
 
+class POTicTacToe : public Environment {
+public:
+
+	// set up the initial environment percept
+	POTicTacToe(options_t &options);
+
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+	virtual void reset_game();
+
+private:
+	int state;
+	int square;
+	int random_choice;
+	int board[3][3];
+	std::vector<int> open_squares;
+	int win_cond;
+	int opponent_win_cond;
+	int game_finished;
+};
+
 
 class BiasedRockPaperSciessor : public Environment {
 public:

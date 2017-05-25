@@ -1111,6 +1111,233 @@ void TicTacToe::performAction(action_t action) {
 
 }
 
+
+
+// For POtictactoe
+
+// Observation space is
+// O = { Blank,O,X}*{1,2,3,4,5,6,7,8,9}
+// A = {Up,down,left,right,X,null,observe}
+// R = R_old
+
+// |O| = 27 < 32 = 2^5 < 2^18 = 262144 = |O_old|
+// |A| = 7 < 8 = 2^3 < 2^4 = 16 ~= |A_old|
+
+// The initial tictactoe function
+// Sets the game up initially
+POTicTacToe::POTicTacToe(options_t &options) {
+	// Initial state reward and observation, state is integer = observation
+	state = 0;
+	square = 0; 
+	// from the set {0,1,2,3,4,5,6,7,8}, which square the agent is in
+	m_reward = 0;
+	m_observation = state;
+
+	// The win conditions of agent and opponent
+	win_cond = 0;
+	opponent_win_cond = 0;
+
+	//open_squares = (1,2,3,4,5,6,7,8,9);
+
+	// The square which have yet to be used
+	open_squares = {0,1,2,3,4,5,6,7,8};
+
+	// if the game is finished
+	game_finished = 0;
+
+	// Set up board, 0 for empty, -1 for O and 1 for X
+	for (int i = 0; i < 3 ; i++) {
+		for (int j = 0 ; j < 3 ; j++) {
+			board[i][j] = 0;
+		}
+	}
+}
+
+
+// The TicTacToe reset game function
+// Makes the state and board to be empty
+// Resets the open squares to be every square
+void POTicTacToe::reset_game() {
+	// reset the board
+	state = 0;
+	square = 0;
+	m_observation = state;
+
+	// The win conditions of agent and opponent
+	win_cond = 0;
+	opponent_win_cond = 0;
+
+	//open_squares = (1,2,3,4,5,6,7,8,9);
+
+	// The square which have yet to be used
+	open_squares = {0,1,2,3,4,5,6,7,8};
+
+	// if the game is finished
+	game_finished = 0;
+
+	// Set up board, 0 for empty, -1 for O and 1 for X
+	for (int i = 0; i < 3 ; i++) {
+		for (int j = 0 ; j < 3 ; j++) {
+			board[i][j] = 0;
+		}
+	}
+}
+
+
+// The TicTacToe perform action function
+// Takes in an action, ie the position of the board that the agent wishes to play on
+// If the move is illegal, low reward
+// otherwise, check if the game is won by the agent from that mvoe
+// The opponent make a random move in a possible square
+// check if the game is won by the opponent
+// then the observation if the state of the board
+void POTicTacToe::performAction(action_t action) {
+	//Agent move is added to state
+	//If he wins game ends, if illegal lose points
+	// All positive rewards, normalised at 3
+
+	// to find the nth number base 2 in the state, b = state/pow(2,n-1) % 4
+
+	// std::cout << "Action / 3: " << action / 3 <<  " Action mod 3: " << action % 3 << std::endl;
+	// std::cout << "Board[above][above]: " << board[action / 3][action % 3] << std::endl;
+	// std::cout << "Open tile size: " << open_squares.size() << std::endl;
+
+
+	// Action space = {Up,down,left,right,X,null,observe}
+	// check if action is movement, ie 0,1,2 or 3
+	// else if X ie 4
+	// else if null ie 5
+	// else if observe ie 6
+
+
+	if (action == 0) {
+		// perform the null action
+		m_reward = 3;
+	} 
+	else if (action <= 4) {
+		// Perform movement action
+		if (action == 1) {
+			// move up
+			// check if the square is in the board
+			if ( board[square / 3][square % 3] != 0)
+		} else if (action == 2) {
+			// move down
+		} else if (action == 3) {
+			// move left
+		} else {
+			// move right
+		}
+	} 
+	else if (action == 5) {
+		// Place X on current square, got to check if occupied
+		if ( board[square / 3][square % 3] != 0) {
+			// If the agent performs an illegal move
+			m_reward = 0;
+			// std::cout << "Cannot place tile here " << std::endl;
+		} else {
+			// Agent move is added to state
+			state += pow(4,square);
+			board[(square / 3)][(square % 3)] = 1;
+			// std::cout << " Placed tile at above" << std::endl;
+			// std::cout << "Board: " << board[(action / 3)][(action % 3)] << std::endl;
+			// Remove the square from open squares
+			open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), square), open_squares.end());
+			// Reward for an action
+			m_reward = 3;
+			// Check is game is finished
+			win_cond = ( (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == 1) || win_cond == 1) ? 1 : 0;
+			win_cond = ( (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == 1) || win_cond == 1) ? 1 : 0;
+		}
+		if (win_cond == 1) {
+			// If game is finished, then agent has won, and get reward of 5
+			game_finished = 1;
+			reset_game();
+			m_reward = 5;
+			// std::cout << "Game won!" << std::endl;
+
+		// check if board fills up
+		} else if (open_squares.size() == 0) {
+			// game is a draw
+			game_finished = 1;
+			reset_game();
+			m_reward = 4;
+			// std::cout << "Game draw!" << std::endl;
+			// std::cout << "Open squares: " << open_squares.size() << std::endl;
+		} else {
+			// find how many moves are possible, then make random move		
+
+			/*
+			// Alternative randomisation
+
+			#include <random>
+			std::random_device random_device;
+			std::mt19937 engine{random_device()};
+			std::uniform_int_distribution<int> dist(0, open_squares.size() - 1);
+			
+			int random_choice = open_squares[dist(engine)];
+			*/
+
+			std::random_shuffle ( open_squares.begin(), open_squares.end() );
+			random_choice = open_squares[0];
+
+			state += pow(4,random_choice)*2;
+
+
+			board[(random_choice / 3)][(random_choice % 3)] = -1;
+			// std::cout << "Opponent move: " << (random_choice / 3) << " , " << (random_choice % 3) << std::endl;
+
+			open_squares.erase(std::remove(open_squares.begin(), open_squares.end(), random_choice), open_squares.end());
+
+			// could implement as a tree style search under a while loop, only need one to be true
+			opponent_win_cond = ( (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+			opponent_win_cond = ( (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == (-1)) || opponent_win_cond == 1) ? 1 : 0;
+
+			if (opponent_win_cond == 1) {
+				game_finished = 1;
+				reset_game();
+				m_reward = 1;
+			} else if (open_squares.size() == 0) {
+				game_finished = 1;
+				reset_game();
+				m_reward = 4;
+			}
+		}
+			// can place X here
+	} else if (action == 6) {
+		// perform observe action
+	}
+
+	// Observe the 
+	m_observation = pow(2,4)*(board[square / 3][square % 3]+1) + board
+
+	// Printing the screen
+	for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            std::cout << board[i][j] << ' ';
+            //std::cout << (char)127 << ' ';
+        }
+        std::cout << std::endl;
+    }
+
+	//Random Opponent makes moves
+	//if he wins game ends, if not give observations
+
+}
+
 // Initial Biased Rock Paper Scissors function
 // Sets initial observation and reward for the agent
 BiasedRockPaperSciessor::BiasedRockPaperSciessor(options_t &options) {

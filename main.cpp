@@ -330,6 +330,14 @@ Environment* environmentFactory(std::string environment_name, options_t& options
 		}
 		return new TicTacToe(options);
 	}
+	else if (environment_name == "potictactoe") {
+		if(!only_env){
+			options["agent-actions"] = "7";
+			options["observation-bits"] = "5";
+			options["reward-bits"] = "4";
+		}
+		return new TicTacToe(options);
+	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		if(!only_env){	
 			options["agent-actions"] = "3";
