@@ -231,7 +231,13 @@ The MC-AIXI-CTW agent program is composed of several components. Each is briefly
 % The \textbf{CTW} folder contains the CTNode and ContextTree classes which implement the CTW method for predicting and simulating the environment.
 
 \begin{itemize}
-    \item \textbf{AIXI} \todo{Fill this Similar to CTW. Arie/Elliot}
+    \item \textbf{AIXI} The AIXI module has n main functions: 
+    \begin{itemize}
+        \item \textbf{(d)encode}: Decodes and encode the reward, actions and percepts of the agent with the environment.
+        \item \textbf{update}: Updates the model based on the updated and generated percepts.
+        \item \textbf{initialisation}: Initialises the agents parameters: History size, number of simulations/actions, number of observation and reward bits.
+        \item \textbf{planning}: The planner from the search tree returns a planned action.
+    \end{itemize}
     \item \textbf{MCTS} \todo{Fill this Similar to CTW Arie/Elliot}
     \item \textbf{CTW}\\
     The CTW module has two main functions: 
