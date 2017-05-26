@@ -156,7 +156,7 @@ MCTS collects the outcomes of simulations in an iteratively expanding search tre
 
 To illustrate, consider the problem of finding the best opening move in a game of tic-tac-toe. MC-AIXI-CTW runs a number of simulations to up to a pre-specified "search depth" into the future. The Context Tree Weighting method simulates the environment by taking prospective actions from the agent and return observation reward pairs, much like the environment would. In aggregate, the simulations yield an estimated win rate for each opening move. The agent subsequently chooses the opening move that had the highest win rate in its simulations.
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width = 12cm]{mcts}
 	\caption{\citep{veness2011monte}. Monte Carlo Tree Search collects the outcomes of simulations in an iteratively expanding search tree. The tree is composed of decision nodes (circles) and chance nodes (stars). These correspond to the alternating max and sum operations in the expectimax operation.}
 \end{figure}
@@ -236,14 +236,17 @@ The MC-AIXI-CTW agent program is composed of several components. Each is briefly
 % The \textbf{CTW} folder contains the CTNode and ContextTree classes which implement the CTW method for predicting and simulating the environment.
 
 \begin{itemize}
-    \item \textbf{AIXI} The AIXI module has n main functions: 
+    \item \textbf{AIXI} The AIXI module has four main functions: 
     \begin{itemize}
         \item \textbf{(d)encode}: Decodes and encode the reward, actions and percepts of the agent with the environment.
         \item \textbf{update}: Updates the model based on the updated and generated percepts.
         \item \textbf{initialisation}: Initialises the agents parameters: History size, number of simulations/actions, number of observation and reward bits.
         \item \textbf{planning}: The planner from the search tree returns a planned action.
     \end{itemize}
-    \item \textbf{MCTS} \todo{Fill this Similar to CTW Arie/Elliot}
+    \item \textbf{MCTS} \begin{itemize}
+        \item \textbf{search tree}: The search tree is created, pruned, and search through.
+        \item \textbf{produce action}: The best action is chosen from the search tree.
+    \end{itemize} 
     \item \textbf{CTW}\\
     The CTW module has two main functions: 
     \begin{itemize}
@@ -351,7 +354,7 @@ Our experimental results for the environments are as follows, we use the followi
  \end{align*}
 Next are the parameters used in each environment, with the average reward of each set of parameters in the environment. For each environment we graphed each configuration value compared with each other. Additionally for each environment we graphed of the performance of our agent over time, compared with intermediate evaluation of our agent, the agent in \citep{veness2011monte} and a random agent.
 
-\todo{I would like a line or two in each experiment page discussing the results, i.e. analysing the graph.}
+
 
 \newpage
 
@@ -364,19 +367,20 @@ BRPS-2        & 96        & 8           & 0.999       & 0.9991            & 12  
 BRPS-3        & 256       & 4           & 0.999       & 0.9991            & 13     & 0.21425        \\ \hline
 BRPS-4        & 256       & 8           & 0.999       & 0.999             & 7      & 0.246525  \\ \hline  
 E\underline{ }BRPS        & 256       & 8           & 0.999       & 0.999             & 9      & N/A  \\ \hline      
-\end{tabular}
+\end{tabular} 
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9.3cm]{4_Biased_RPS}
+    \includegraphics[width=9.1cm]{4_Biased_RPS}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-    \includegraphics[width=9.3cm]{Biased_RPS}
+    \includegraphics[width=9.1cm]{Biased_RPS}
 \end{figure}
+
+Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
 
 \newpage
 
@@ -390,19 +394,20 @@ KPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 1
 KPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 1.23595         \\ \hline
 E\underline{ }KPKR  & 96       & 4           & 0.9999       & 0.9995            & 30     & N/A         \\ \hline
 %Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7      &               
-\end{tabular}
+\end{tabular} 
+
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{4_Kuhn_Poker}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{Kuhn_Poker}
+\end{figure}
 
 Compared to the random agent, our agent performed superiorly. We did not compare with \citep{veness2011monte} since they used Kuhn Poker.
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{4_Kuhn_Poker}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{Kuhn_Poker}
-\end{figure}
 
 \newpage
 
@@ -415,19 +420,19 @@ TKPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 
 TKPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 0.0611         \\ \hline
 TKPKR-4  & 512       & 8           & 0.9999      & 0.999             & 7      & 0.056      \\ \hline 
 E\underline{ }TKPKR  & 96       & 4           & 0.9999      & 0.9995             & 30      & N/A      \\ \hline        
-\end{tabular}
+\end{tabular} 
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{4_True_Kuhn_Poker}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{True_Kuhn_Poker}
+\end{figure}
 
 Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{4_True_Kuhn_Poker}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{True_Kuhn_Poker}
-\end{figure}
 
 \newpage
 
@@ -440,19 +445,19 @@ TTTE-2   & 96        & 9           & 0.9999      & 0.9995            & 24     & 
 % TicTacToe   & 256       & 9           & 0.9999      & 0.9991            & 13     &                \\
 TTTE-4   & 128       & 10          & 0.9999      & 0.9991            & 12     & -0.83726875  \\  \hline  
 E\underline{ }TTTE  & 64       & 9          & 0.9999      & 0.99991            & 180     & N/A  \\  \hline    
-\end{tabular}
+\end{tabular} 
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{4_TicTacToe}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{TicTacToe}
+\end{figure}
 
 Compared to the random agent, our agent performed slightly better. Compared to \citep{veness2011monte} our agent performed worse.
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{4_TicTacToe}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{TicTacToe}
-\end{figure}
 
 \newpage
 
@@ -465,19 +470,19 @@ ETGR-2 & 64        & 4           & 0.999       & 0.999             & 12     & -7
 ETGR-3 & 42        & 8           & 0.999       & 0.9991            & 13     & -10             \\ \hline
 ETGR-4 & 256       & 4           & 0.999       & 0.9991            & 13     & -7.519  \\ \hline 
 E\underline{ }ETGR & 64       & 4           & 0.999       & 0.999            & 15     & N/A  \\ \hline    
-\end{tabular}
+\end{tabular} 
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{4_Extended_Tiger}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{Extended_Tiger}
+\end{figure}
 
 Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed worse.
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{4_Extended_Tiger}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{Extended_Tiger}
-\end{figure}
 
 \newpage
 
@@ -490,19 +495,19 @@ PCMN-1  & 256       & 8           & 0.999       & 0.999             & 12     & -
  PCMN-3    & 256       & 4           & 0.999       & 0.9991            & 13     & -1.0055625       \\ \hline
  PCMN-4     & 92        & 4           & 0.999       & 0.999             & 7      &    -1.000225    \\  \hline 
   E\underline{ }PCMN    & 256        & 8           & 0.999       & 0.999             & 15      &    N/A    \\  \hline     
-\end{tabular}
+\end{tabular} \\
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{4_Pacman}
+\end{figure}
+
+ \begin{figure}[h]
+ \centering
+    \includegraphics[width=9.1cm]{Pacman}
+\end{figure}
 
 Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{4_Pacman}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.3cm]{Pacman}
-\end{figure}
 
 \newpage
 
@@ -510,8 +515,8 @@ Compared to the random agent, our agent performed superiorly. Compared to \citep
 \subsection{Cross Domain-Kuhn Poker and BRPS }
  \begin{tabular}{|l|l|l|l|l|l|l|}
  \hline \centering
- Experiment ID& D & m & $\epsilon$ & $\gamma$ & Cycles (KP/BRPS) & Average Reward \\ \hline
-BRPS\underline{ }KPKR  & 96       & 8           & 0.9999       & 0.9991             & 12/10     &        \\ \hline    
+ Experiment ID& D & m & $\epsilon$ & $\gamma$ & Cycles (KP) & Cycles (BRPS) \\ \hline
+BRPS\underline{ }KPKR  & 96       & 8           & 0.9999       & 0.9991             & 12    &  10      \\ \hline    
 \end{tabular} \\
 
 First\underline{ }BRPS is the initial training. Second\underline{ }KPKR is the cross domain running on Kuhn poker. Third\underline{ }BRPS is the evaluation for again running on Biased Rock Paper Scissors.
@@ -538,7 +543,7 @@ First\underline{ }BRPS is the initial training. Second\underline{ }KPKR is the c
 \section{Discussion}
 
 
-The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. Although our plots did not exactly match those of \citep{veness2011monte}, after training our evaluation was comparable. \\
+The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. Although our plots did not exactly match those of \citep{veness2011monte}, especially for harder environments, after training our evaluation was comparable. \\
 
 Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. \\
 
