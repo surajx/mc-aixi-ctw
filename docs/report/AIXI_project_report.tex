@@ -263,11 +263,15 @@ and execute the command (in Cygwin)
 cd mc-aixi-ctw
 make all
 /bin/aixi.exe -c /conf/coinflip.conf
-\end{lstlisting}
+\end{lstlisting} 
 
 The file coinflip.conf may be replaced with any other file in the conf folder. 
 After execution, the two files logfile.log and logfile.csv will contain data on the agent’s actions and performance.
 Additionally, the command
+\begin{lstlisting}[style=DOS]
+./bin/aixi -h
+\end{lstlisting}
+or if using windows (cygwin)
 \begin{lstlisting}[style=DOS]
 /bin/aixi.exe -h
 \end{lstlisting}
@@ -288,7 +292,7 @@ Our experimental results for the environments are as follows, we use the followi
      m &= \text{ Horizon} \\
      \epsilon &= \text{ Exploration} \\
      \gamma &= \text{ Exploration Decay} \\
-     \text{Cycles } &= \text{ Number of cycles } \times 10^3 \\
+     \text{Cycles }\times 10^3 &= \text{ Number of cycles }  \\
      \text{E\underline{ } } &= \text{ Intermediate Evaluation}
  \end{align*}
 Next are the parameters used in each environment, with the average reward of each set of parameters in the environment. For each environment we graphed each configuration value compared with each other. Additionally for each environment we graphed of the performance of our agent over time, compared with intermediate evaluation of our agent, the agent in \citep{veness2011monte} and a random agent.
@@ -440,6 +444,24 @@ PCMN-1  & 256       & 8           & 0.999       & 0.999             & 12     & -
  \centering
     \includegraphics[width=9.3cm]{Pacman}
 \end{figure}
+
+\newpage
+
+
+\subsection{Cross Domain-Kuhn Poker and BRPS }
+ \begin{tabular}{|l|l|l|l|l|l|l|}
+ \hline \centering
+ Experiment ID& D & m & $\epsilon$ & $\gamma$ & Cycles (KP/BRPS) & Average Reward \\ \hline
+BRPS\underline{ }KPKR  & 96       & 8           & 0.9999       & 0.9991             & 12/10     &        \\ \hline    
+\end{tabular}
+
+
+
+ \begin{figure}[h]
+ \centering
+%    \includegraphics[width=9.3cm]{CrossDom}
+\end{figure}
+
 
 \newpage
 
