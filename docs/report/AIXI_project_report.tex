@@ -120,14 +120,14 @@
 \newpage
 
 \section{Introduction}
-We implement and test an approximation of the AIXI model \citep{hutter2005universal}. The AIXI model is a mathematical “solution” to the general reinforcement learning problem. That is, an AIXI agent solves the problem of maximising expected reward in an unknown, stochastic and partially observable environment. Unfortunately, the AIXI model is incomputable. \citep{veness2011monte} present a down-scaled (i.e. computable) version of AIXI which they call Monte Carlo AIXI Context Tree Weighting, or MC-AIXI-CTW. Our work implements the agent design of Veness and colleagues with the aim to reproduce their experimental results on a variety of reinforcement learning domains.
+We implement and test an approximation of the AIXI model \citep{hutter2005universal}. The AIXI model is a mathematical “solution” to the general reinforcement learning problem. That is, an AIXI agent solves the problem of maximising expected reward in an unknown computable environment that is potentially stochastic and partially observable. Unfortunately, the AIXI model is incomputable. A down-scaled (i.e. computable) version of AIXI is presented in \citep{veness2011monte} which is called Monte Carlo AIXI Context Tree Weighting, or MC-AIXI-CTW. Our work implements the agent design of Veness and colleagues with the aim to reproduce their experimental results on a variety of reinforcement learning domains.
 
-The following subsections briefly introduce the three main components of the MC-AIXI-CTW agent. A complete description of the AIXI agent can be found in \citep{hutter2005universal}. The Monte Carlo component is described in \citep{kocsis2006bandit}, and the Context Tree Weighting method in \citep{willems1995context}.  Section 2 describes a variety of domains on which we tested our agent, section 3 describes our implementation of MC-AIXI-CTW and how to compile and run the code, and section 4 presents our experimental results on a variety of problem domains and compares them with the results originally obtained by \citep{veness2011monte}.
+The following subsections briefly introduce the three main components of the MC-AIXI-CTW agent. A complete description of the AIXI agent can be found in \citep{hutter2005universal}. The Monte Carlo component is described in \citep{kocsis2006bandit}, and the Context Tree Weighting method in \citep{willems1995context}.  Section 2 describes a variety of domains on which we tested our agent, section 3 describes our implementation of MC-AIXI-CTW and how to compile and run the code, and section 4 presents our experimental results on a variety of problem domains, and compares them with the results originally obtained by \citep{veness2011monte}.
 
 \subsection{The AIXI agent}
-AIXI is a Bayesian optimality notion for general reinforcement learning agents. AIXI interacts with an unknown environment in cycles. In each cycle, the agent executes an action and in turn receives an observation and a reward. (when the environment is fully observable at all times, an observation is called a state; see figure). AIXI aims to choose actions that will on average lead to the best possible outcome. More precisely, AIXI maximises the expected sum of rewards over its lifetime.
+AIXI is a Bayesian (``on-average'') optimality notion for general reinforcement learning agents. AIXI interacts with an unknown environment in cycles. In each cycle, the agent executes an action and in turn receives an observation and a reward. (when the environment is fully observable at all times, an observation is called a state; see figure 1). AIXI aims to choose actions that will on average lead to the best possible outcome. More precisely, AIXI maximises the expected sum of rewards over its lifetime.
 
-Each time the agent takes an action, the environment responds by returning an observation reward pair. The agent integrates the new observation-reward information and the next iteration begins with another action by the agent. In principle, the agent has access to its entire history of action-observation-reward cycles, and unlimited time to compute the next best action.  
+Each time the agent takes an action, the environment responds by returning an observation reward pair. The agent processes the new observation-reward information and the next iteration begins with another action by the agent. In principle, the agent has access to its entire history of action-observation-reward cycles, and unlimited time to compute the next best action.  
 
 \begin{figure}
 \includegraphics[width = 12cm]{suttonbarto_rl}
@@ -135,46 +135,50 @@ Each time the agent takes an action, the environment responds by returning an ob
 \end{figure}
  
 
-Suppose the AIXI agent interacts with an environment in cycles $k=1,2, \ldots, m$. The agent chooses action $a_k$, subsequently the environment "chooses" (produces) an observation reward pair $o_kr_k$, and the next cycle begins. By interacting, a history sequence $h=a_1o_1r_1 \ldots a_mo_mr_m$ is formed.
+Suppose the AIXI agent interacts with an environment in cycles $k=1,2, \ldots, m$. The agent chooses action $a_k$, subsequently the environment "chooses" (produces) an observation reward pair $o_kr_k$, and the next cycle begins. Over time, a history sequence $h=a_1o_1r_1 \ldots a_mo_mr_m$ is formed.
 
 Agents are distinguished by how well they choose their actions in light of rewards received from the environment. In cycle $k$, the full AIXI model chooses its next action $a_k$ according to the following equation:
 
 $$a_k \coloneqq \argmax_{a_k} \sum_{o_kr_k} \ldots \max_{a_m} \sum_{o_mr_m} (r_k+\ldots+r_m) \xi (o_1r_1 \ldots o_mr_m \mid a_1 \ldots a_m), $$
 
-where $\xi (o_1r_1 \ldots o_mr_m \mid a_1 \ldots a_m)$ is a mixture environment model over a model class of chronological probability distributions. See \citep{hutter2005universal} for the full details of this model. Intuitively, the agent considers the sum of the total reward over all possible futures up to m steps ahead, weighs each of them by the complexity of programs consistent with the agent’s past that can generate the future, and then picks the action that maximises expected future rewards \citep{veness2011monte}. 
+where $\xi (o_1r_1 \ldots o_mr_m \mid a_1 \ldots a_m)$ is a mixture environment model over a model class of chronological probability distributions. See \citep{hutter2005universal} for the full details of this model. Intuitively, the agent considers the sum of the total reward over all possible futures up to m steps ahead, weighs each of them by the complexity of (environments) consistent with the agent’s past that can generate the future, and then picks the action that maximises expected future rewards \citep{veness2011monte}. 
 
 The alternating sum and max operators execute the (finite-horizon) expectimax operation, which is a classic result from sequential decision theory. Expectimax is responsible for planning a best course of action.
 
 The mixture environment model is responsible for learning to predict future observations and rewards based on past experience. The technique is inspired by Solomonoff’s universal induction scheme. Initially, the mixture assigns greater weights to simple environment models. Each interaction cycle generates new evidence as to which models are more likely to be the “true” model of the environment. Models consistent with the evidence acquire increased weight (i.e. importance) in the decision procedure while inconsistent models are pruned away.
 
-The expectimax operation runs in exponential time with respect to lookahead m and is computationally infeasible for all but the smallest values. Worse yet, the mixture environment model is not even finitely computable. To deal with these issues, Veness et al. developed a computable approximation of AIXI. This approximation uses Monte Carlo Tree Search (MCTS) to approximate the expectimax operation and Context Tree Weighting (CTW) to maintain a mixture environment model. 
+The AIXI agent requires an overwhelming number of computations to find its next action. The expectimax operation runs in exponential time with respect to lookahead $m$ and is computationally infeasible for all but the smallest values. Worse yet, the mixture environment model is not even finitely computable because the mixture is taken over an infinite set of environments. To deal with these issues, Veness et al. developed a computable approximation of AIXI. This approximation uses Monte Carlo Tree Search (MCTS) to approximate the expectimax operation and Context Tree Weighting (CTW) to maintain a mixture environment model. 
 
 \subsection{Monte Carlo Tree Search}
 Expectimax requires us to consider every possible future that can result from taking an action in the present. Again, this is computationally infeasible. Instead of considering every path through the future, Monte Carlo Tree Search (MCTS) samples as many paths as time and computation resources permit. An action with highly rewarding (simulated) futures is considered better than an action for which every sample returns nothing.
 
 MCTS collects the outcomes of simulations in an iteratively expanding search tree.  \citep{kocsis2006bandit} developed a powerful heuristic which helps the agent focus its resources on useful parts of the tree. Actions with more simulations have better value estimates, so we must carefully consider which actions we care most about investing computational resources in. We prefer to spend resources on actions with high uncertainty about their real value, and/or with high probability of being the best action. These competing demands -- exploration of new actions, and exploitation of known good actions -- are balanced by taking a weighted average in such a way that total “regret” is minimised (see paper).
 
-To illustrate, consider the problem of finding the best opening move in a game of tic-tac-toe. MC-AIXI-CTW runs a number of simulations to up to a pre-specified "search depth" into the future. The Context Tree Weighting method supplies the simulated next board positions (and rewards). In aggregate, the simulations yield an estimated win rate for each opening move. The agent subsequently chooses the opening move that had the highest win rate in its simulations.
+To illustrate, consider the problem of finding the best opening move in a game of tic-tac-toe. MC-AIXI-CTW runs a number of simulations to up to a pre-specified "search depth" into the future. The Context Tree Weighting method simulates the environment by taking prospective actions from the agent and return observation reward pairs, much like the environment would. In aggregate, the simulations yield an estimated win rate for each opening move. The agent subsequently chooses the opening move that had the highest win rate in its simulations.
+
+\begin{figure}
+\includegraphics[width = 12cm]{mcts}
+	\caption{\citep{veness2011monte}. Monte Carlo Tree Search collects the outcomes of simulations in an iteratively expanding search tree. The tree is composed of decision nodes (circles) and chance nodes (stars). These correspond to the alternating max and sum operations in the expectimax operation.}
+\end{figure}
 
 \subsection{Context Tree Weighting}
 The Context Tree Weighting (CTW) method was initially proposed as a universal compression method. CTW learns to identify patterns in a bit sequence. If the sequence is generated by a D-order Markov process (that is, the probability of the next bit being 1 is conditioned only on the last D bits that were observed) then CTW will converge to optimal prediction. 
 
 Several attributes make CTW a suitable approximator of universal Solomonoff induction:
 \begin{itemize}
-\item like Solomonoff induction, it maintains a mixture model over environments which converges to the true environment as evidence accumulates;
-\item it assigns higher prior probability to simple models;
-\item it covers the huge class of D-order Markov processes which contains many interesting and important environments; and
-\item its running time is linear in the length of the input sequence, compared to exponential in the length of more na\"ive methods.
+\item like Solomonoff induction, CTW maintains a mixture model over environments. The mixture converges to the true environment as evidence accumulates;
+\item CTW assigns higher prior probability to simple models;
+\item CTW covers the huge class of D-order Markov processes which contains many interesting and important environments; and
+\item The running time of CTW is linear in the length of the input sequence, compared to exponential in the length of more na\"ive methods.
 \end{itemize}
 
-Each time the agent simulates taking an action, CTW is called to predict the subsequent observation reward pair. In the MC-AIXI-CTW implementation, every action, observation and reward is encoded as a string of bits. So in practice, to generate an observation reward pair, a number of steps are involved. CTW is asked to predict the next bit $b$ given the history sequence $h$, and subsequently we append the predicted bit to the history sequence by setting $h = hb$. We predict subsequent bits in this manner until we have appended to the origininal history $h$ a sequence of bits of length corresponding to an obseration reward pair. 
+Each time the agent simulates taking an action, CTW is used to predict the subsequent observation reward pair. In the MC-AIXI-CTW implementation, every action, observation and reward is encoded as a string of bits. So in practice, to generate an observation reward pair, a number of steps are involved. CTW is asked to predict the next bit $b$ given the history sequence $h$, and subsequently the agent appends the predicted bit to the history sequence by setting $h \gets hb$. The agent predicts subsequent bits in this manner until they have appended to the original history $h$ a sequence of bits of length corresponding to an obseration reward pair. 
  
 In this manner, the MC-AIXI-CTW agent uses the CTW method to simulate paths through the future in order to plan a best course of action.  By interacting with the environment, MC-AIXI-CTW acquires the training data for CTW to learn over time how to emulate the environment, making it an increasingly good predictor of the future. 
 
 This convergence to the true environment works as follows.
-Let $C_D$ denote the class of all prediction suffix trees of depth up to D, which are a form of variable order Markov models. We use $C_D$ as our environment class and we assume that the "true" environment $E^*$ is contained in $C_D$. To each $E \in C_D$ we assign a code with length $CL(E)$. We can think of this code as a compressed representation of the environment; simple environments have simple (short) codes. 
+Let $C_D$ denote the class of all prediction suffix trees of depth up to D, which are a form of variable order Markov models. We use $C_D$ as our environment class and we assume that the "true" environment $E^*$ is contained in $C_D$. To each $E \in C_D$ we assign a code with length $CL(E)$. We can think of this code as a compressed representation of the environment; simple environments have simple (short) codes and complex environments have complex (long) codes.
 
-% Explain formula
 The mixture environment model $\xi$ from the AIXI model is approximated by 
 \begin{equation} \label{eq1}
 \begin{split}
@@ -185,7 +189,7 @@ The mixture environment model $\xi$ from the AIXI model is approximated by
 \end{equation}
 
 % Explain how convergence to true occurs
-The $2^{-CL(E)}$ factor causes simple environments to have an outsize contribution on the output value $P_{CTW}$. The factor $P(o_1r_1 \ldots o_mr_m \mid E, a_1 \ldots a_m)$ approaches zero when the "real" environment $E^*$ produces observation reward pairs $o_1r_1 \ldots o_mr_m$ that we would not likely observe if $E$ were the true environment. Hence, over time the $P(o_1r_1 \ldots o_mr_m \mid E^*, a_1 \ldots a_m)$ term will dominate the sum. 
+The $2^{-CL(E)}$ factor causes simple environments to have an outsize contribution on the output value $P_{CTW}$. The factor $P(o_1r_1 \ldots o_mr_m \mid E, a_1 \ldots a_m)$ approaches zero when the ``real" environment $E^*$ produces observation reward pairs $o_1r_1 \ldots o_mr_m$ that we would not likely observe if $E$ were the true environment. Hence, over time the $P(o_1r_1 \ldots o_mr_m \mid E^*, a_1 \ldots a_m)$ term that corresponds to the real environment $E*$ will dominate the sum. 
 
 
 \section{Overview of implemented domains}
@@ -480,9 +484,11 @@ Lastly we were able to implement was our agent in the RoboCup simulation environ
 
 
 \section{Conclusion}
-In all the environments we tested our MC-AIXI-CTW agent was able to outperform a random agent. Additionally, we were able to achieve comparable results to (Veness et al. 2011) for all environments. Our MC-AIXI-CTW agent can achieve near optimal to optimal solutions on small domains, however it runs into difficulty for larger domains, this comes into play especially for TicTacToe, Pacman and Extended tiger.
+We implemented and tested a version of the MC-AIXI-CTW agent presented by (Veness et al. 2011). The results of Veness and colleagues were not reproduced exactly, but our results are nonetheless similar enough to substantiate their claim that MC-AIXI-CTW can learn their domains.
 
-  
+In all the environments we tested our MC-AIXI-CTW agent was able to outperform a random agent. Near optimal to optimal solutions were achieved on on small domains. However, it runs into difficulty for larger domains, where care must be taken to manage the memory and initialize data structures as you go. This comes into play especially for TicTacToe, Pacman and Extended tiger. 
+
+MC-AIXI-CTW is more than anything a proof of concept. The agent design may readily be improved by various methods. Multithreading is an obvious candidate. Future work may look into using Context Tree Switching in place of CTW, which we expect to lead to similar results with less computation time. The implementation of MCTS has been relatively bare-bones in that it failed to leverage the rich literature of improvements that has been developed since the technique's inception. Using our modular implementation of MC-AIXI-CTW as a basis, the next step would be to develop the ideas of Veness and colleagues to their full potential as a solution to the general reinforcement learning problem. 
 
 \printbibliography
 
