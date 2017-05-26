@@ -289,8 +289,9 @@ Our experimental results for the environments are as follows, we use the followi
      \epsilon &= \text{ Exploration} \\
      \gamma &= \text{ Exploration Decay} \\
      \text{Cycles } &= \text{ Number of cycles } \times 10^3 \\
+     \text{E\underline{ } } &= \text{ Intermediate Evaluation}
  \end{align*}
-Next are the parameters used in each environment, with the average reward of each set of parameters in the environment. For each environment we graphed each configuration value against each other. Additionally for each environment we graphed of the performance of our agent over time, compared with intermediate evaluation of our agent, the agent in \citep{veness2011monte} and a random agent.
+Next are the parameters used in each environment, with the average reward of each set of parameters in the environment. For each environment we graphed each configuration value compared with each other. Additionally for each environment we graphed of the performance of our agent over time, compared with intermediate evaluation of our agent, the agent in \citep{veness2011monte} and a random agent.
 
 
 
@@ -304,19 +305,19 @@ BRPS-1        & 32        & 4           & 0.999       & 0.9995            & 30  
 BRPS-2        & 96        & 8           & 0.999       & 0.9991            & 12     & 0.2419375       \\ \hline
 BRPS-3        & 256       & 4           & 0.999       & 0.9991            & 13     & 0.21425        \\ \hline
 BRPS-4        & 256       & 8           & 0.999       & 0.999             & 7      & 0.246525  \\ \hline  
-E\underline{ }BRPS-4        & 256       & 8           & 0.999       & 0.999             & 9      & N/A  \\ \hline      
+E\underline{ }BRPS        & 256       & 8           & 0.999       & 0.999             & 9      & N/A  \\ \hline      
 \end{tabular}
 
 
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{4_Biased_RPS}
+    \includegraphics[width=9.3cm]{4_Biased_RPS}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-    \includegraphics[width=9cm]{Biased_RPS}
+    \includegraphics[width=9.3cm]{Biased_RPS}
 \end{figure}
 
 \newpage
@@ -329,18 +330,18 @@ E\underline{ }BRPS-4        & 256       & 8           & 0.999       & 0.999     
 KPKR-1  & 42        & 2           & 0.99        & 0.9999            & 2000   & 1.2024625        \\ \hline
 KPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 1.258875         \\ \hline
 KPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 1.23595         \\ \hline
-E\underline{ }KPKR-2  & 96       & 4           & 0.9999       & 0.9995            & 30     & N/A         \\ \hline
+E\underline{ }KPKR  & 96       & 4           & 0.9999       & 0.9995            & 30     & N/A         \\ \hline
 %Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7      &               
 \end{tabular}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{4_Kuhn_Poker}
+    \includegraphics[width=9.3cm]{4_Kuhn_Poker}
 \end{figure}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{Kuhn_Poker}
+    \includegraphics[width=9.3cm]{Kuhn_Poker}
 \end{figure}
 
 \newpage
@@ -353,18 +354,18 @@ TKPKR-1  & 42        & 2           & 0.99        & 0.9999            & 2000   & 
 TKPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 0.01415         \\ \hline
 TKPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 0.0611         \\ \hline
 TKPKR-4  & 512       & 8           & 0.9999      & 0.999             & 7      & 0.056      \\ \hline 
-E\underline{ }TKPKR-2  & 96       & 4           & 0.9999      & 0.9995             & 30      & N/A      \\ \hline        
+E\underline{ }TKPKR  & 96       & 4           & 0.9999      & 0.9995             & 30      & N/A      \\ \hline        
 \end{tabular}
 
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{4_True_Kuhn_Poker}
+    \includegraphics[width=9.3cm]{4_True_Kuhn_Poker}
 \end{figure}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{True_Kuhn_Poker}
+    \includegraphics[width=9.3cm]{True_Kuhn_Poker}
 \end{figure}
 
 \newpage
@@ -377,17 +378,17 @@ TTTE-1   & 64        & 9           & 0.9999      & 0.99991           & 145    & 
 TTTE-2   & 96        & 9           & 0.9999      & 0.9995            & 24     & -0.636375         \\ \hline
 % TicTacToe   & 256       & 9           & 0.9999      & 0.9991            & 13     &                \\
 TTTE-4   & 128       & 10          & 0.9999      & 0.9991            & 12     & -0.83726875  \\  \hline  
-E\underline{ }TTTE-1   & 64       & 9          & 0.9999      & 0.99991            & 180     & N/A  \\  \hline    
+E\underline{ }TTTE  & 64       & 9          & 0.9999      & 0.99991            & 180     & N/A  \\  \hline    
 \end{tabular}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{4_TicTacToe}
+    \includegraphics[width=9.3cm]{4_TicTacToe}
 \end{figure}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{TicTacToe}
+    \includegraphics[width=9.3cm]{TicTacToe}
 \end{figure}
 
 \newpage
@@ -400,19 +401,19 @@ ETGR-1 & 96        & 4           & 0.999       & 0.99991           & 130    & -7
 ETGR-2 & 64        & 4           & 0.999       & 0.999             & 12     & -7.08699       \\ \hline
 ETGR-3 & 42        & 8           & 0.999       & 0.9991            & 13     & -10             \\ \hline
 ETGR-4 & 256       & 4           & 0.999       & 0.9991            & 13     & -7.519  \\ \hline 
-E\underline{ }ETGR-2 & 64       & 4           & 0.999       & 0.999            & 15     & N/A  \\ \hline    
+E\underline{ }ETGR & 64       & 4           & 0.999       & 0.999            & 15     & N/A  \\ \hline    
 \end{tabular}
 
 
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{4_Extended_Tiger}
+    \includegraphics[width=9.3cm]{4_Extended_Tiger}
 \end{figure}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{Extended_Tiger}
+    \includegraphics[width=9.3cm]{Extended_Tiger}
 \end{figure}
 
 \newpage
@@ -425,19 +426,19 @@ PCMN-1  & 256       & 8           & 0.999       & 0.999             & 12     & -
 %Pacman      & 512       & 10          & 0.9999      & 0.999             & 7      &                \\
  PCMN-3    & 256       & 4           & 0.999       & 0.9991            & 13     & -1.0055625       \\ \hline
  PCMN-4     & 92        & 4           & 0.999       & 0.999             & 7      &    -1.000225    \\  \hline 
-  E\underline{ }PCMN-1    & 256        & 8           & 0.999       & 0.999             & 15      &    N/A    \\  \hline     
+  E\underline{ }PCMN    & 256        & 8           & 0.999       & 0.999             & 15      &    N/A    \\  \hline     
 \end{tabular}
 
 
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{4_Pacman}
+    \includegraphics[width=9.3cm]{4_Pacman}
 \end{figure}
 
  \begin{figure}[h]
  \centering
-    \includegraphics[width=9cm]{Pacman}
+    \includegraphics[width=9.3cm]{Pacman}
 \end{figure}
 
 \newpage
