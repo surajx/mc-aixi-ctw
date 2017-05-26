@@ -256,7 +256,7 @@ make all
 \subsubsection*{Windows (Cygwin)}
 Extract the source files into a folder for example
 \begin{lstlisting}[style=DOS]
- c/mc-aixi-ctw 
+ /cygwin/c/mc-aixi-ctw 
 \end{lstlisting}
 and execute the command (in Cygwin)
 \begin{lstlisting}[style=DOS]
@@ -290,7 +290,7 @@ Our experimental results for the environments are as follows, we use the followi
      \gamma &= \text{ Exploration Decay} \\
      \text{Cycles } &= \text{ Number of cycles } \times 10^3 \\
  \end{align*}
-Next are the parameters used in each environment, with the average reward of each set of parameter in the environment. Additionally graphs of the performance of our agent over time, as well as the performance of the agent in \citep{veness2011monte} are included.
+Next are the parameters used in each environment, with the average reward of each set of parameter in the environment. For each environment we graphed each configuration value against each other. Additionally for each environment we graphed of the performance of our agent over time, compared with intermediate evaluation of our agent, the agent in \citep{veness2011monte} and a random agent.
 
 
 
@@ -436,7 +436,7 @@ Pacman      & 92        & 4           & 0.999       & 0.999             & 7     
 \section{Discussion}
 
 
-The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. However, our graphs do not match the \citep{veness2011monte} results. This is due to our graph reflecting the average over the cycle, whereas in \citep{veness2011monte} intermediate evaluation was used. This average causes our graph to describe a $\frac{1}{x}$ graph of the reward. After training, our evaluation was comparable to \citep{veness2011monte}. \\
+The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. After training, our evaluation was comparable to \citep{veness2011monte}. \\
 
 Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. \\
 
