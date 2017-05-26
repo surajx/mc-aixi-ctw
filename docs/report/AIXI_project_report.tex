@@ -41,6 +41,8 @@
 \usepackage{comment}
 \usepackage{caption}
 \usepackage[capitalize]{cleveref}
+\usepackage{xcolor}
+
 
 \newcommand\Under[2]{\strut%
   \setstackgap{L}{1.1\normalbaselineskip}%
@@ -83,6 +85,15 @@
   {\pushQED{\qed}\renewcommand{\qedsymbol}{$\diamondsuit$}\examplex}
   {\popQED\endexamplex}
 
+\lstset{
+    literate={~} {$\sim$}{1}
+}
+
+\lstdefinestyle{DOS}
+{
+    backgroundcolor=\color{white},
+    basicstyle=\scriptsize\color{black}\ttfamily
+}
 
 % \let\oldendexample\endexample
 % \def\endexample{$\diamondsuit$\oldendexample}
@@ -104,6 +115,9 @@
 \author{Elliot Catt, Suraj Narayanan, Arie Slobbe}
 \begin{document}
 \maketitle
+\tableofcontents
+
+\newpage
 
 \section{Introduction}
 We implement and test an approximation of the AIXI model \citep{hutter2005universal}. The AIXI model is a mathematical “solution” to the general reinforcement learning problem. That is, an AIXI agent solves the problem of maximising expected reward in an unknown, stochastic and partially observable environment. Unfortunately, the AIXI model is incomputable. \citep{veness2011monte} present a down-scaled (i.e. computable) version of AIXI which they call Monte Carlo AIXI Context Tree Weighting, or MC-AIXI-CTW. Our work implements the agent design of Veness and colleagues with the aim to reproduce their experimental results on a variety of reinforcement learning domains.
@@ -192,7 +206,7 @@ The Coin Flip is a very simple environment where the agent will choose heads or 
 \subsection{Extended Tiger}
 Extended tiger is a simple game where the agent begins sitting on a chair, in front of two doors. Behind one door is a tiger, behind the other is gold. While sitting the agent has the choice to stand or listen to the door. If the agent listens they will make a correct observation about which door the tiger is behind with a probability of 0.85, and observe the wrong door with probability 0.15. Once standing the agent can open door 1 or open door 2. If the agent opens the door with the gold they receive a reward of 30, and if they open the door with the tiger they receive a reward of -100. If the agent stands up while sitting down or listens while sitting down they will receive a reward of -1. Any invalid action the agent performs yields a reward of -10.
 
-\subsection{Pacman (POcman, Partially Observable Pacman)}
+\subsection{Partially Observable Pacman}
 Partially observable pacman (POcman) is a version of the 17x19 pacman game where the agent controlling Pacman cannot observe the whole space. Instead, pacman can detect: if there are walls around him; if he can see a ghost in the four directions around him; if there are is a food pellet within 2, 3, and 4 of his location; if he can see a food pellet in any of the four directions; and if he has the power pill or not. The ghosts will move randomly, unless they are within a manhattan distance of 5 or less, in which case they will try to move towards him. The agent receives a reward of -1 for every move it makes, -10 for hitting a wall, +10 for collecting a food pellet, -50 if touched by a ghost, and +100 when it completes the level by collecting all pellets.
 
 \subsection{Tic Tac Toe}
@@ -226,35 +240,33 @@ The CTW folder contains the CTNode and ContextTree classes which implement the C
 \todo{Add some more explanation}
 
 \subsection{How to compile and run}
-\subsubsection*{Linux}
-TODO: format terminal commands 
+\subsubsection*{Linux/Mac OS}
 Extract the source files into a folder 
-\begin{lstlisting}[language=bash]
-~/mc-aixi-ctw 
+\begin{lstlisting}[style=DOS]
+ ~/mc-aixi-ctw 
 \end{lstlisting}
  and execute in the terminal:
  
-\begin{lstlisting}[language=bash]
+\begin{lstlisting}[style=DOS]
 cd ~/mc-aixi-ctw
 make all
-./bin/aixi ./conf/coinflip.conf
+./bin/aixi -h
 \end{lstlisting}
 
 \subsubsection*{Windows (Cygwin)}
-\begin{lstlisting}[language=bash]
+Extract the source files into a folder for example
+\begin{lstlisting}[style=DOS]
+ c/mc-aixi-ctw 
+\end{lstlisting}
+and execute the command (in Cygwin)
+\begin{lstlisting}[style=DOS]
 cd mc-aixi-ctw
 make all
-/bin/aixi.exe /conf/coinflip.conf
+/bin/aixi.exe -h
 \end{lstlisting}
 
 
-\subsubsection*{Mac OS}
-Extract the source files into a folder ~/mc-aixi-ctw and execute in the terminal:
-\begin{lstlisting}[language=bash]
-cd ~/mc-aixi-ctw
-make all
-./bin/aixi ./conf/coinflip.conf
-\end{lstlisting}
+
 
 The file coinflip.conf may be replaced with any other file in the conf folder.
 After execution, the two files logfile.log and logfile.csv will contain data on the agent’s actions and performance.
@@ -264,8 +276,11 @@ After execution, the two files logfile.log and logfile.csv will contain data on 
 
 \section{Experimental Results}
 
-Our experimental results for the environments are as follows, we use the following notation,
+Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. For the environments, some are easy such as Biased Rock-Paper-Scissors, and Kuhn-Poker. The other environments TicTacToe, Pacman, Extended Tiger are harder games to learn. In each experiment in each domain we chose a CTW Depth, a Horizon, an Exploration, and Exploration Decay and a Number of Cycles. For each set of chosen parameter we run 4 experiments of our agent on the given domain with the given parameters. \\
 
+The parameters were chosen so that we had a balance between the parameters used in \citep{veness2011monte} and computational efficiency. The exploration and exploration decay were chosen so that after the number of cycle the exploration would be $10^{-5}$. For most environments we fixed the horizon and increased the CTW depth. This was done to see what influence the choice of CTW depth had on the results. \\
+
+Our experimental results for the environments are as follows, we use the following notation,
  \begin{align*}
      D &= \text{ CTW Depth} \\
      m &= \text{ Horizon} \\
@@ -273,9 +288,7 @@ Our experimental results for the environments are as follows, we use the followi
      \gamma &= \text{ Exploration Decay} \\
      \text{Cycles } &= \text{ Number of cycles } \times 10^3 \\
  \end{align*}
- 
-Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. For the environments, some are easy such as Biased Rock-Paper-Scissors, and Kuhn-Poker. The other environments TicTacToe, Pacman, Extended Tiger are harder games to learn.
-
+Next are the parameters used in each environment, with the average reward of each set of parameter in the environment. Additionally graphs of the performance of our agent over time, as well as the performance of the agent in \citep{veness2011monte} are included.
 
 
 
@@ -421,17 +434,20 @@ Pacman      & 92        & 4           & 0.999       & 0.999             & 7     
 \section{Discussion}
 
 
-The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. In this regard we were able to achieve our goal, however our graphs do not match the \citep{veness2011monte} results, this is due to our graph reflecting the average over the cycle, wheres in \citep{veness2011monte} intermediate evaluation was used. This average causes our graph to describe a $\frac{1}{x}$ graph of the reward. After training, our evaluation was comparable to \citep{veness2011monte}. Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. Mentioned in \citep{veness2011monte}, the set up need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$. Another possible speedup could come from reward scaling.  e.g. for extended tiger, scaling rewards of 0,90,99,130 to 0,9,10,13. This would reduce the reward bits from 8 to 4, and be an improvement to computation time. One improvement we tested our agent on was the RoboCup simulation environment. However, in this environment our agent was unable to our perform a random agent. This was likely due to the large search space of the environment. One way in which we may we able to reduce the state space of RoboCup simulation (and possibly other environments) is through state aggregation, that is, converting equivalent or similar states to same states, thus reducing the observation (and reward) space, reducing search space, reducing computation time.
+The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. However, our graphs do not match the \citep{veness2011monte} results. This is due to our graph reflecting the average over the cycle, whereas in \citep{veness2011monte} intermediate evaluation was used. This average causes our graph to describe a $\frac{1}{x}$ graph of the reward. After training, our evaluation was comparable to \citep{veness2011monte}. \\
+
+Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. \\
+
+Mentioned in \citep{veness2011monte}, the set up need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$. Reducing the observation space so much would lead to a much smaller history, and ultimately a speedup for the computation. Another possible speedup could come from reward scaling.  e.g. for extended tiger, scaling rewards of 0,90,99,130 to 0,9,10,13. This would reduce the reward bits from 8 to 4, and be an improvement to computation time. \\
+
+Additionally we implements the True Kuhn Poker domain. That is the Kuhn Poker exactly as described in \citep{kuhn1950simplified}. This is different to the Kuhn Poker mentioned in  \citep{veness2011monte} in which the game is not zero sum. \\
+
+Lastly we were able to implement was our agent in the RoboCup simulation environment. However, in this environment our agent was unable to out perform a random agent. This was likely due to the large search space of the environment. One way in which we may we able to reduce the size of the state space of RoboCup simulation (and possibly other environments) is through state aggregation. State aggregation is merging or aggregating equivalent or similar states to same states. State aggregation reduces the observation (and reward) space, thereby reducing search space, thereby reducing computation time.
 
 
 \section{Conclusion}
-In all the environments we tested our MC-AIXI-CTW agent was able to outperform a random agent. Additionally, we were able to achieve comparable results to (Veness et al. 2011) for all environments. Our MC-AIXI-CTW agent can achieve near optimal to optimal solutions on small domains, however runs into difficulty for larger domains, this comes into play especially for TicTacToe, Pacman and Extended tiger.
+In all the environments we tested our MC-AIXI-CTW agent was able to outperform a random agent. Additionally, we were able to achieve comparable results to (Veness et al. 2011) for all environments. Our MC-AIXI-CTW agent can achieve near optimal to optimal solutions on small domains, however it runs into difficulty for larger domains, this comes into play especially for TicTacToe, Pacman and Extended tiger.
 
-
-
-
-  
-  
   
 
 \printbibliography
