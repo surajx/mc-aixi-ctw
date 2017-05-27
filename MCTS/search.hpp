@@ -33,10 +33,9 @@ class SearchNode {
 
  public:
   /**
-  * Constructor to initialize a SearchNode for a given agent. SearchNodes
-  * are the basic elements from which the game tree is constructed.
+  * Constructor to initialize a SearchNode for a given SearchTree. SearchNodes
+  * are the basic elements from which the search tree is constructed.
   *
-  * @param Agent* ai The agent using the SearchNode for its planning
   * @param bool is_chance_node Specifies whether the searchnode is an action node
   *        or a chance node.
   */
@@ -120,11 +119,65 @@ class SearchTree {
   bool isFirst = true;              // Do not prune during very fist search
 
  public:
+   /**
+   * Constructor to initialize a SearchTree for a given agent. A SearchTree
+   * comprises the planning module of the MC-AIXI-CTW agent.
+   *
+   * @param Agent* agent The agent using the SearchTree for its planning
+   */
   SearchTree(Agent* agent);
+
+  /**
+  * The main function of the search file. The agent calls search to choose its
+  * next action.
+  *
+  * @param percept_t prev_obs The previous observation that the environment
+  *        generated
+  * @param percept_t prev_rew The previous reward that the environment
+  *        generated
+  * @param percept_t prev_act The previous action that the agent
+  *        generated
+  *
+  * @return action_t action The child node of the root with the highest expected
+  *         reward
+  */
   action_t search(percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+
+  /**
+  * Executes a playout starting from a search node in order to estimate the
+  * value of itself and its parent nodes. A random playout policy is applied and
+  * reward is accumulated to pass back to the search nodes.
+  *
+  * @param unsigned int playout_len The remaining search depth
+  *
+  * @return reward_t The total reward accumulated in the playout
+  */
   reward_t playout(unsigned int playout_len);
+
+  /**
+  * Retain useful computations from the previous agent-environment interaction
+  * cycle while reclaiming memory allocated to nodes that are not necessary
+  * anymore.
+  *
+  * @param percept_t prev_obs The previous observation that the environment
+  *        generated
+  * @param percept_t prev_rew The previous reward that the environment
+  *        generated
+  * @param percept_t prev_act The previous action that the agent
+  *        generated
+  */
   void pruneTree(percept_t prev_obs, percept_t prev_rew, action_t prev_act);
+
+  /**
+  * Get the SearchNode which is assigned as the root node
+  *
+  * @return SearchNode* The root node of the tree
+  */
   SearchNode* getRootNode() { return rootNode; }
+
+  /**
+  * Desctructor of the SearchTree
+  */
   ~SearchTree(void);
 };
 

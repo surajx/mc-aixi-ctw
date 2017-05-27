@@ -1,5 +1,5 @@
 /****************************************************************************************
-** TODO: Documentation
+** A collection of constants to be used throughout the MC-AIXI-CTW program
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/

@@ -1,3 +1,10 @@
+/****************************************************************************************
+** A collection of functions to be used throughout the MC-AIXI-CTW program.
+**
+** Author: Suraj Narayanan Sasikumar
+***************************************************************************************/
+
+
 #ifndef __UTIL_HPP__
 #define __UTIL_HPP__
 

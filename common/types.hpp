@@ -1,5 +1,5 @@
 /****************************************************************************************
-** TODO: Documentation
+** A collection of types to be used throughout the MC-AIXI-CTW program.
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/
@@ -11,8 +11,6 @@
 #include <vector>
 
 // symbols that can be predicted
-// TODO: think about using boost dynamic bitset library. Stick with this till
-// things take off.
 typedef bool symbol_t;
 
 // a list of symbols
@@ -30,9 +28,7 @@ typedef unsigned long long lifetime_t;
 // describes an agent action
 typedef unsigned int action_t;
 
-// All information about variable content should be inferred from variable name
-// All information about variable type should be inferred from type name,
-// I strongly feel that both these should not be muddled.
+// shortened name for unsigned int 
 typedef unsigned int uint_t;
 
 // the program's keyword/value option pairs
