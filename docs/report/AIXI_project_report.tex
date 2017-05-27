@@ -379,9 +379,7 @@ E\underline{ }BRPS        & 256       & 8           & 0.999       & 0.999       
     \includegraphics[width=9.1cm]{Biased_RPS}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
-
-\newpage
+ In biased rock-paper-scissors, we achieve optimal performance after the first 3000 training cycles. This is expected for two reasons. The CTW is learning a $1^{st}$ order Markov process, and the agent simply has to learn the correlation in its opponent’s actions. Moreover, the observation space and action space are small compared to other games. This allows a CTW with shallow depth to model the environement in fewer cycles. Also, due to the small branching factor, MCTS is able to plan ahead more effectively. Therefore, experiments with higher depths and longer horizon did not converge significantly faster as a result. Compared to the random agent, our agent performed superiorly. Our agent also performed similar to \cite{veness2011monte}.
 
 \subsection{Kuhn Poker}
 
@@ -406,7 +404,7 @@ E\underline{ }KPKR  & 96       & 4           & 0.9999       & 0.9995            
     \includegraphics[width=9.1cm]{Kuhn_Poker}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. We did not compare with \citep{veness2011monte} since they used Kuhn Poker.
+Compared to the random agent, our agent performed superiorly. We did not compare with \cite{veness2011monte} since they used Kuhn Poker.
 
 \newpage
 
@@ -431,9 +429,7 @@ E\underline{ }TKPKR  & 96       & 4           & 0.9999      & 0.9995            
     \includegraphics[width=9.1cm]{True_Kuhn_Poker}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
-
-\newpage
+Compared to the random agent, our agent performed superiorly. Our agent also performed similar to \cite{veness2011monte}.
 
 \subsection{TicTacToe}
 \begin{tabular}{|l|l|l|l|l|l|l|}
@@ -456,9 +452,7 @@ E\underline{ }TTTE  & 64       & 9          & 0.9999      & 0.99991            &
     \includegraphics[width=9.1cm]{TicTacToe}
 \end{figure}
 
-Compared to the random agent, our agent performed slightly better. Compared to \citep{veness2011monte} our agent performed worse.
-
-\newpage
+TicTacToe is a hard game due to the high-dimensional nature of the problem. It should be noted that Veness’s agent took more than 3 weeks of training to get optimal results. In experiment TTTE\_1 our final evaluation receives better score than Venesse. We think this is an anomaly because its associated training curve do not validate the result. We could not redo the same experiment again due to the large number of cycles it required, and time-constraints. Our training graph shows that we have a rising trend and a narrowing standard-deviation. Therefore we hypothesis that, given more time, we should see better results on TicTacToe. Compared to the random agent, our agent performed reasonably better. Our agent performed worse compared to \cite{veness2011monte}.
 
 \subsection{Extended Tiger}
  \begin{tabular}{|l|l|l|l|l|l|l|}
@@ -481,7 +475,7 @@ E\underline{ }ETGR & 64       & 4           & 0.999       & 0.999            & 1
     \includegraphics[width=9.1cm]{Extended_Tiger}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed worse.
+The configuration of the game changes with episode, and the observations are stochastic, making Extended Tiger a hard game to learn. Since the agent gets large penalties for opening the door, it prefers not opening the door. The agent is happy to just get rewards for doing valid actions. Given the extremely negative reward, our agent is relatively close to the optimal value. Compared to the random agent, our agent performed superiorly. Our agent performed worse compared to \cite{veness2011monte}.
 
 \newpage
 
@@ -506,12 +500,14 @@ PCMN-1  & 256       & 8           & 0.999       & 0.999             & 12     & -
     \includegraphics[width=9.1cm]{Pacman}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
+There are $10^{60}$ states in Pacman, making this the most difficult game in this set of experiments. Our results suggests that the agent learns to not run into walls and ghosts. Compared to the random agent, our agent performed superiorly. In a cycle-by-cycle comparison our agent performed better compared to \cite{veness2011monte}, but they have a rising trend. \cite{veness2011monte} trained the agent for $250,000$ cycles, because of which they are able to get increasingly better scores.
 
 \newpage
 
 
 \subsection{Cross Domain-Kuhn Poker and BRPS }
+Our cross-domain experiments were done on Biased Rock Paper Scissors (BRPS) and Kuhn Poker. We chose them because of their simplicity, and the optimal performance of BRPS. The agent was first evaluated on BRPS obtaining optimal performace as expected. Moving to Khun Poker, the agent struggled initially but later obtained the expected performance. This means that the CTW would have re-learnt the model in a short period of time. Given that the domains are entirely different, this is a remarkable result. When we moved back to BRSP our evaluation scores show that the agent performed well without any issue. This is perhaps because BRSP is really a simple game. The evidence from Khun poker might not have affected the statistics for simpler models in the CTW. Regardless, we were not able to conclude whether any information that were learnt in one domain was usefull in the other.
+
  \begin{tabular}{|l|l|l|l|l|l|l|}
  \hline \centering
  Experiment ID& D & m & $\epsilon$ & $\gamma$ & Cycles (KP) & Cycles (BRPS) \\ \hline
