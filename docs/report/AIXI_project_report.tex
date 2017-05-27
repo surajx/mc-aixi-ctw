@@ -42,6 +42,8 @@
 \usepackage{caption}
 \usepackage[capitalize]{cleveref}
 \usepackage{xcolor}
+\usepackage[section]{placeins}
+
 
 
 \newcommand\Under[2]{\strut%
@@ -368,20 +370,24 @@ BRPS-2        & 96        & 8           & 0.999       & 0.9991            & 12  
 BRPS-3        & 256       & 4           & 0.999       & 0.9991            & 13     & 0.21425        \\ \hline
 BRPS-4        & 256       & 8           & 0.999       & 0.999             & 7      & 0.246525  \\ \hline  
 E\underline{ }BRPS        & 256       & 8           & 0.999       & 0.999             & 9      & N/A  \\ \hline      
-\end{tabular} 
-
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{4_Biased_RPS}
-\end{figure}
-
-\begin{figure}[h]
-\centering
-    \includegraphics[width=9.1cm]{Biased_RPS}
-\end{figure}
+\end{tabular}  \\
 
  In biased rock-paper-scissors, we achieve optimal performance after the first 3000 training cycles. This is expected for two reasons. The CTW is learning a $1^{st}$ order Markov process, and the agent simply has to learn the correlation in its opponent’s actions. Moreover, the observation space and action space are small compared to other games. This allows a CTW with shallow depth to model the environement in fewer cycles. Also, due to the small branching factor, MCTS is able to plan ahead more effectively. Therefore, experiments with higher depths and longer horizon did not converge significantly faster as a result. Compared to the random agent, our agent performed superiorly. Our agent also performed similar to \cite{veness2011monte}.
+
+
+
+
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{4_Biased_RPS}
+\end{figure}
+
+\begin{figure}[!htb]
+\centering
+    \includegraphics[width=11.1cm]{Biased_RPS}
+\end{figure}
+
+\newpage
 
 \subsection{Kuhn Poker}
 
@@ -393,20 +399,21 @@ KPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 1
 KPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 1.23595         \\ \hline
 E\underline{ }KPKR  & 96       & 4           & 0.9999       & 0.9995            & 30     & N/A         \\ \hline
 %Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7      &               
-\end{tabular} 
+\end{tabular}  \\
 
+In Kuhn Poker the optimal policy is easy to learn, this is due to the simplicity of the game. However since the variety in possible rewards is so high the optimal policy will perform far better then the random policy. This was demonstarted by our experiment, where our agent learnt the near optimal polciy and out performed the random agent. We did not compare with \cite{veness2011monte} since they used True Kuhn Poker.
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_Kuhn_Poker}
+    \includegraphics[width=11.1cm]{4_Kuhn_Poker}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Kuhn_Poker}
+    \includegraphics[width=11.1cm]{Kuhn_Poker}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. We did not compare with \cite{veness2011monte} since they used Kuhn Poker.
+
 
 \newpage
 
@@ -419,19 +426,21 @@ TKPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 
 TKPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 0.0611         \\ \hline
 TKPKR-4  & 512       & 8           & 0.9999      & 0.999             & 7      & 0.056      \\ \hline 
 E\underline{ }TKPKR  & 96       & 4           & 0.9999      & 0.9995             & 30      & N/A      \\ \hline        
-\end{tabular} 
+\end{tabular} \\
 
- \begin{figure}[h]
+In True Kuhn Poker has a small observation, action and reward space. This allows the agent to quickly learn the optimal policy. For the optimal policy the average reward per cycle is $\frac{1}{18}$. In comparison to the random agent, our agent was able to achieve a superior performance. In comparison to \cite{veness2011monte}, which is near optimal, our agent was able achieve very a similar performance.
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_True_Kuhn_Poker}
+    \includegraphics[width=12.1cm]{4_True_Kuhn_Poker}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{True_Kuhn_Poker}
+    \includegraphics[width=12.1cm]{True_Kuhn_Poker}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Our agent also performed similar to \cite{veness2011monte}.
+\newpage
 
 \subsection{TicTacToe}
 \begin{tabular}{|l|l|l|l|l|l|l|}
@@ -442,19 +451,22 @@ TTTE-2   & 96        & 9           & 0.9999      & 0.9995            & 24     & 
 % TicTacToe   & 256       & 9           & 0.9999      & 0.9991            & 13     &                \\
 TTTE-4   & 128       & 10          & 0.9999      & 0.9991            & 12     & -0.83726875  \\  \hline  
 E\underline{ }TTTE  & 64       & 9          & 0.9999      & 0.99991            & 180     & N/A  \\  \hline    
-\end{tabular} 
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{4_TicTacToe}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{TicTacToe}
-\end{figure}
+\end{tabular} \\
 
 TicTacToe is a hard game due to the high-dimensional nature of the problem. It should be noted that Veness’s agent took more than 3 weeks of training to get optimal results. In experiment TTTE\_1 our final evaluation receives better score than Venesse. We think this is an anomaly because its associated training curve do not validate the result. We could not redo the same experiment again due to the large number of cycles it required, and time-constraints. Our training graph shows that we have a rising trend and a narrowing standard-deviation. Therefore we hypothesis that, given more time, we should see better results on TicTacToe. Compared to the random agent, our agent performed reasonably better. Our agent performed worse compared to \cite{veness2011monte}.
+
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{4_TicTacToe}
+\end{figure}
+
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{TicTacToe}
+\end{figure}
+
+
+\newpage
 
 \subsection{Extended Tiger}
  \begin{tabular}{|l|l|l|l|l|l|l|}
@@ -465,19 +477,20 @@ ETGR-2 & 64        & 4           & 0.999       & 0.999             & 12     & -7
 ETGR-3 & 42        & 8           & 0.999       & 0.9991            & 13     & -10             \\ \hline
 ETGR-4 & 256       & 4           & 0.999       & 0.9991            & 13     & -7.519  \\ \hline 
 E\underline{ }ETGR & 64       & 4           & 0.999       & 0.999            & 15     & N/A  \\ \hline    
-\end{tabular} 
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{4_Extended_Tiger}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{Extended_Tiger}
-\end{figure}
+\end{tabular} \\
 
 The configuration of the game changes with episode, and the observations are stochastic, making Extended Tiger a hard game to learn. Since the agent gets large penalties for opening the door, it prefers not opening the door. The agent is happy to just get rewards for doing valid actions. Given the extremely negative reward, our agent is relatively close to the optimal value. Compared to the random agent, our agent performed superiorly. Our agent performed worse compared to \cite{veness2011monte}.
+
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{4_Extended_Tiger}
+\end{figure}
+
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{Extended_Tiger}
+\end{figure}
+
 
 \newpage
 
@@ -492,50 +505,53 @@ PCMN-1  & 256       & 8           & 0.999       & 0.999             & 12     & -
   E\underline{ }PCMN    & 256        & 8           & 0.999       & 0.999             & 15      &    N/A    \\  \hline     
 \end{tabular} \\
 
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{4_Pacman}
-\end{figure}
-
- \begin{figure}[h]
- \centering
-    \includegraphics[width=9.1cm]{Pacman}
-\end{figure}
-
 There are $10^{60}$ states in Pacman, making this the most difficult game in this set of experiments. Our results suggests that the agent learns to not run into walls and ghosts. Compared to the random agent, our agent performed superiorly. In a cycle-by-cycle comparison our agent performed better compared to \cite{veness2011monte}, but they have a rising trend. \cite{veness2011monte} trained the agent for $250,000$ cycles, because of which they are able to get increasingly better scores.
 
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{4_Pacman}
+\end{figure}
+
+ \begin{figure}[!htb]
+ \centering
+    \includegraphics[width=11.1cm]{Pacman}
+\end{figure}
+
+
+
 \newpage
-
-
+\hspace{3cm}
 \subsection{Cross Domain-Kuhn Poker and BRPS }
-Our cross-domain experiments were done on Biased Rock Paper Scissors (BRPS) and Kuhn Poker. We chose them because of their simplicity, and the optimal performance of BRPS. The agent was first evaluated on BRPS obtaining optimal performace as expected. Moving to Khun Poker, the agent struggled initially but later obtained the expected performance. This means that the CTW would have re-learnt the model in a short period of time. Given that the domains are entirely different, this is a remarkable result. When we moved back to BRSP our evaluation scores show that the agent performed well without any issue. This is perhaps because BRSP is really a simple game. The evidence from Khun poker might not have affected the statistics for simpler models in the CTW. Regardless, we were not able to conclude whether any information that were learnt in one domain was usefull in the other.
-
  \begin{tabular}{|l|l|l|l|l|l|l|}
  \hline \centering
  Experiment ID& D & m & $\epsilon$ & $\gamma$ & Cycles (KP) & Cycles (BRPS) \\ \hline
 BRPS\underline{ }KPKR  & 96       & 8           & 0.9999       & 0.9991             & 12    &  10      \\ \hline    
 \end{tabular} \\
+Our cross-domain experiments were done on Biased Rock Paper Scissors (BRPS) and Kuhn Poker. We chose them because of their simplicity, and the optimal performance of BRPS. The agent was first evaluated on BRPS obtaining optimal performace as expected. Moving to Khun Poker, the agent struggled initially but later obtained the expected performance. This means that the CTW would have re-learnt the model in a short period of time. Given that the domains are entirely different, this is a remarkable result. When we moved back to BRSP our evaluation scores show that the agent performed well without any issue. This is perhaps because BRSP is really a simple game. The evidence from Khun poker might not have affected the statistics for simpler models in the CTW. Regardless, we were not able to conclude whether any information that were learnt in one domain was usefull in the other.
 
 First\underline{ }BRPS is the initial training. Second\underline{ }KPKR is the cross domain running on Kuhn poker. Third\underline{ }BRPS is the evaluation for again running on Biased Rock Paper Scissors.
 
 
- \begin{figure}[h]
+
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{First_BRPS}
+    \includegraphics[width=11.1cm]{First_BRPS}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Second_KPKR}
+    \includegraphics[width=11.1cm]{Second_KPKR}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Third_BRPS}
+    \includegraphics[width=11.1cm]{Third_BRPS}
 \end{figure}
 
 
 \newpage
+\hspace{3cm}
 
 \section{Discussion}
 
