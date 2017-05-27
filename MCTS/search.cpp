@@ -1,5 +1,7 @@
 /****************************************************************************************
-** TODO: Documentation
+** Implements the classes SearchNode and SearchTree. This module implements
+** a variant of the UCT algorithm for Monte Carlo tree search with adaptations
+** to deal with planning and predicting in unkown environments.
 **
 ** Author: Arie Slobbe
 ***************************************************************************************/

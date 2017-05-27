@@ -1,7 +1,9 @@
 /******************************************************************************
-** TODO: Documentation
+** ContextTree Class contains the various functionality that can be performed
+** by the CTW method. Detailed Documentation of each functionality is given in
+** the header file.
 **
-** Author: Suraj Narayanan Sasikumar, Baseline code Author
+** Author: Suraj Narayanan Sasikumar
 *******************************************************************************/
 
 #include <cassert>
@@ -28,9 +30,6 @@ ContextTree::~ContextTree() {
 void ContextTree::clear() {
   sequenceHistory.clear();
   if (rootNode) {
-    // TODO: Investigate further why this results in a strange unconsequential
-    // segfault.
-    // deleteTree(rootNode);
     delete rootNode;
   }
   rootNode = new CTNode();

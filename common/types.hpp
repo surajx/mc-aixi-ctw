@@ -1,5 +1,6 @@
 /****************************************************************************************
-** TODO: Documentation
+** All the type definitions that are used throughout the project is captured in one 
+** location.
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/
@@ -11,8 +12,6 @@
 #include <vector>
 
 // symbols that can be predicted
-// TODO: think about using boost dynamic bitset library. Stick with this till
-// things take off.
 typedef bool symbol_t;
 
 // a list of symbols

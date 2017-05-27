@@ -90,7 +90,7 @@ void Pacman::reset_game() {
 	complete_game_state[0][19] = complete_game_state[0][20] = complete_game_state[18][19] = complete_game_state[18][20] = 1;
 	//complete_game_state[]
 
-	//TODO add all the walls
+	// TODO: add all the walls
 	// Walls of the game, line by line (literally), each line is a bloack
 	complete_game_state[2][2] = complete_game_state[3][2] = 1;
 	complete_game_state[5][2] = complete_game_state[6][2] = complete_game_state[7][2] = 1;
@@ -290,7 +290,7 @@ Pacman::Ghost Pacman::ghost_movement(Ghost ghost) {
 	// Pursue pacman
 	if (ghost.manhattan_distance <= 5) {
 		//pursue pacman
-		// TODO turn into a function
+		// TODO: turn into a function
 		// Check which quadrant pacman is in, TopLeft, etc
 		if (ghost.x > pacmanX)  {
 			if (ghost.y > pacmanY) {
@@ -788,7 +788,7 @@ void Pacman::performAction(action_t action) {
 
 	// 3-bit observation on whether or not a pellat is within 2,3,4 manhattan distance from pacman
 
-	// TODO implement as a tree style search under a while loop, only need one to be true
+	// TODO: implement as a tree style search under a while loop, only need one to be true
 	// Pellat is within 2
 	pellat_within_2 = (complete_game_state[pacmanX+2][pacmanY] == 2 || pellat_within_2) ? 1 : 0;
 	pellat_within_2 = (complete_game_state[pacmanX-2][pacmanY] == 2 || pellat_within_2) ? 1 : 0;
