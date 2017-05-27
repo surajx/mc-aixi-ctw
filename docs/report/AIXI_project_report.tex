@@ -242,8 +242,8 @@ The MC-AIXI-CTW agent program is composed of several components. Each is briefly
         \item \textbf{initialisation}: Initialises the agents parameters: History size, number of simulations/actions, number of observation and reward bits.
         \item \textbf{planning}: The planner from the search tree returns a planned action.
     \end{itemize}
-    \item \textbf{MCTS} \begin{itemize} \\
-    The MCTS module has three main functions:
+    \item \textbf{MCTS}     The MCTS module has three main functions:
+	\begin{itemize}
         \item \textbf{search}: Estimates the best action by simulation playouts and collecting the results in an iteratively expanding search tree.
         \item \textbf{sample}: grows the search tree by one node by simulating a playout and storing the results.
         \item \textbf{prune}: retains useful computations from the previous agent-environment interaction cycle while reclaiming memory allocated to nodes that are not necessary anymore.
