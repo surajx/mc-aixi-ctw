@@ -1,6 +1,5 @@
 /****************************************************************************************
-** All the type definitions that are used throughout the project is captured in one 
-** location.
+** All the type definitions that are used throughout the project is captured here
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/
@@ -29,9 +28,7 @@ typedef unsigned long long lifetime_t;
 // describes an agent action
 typedef unsigned int action_t;
 
-// All information about variable content should be inferred from variable name
-// All information about variable type should be inferred from type name,
-// I strongly feel that both these should not be muddled.
+// shortened name for unsigned int 
 typedef unsigned int uint_t;
 
 // the program's keyword/value option pairs

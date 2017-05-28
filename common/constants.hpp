@@ -1,5 +1,5 @@
 /****************************************************************************************
-** Containts all the constants that are used in the project.
+** A collection of constants to be used throughout the MC-AIXI-CTW program
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/
