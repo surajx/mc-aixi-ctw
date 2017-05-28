@@ -42,6 +42,8 @@
 \usepackage{caption}
 \usepackage[capitalize]{cleveref}
 \usepackage{xcolor}
+\usepackage[section]{placeins}
+
 
 
 \newcommand\Under[2]{\strut%
@@ -120,14 +122,14 @@
 \newpage
 
 \section{Introduction}
-We implement and test an approximation of the AIXI model \citep{hutter2005universal}. The AIXI model is a mathematical “solution” to the general reinforcement learning problem. That is, an AIXI agent solves the problem of maximising expected reward in an unknown computable environment that is potentially stochastic and partially observable. Unfortunately, the AIXI model is incomputable. A down-scaled (i.e. computable) version of AIXI is presented in \citep{veness2011monte} which is called Monte Carlo AIXI Context Tree Weighting, or MC-AIXI-CTW. Our work implements the agent design of Veness and colleagues with the aim to reproduce their experimental results on a variety of reinforcement learning domains.
+We implement and test an approximation of the AIXI model \citep{hutter2005universal}. The AIXI model is a mathematical “solution” to the general reinforcement learning problem. That is, an AIXI agent solves the problem of maximising expected reward in an unknown computable environment that is potentially stochastic and partially observable. Unfortunately, the AIXI model is incomputable. A down-scaled (i.e. computable) version of AIXI is presented in \citep{veness2011monte} which is called Monte Carlo AIXI Context Tree Weighting, or MC-AIXI-CTW. Our work implements the agent design of Veness and colleagues with the aim to reproduce their experimental results on a variety of reinforcement learning domains. \\ 
 
 The following subsections briefly introduce the three main components of the MC-AIXI-CTW agent. A complete description of the AIXI agent can be found in \citep{hutter2005universal}. The Monte Carlo component is described in \citep{kocsis2006bandit}, and the Context Tree Weighting method in \citep{willems1995context}.  Section 2 describes a variety of domains on which we tested our agent, section 3 describes our implementation of MC-AIXI-CTW and how to compile and run the code, and section 4 presents our experimental results on a variety of problem domains, and compares them with the results originally obtained by \citep{veness2011monte}.
 
 \subsection{The AIXI agent}
-AIXI is a Bayesian (``on-average'') optimality notion for general reinforcement learning agents. AIXI interacts with an unknown environment in cycles. In each cycle, the agent executes an action and in turn receives an observation and a reward. (when the environment is fully observable at all times, an observation is called a state; see figure 1). AIXI aims to choose actions that will on average lead to the best possible outcome. More precisely, AIXI maximises the expected sum of rewards over its lifetime.
+AIXI is a Bayesian (``on-average'') optimality notion for general reinforcement learning agents. AIXI interacts with an unknown environment in cycles. In each cycle, the agent executes an action and in turn receives an observation and a reward. (when the environment is fully observable at all times, an observation is called a state; see figure 1). AIXI aims to choose actions that will on average lead to the best possible outcome. More precisely, AIXI maximises the expected sum of rewards over its lifetime. \\
 
-Each time the agent takes an action, the environment responds by returning an observation reward pair. The agent processes the new observation-reward information and the next iteration begins with another action by the agent. In principle, the agent has access to its entire history of action-observation-reward cycles, and unlimited time to compute the next best action.  
+Each time the agent takes an action, the environment responds by returning an observation reward pair. The agent processes the new observation-reward information and the next iteration begins with another action by the agent. In principle, the agent has access to its entire history of action-observation-reward cycles, and unlimited time to compute the next best action.  \\
 
 \begin{figure}
 \includegraphics[width = 12cm]{suttonbarto_rl}
@@ -135,26 +137,26 @@ Each time the agent takes an action, the environment responds by returning an ob
 \end{figure}
  
 
-Suppose the AIXI agent interacts with an environment in cycles $k=1,2, \ldots, m$. The agent chooses action $a_k$, subsequently the environment "chooses" (produces) an observation reward pair $o_kr_k$, and the next cycle begins. Over time, a history sequence $h=a_1o_1r_1 \ldots a_mo_mr_m$ is formed.
+Suppose the AIXI agent interacts with an environment in cycles $k=1,2, \ldots, m$. The agent chooses action $a_k$, subsequently the environment "chooses" (produces) an observation reward pair $o_kr_k$, and the next cycle begins. Over time, a history sequence $h=a_1o_1r_1 \ldots a_mo_mr_m$ is formed. \\ 
 
 Agents are distinguished by how well they choose their actions in light of rewards received from the environment. In cycle $k$, the full AIXI model chooses its next action $a_k$ according to the following equation:
 
 $$a_k \coloneqq \argmax_{a_k} \sum_{o_kr_k} \ldots \max_{a_m} \sum_{o_mr_m} (r_k+\ldots+r_m) \xi (o_1r_1 \ldots o_mr_m \mid a_1 \ldots a_m), $$
 
-where $\xi (o_1r_1 \ldots o_mr_m \mid a_1 \ldots a_m)$ is a mixture environment model over a model class of chronological probability distributions. See \citep{hutter2005universal} for the full details of this model. Intuitively, the agent considers the sum of the total reward over all possible futures up to m steps ahead, weighs each of them by the complexity of (environments) consistent with the agent’s past that can generate the future, and then picks the action that maximises expected future rewards \citep{veness2011monte}. 
+where $\xi (o_1r_1 \ldots o_mr_m \mid a_1 \ldots a_m)$ is a mixture environment model over a model class of chronological probability distributions. See \citep{hutter2005universal} for the full details of this model. Intuitively, the agent considers the sum of the total reward over all possible futures up to m steps ahead, weighs each of them by the complexity of (environments) consistent with the agent’s past that can generate the future, and then picks the action that maximises expected future rewards \citep{veness2011monte}. \\
 
-The alternating sum and max operators execute the (finite-horizon) expectimax operation, which is a classic result from sequential decision theory. Expectimax is responsible for planning a best course of action.
+The alternating sum and max operators execute the (finite-horizon) expectimax operation, which is a classic result from sequential decision theory. Expectimax is responsible for planning a best course of action. \\
 
-The mixture environment model is responsible for learning to predict future observations and rewards based on past experience. The technique is inspired by Solomonoff’s universal induction scheme. Initially, the mixture assigns greater weights to simple environment models. Each interaction cycle generates new evidence as to which models are more likely to be the “true” model of the environment. Models consistent with the evidence acquire increased weight (i.e. importance) in the decision procedure while inconsistent models are pruned away.
+The mixture environment model is responsible for learning to predict future observations and rewards based on past experience. The technique is inspired by Solomonoff’s universal induction scheme. Initially, the mixture assigns greater weights to simple environment models. Each interaction cycle generates new evidence as to which models are more likely to be the “true” model of the environment. Models consistent with the evidence acquire increased weight (i.e. importance) in the decision procedure while inconsistent models are pruned away. \\
 
 The AIXI agent requires an overwhelming number of computations to find its next action. The expectimax operation runs in exponential time with respect to lookahead $m$ and is computationally infeasible for all but the smallest values. Worse yet, the mixture environment model is not even finitely computable because the mixture is taken over an infinite set of environments. To deal with these issues, Veness et al. developed a computable approximation of AIXI. This approximation uses Monte Carlo Tree Search (MCTS) to approximate the expectimax operation and Context Tree Weighting (CTW) to maintain a mixture environment model. 
 
 \subsection{Monte Carlo Tree Search}
-Expectimax requires us to consider every possible future that can result from taking an action in the present. Again, this is computationally infeasible. Instead of considering every path through the future, Monte Carlo Tree Search (MCTS) samples as many paths as time and computation resources permit. An action with highly rewarding (simulated) futures is considered better than an action for which every sample returns nothing.
+Expectimax requires us to consider every possible future that can result from taking an action in the present. Again, this is computationally infeasible. Instead of considering every path through the future, Monte Carlo Tree Search (MCTS) samples as many paths as time and computation resources permit. An action with highly rewarding (simulated) futures is considered better than an action for which every sample returns nothing. \\
 
-MCTS collects the outcomes of simulations in an iteratively expanding search tree.  \citep{kocsis2006bandit} developed a powerful heuristic which helps the agent focus its resources on useful parts of the tree. Actions with more simulations have better value estimates, so we must carefully consider which actions we care most about investing computational resources in. We prefer to spend resources on actions with high uncertainty about their real value, and/or with high probability of being the best action. These competing demands -- exploration of new actions, and exploitation of known good actions -- are balanced by taking a weighted average in such a way that total “regret” is minimised (see paper).
+MCTS collects the outcomes of simulations in an iteratively expanding search tree.  \citep{kocsis2006bandit} developed a powerful heuristic which helps the agent focus its resources on useful parts of the tree. Actions with more simulations have better value estimates, so we must carefully consider which actions we care most about investing computational resources in. We prefer to spend resources on actions with high uncertainty about their real value, and/or with high probability of being the best action. These competing demands -- exploration of new actions, and exploitation of known good actions -- are balanced by taking a weighted average in such a way that total “regret” is minimised (see paper). \\
 
-To illustrate, consider the problem of finding the best opening move in a game of tic-tac-toe. MC-AIXI-CTW runs a number of simulations to up to a pre-specified "search depth" into the future. The Context Tree Weighting method simulates the environment by taking prospective actions from the agent and return observation reward pairs, much like the environment would. In aggregate, the simulations yield an estimated win rate for each opening move. The agent subsequently chooses the opening move that had the highest win rate in its simulations.
+To illustrate, consider the problem of finding the best opening move in a game of tic-tac-toe. MC-AIXI-CTW runs a number of simulations to up to a pre-specified "search depth" into the future. The Context Tree Weighting method simulates the environment by taking prospective actions from the agent and return observation reward pairs, much like the environment would. In aggregate, the simulations yield an estimated win rate for each opening move. The agent subsequently chooses the opening move that had the highest win rate in its simulations. \\ 
 
 \begin{figure}[h]
 \includegraphics[width = 12cm]{mcts}
@@ -162,7 +164,7 @@ To illustrate, consider the problem of finding the best opening move in a game o
 \end{figure}
 
 \subsection{Context Tree Weighting}
-The Context Tree Weighting (CTW) method was initially proposed as a sequential universal compression method. CTW learns to identify patterns in a bit-sequence by performing Bayesian model averaging over all prediction suffix trees of maximum depth $D$. If the sequence generated by an $k$-order Markov process (that is, the probability of the next bit being 1 is conditioned on the last $k$ bits that were observed) and $k\leq D$ then CTW will converge to optimal prediction.
+The Context Tree Weighting (CTW) method was initially proposed as a sequential universal compression method. CTW learns to identify patterns in a bit-sequence by performing Bayesian model averaging over all prediction suffix trees of maximum depth $D$. If the sequence generated by an $k$-order Markov process (that is, the probability of the next bit being 1 is conditioned on the last $k$ bits that were observed) and $k\leq D$ then CTW will converge to optimal prediction. \\
 
 Several attributes make CTW a suitable approximator of universal Solomonoff induction:
 \begin{itemize}
@@ -172,13 +174,13 @@ Several attributes make CTW a suitable approximator of universal Solomonoff indu
 \item The running time of CTW is linear in the length of the input sequence, compared to exponential in the length of more na\"ive methods.
 \end{itemize}
 
-Each time the agent simulates taking an action, CTW is used to predict the subsequent observation reward pair. In the MC-AIXI-CTW implementation, every action, observation and reward is encoded as a string of bits. So in practice, to generate an observation reward pair, a number of steps are involved. CTW is asked to predict the next bit $b$ given the history sequence $h$, and subsequently the agent appends the predicted bit to the history sequence by setting $h \gets hb$. The agent predicts subsequent bits in this manner until they have appended to the original history $h$ a sequence of bits of length corresponding to an obseration reward pair. 
+Each time the agent simulates taking an action, CTW is used to predict the subsequent observation reward pair. In the MC-AIXI-CTW implementation, every action, observation and reward is encoded as a string of bits. So in practice, to generate an observation reward pair, a number of steps are involved. CTW is asked to predict the next bit $b$ given the history sequence $h$, and subsequently the agent appends the predicted bit to the history sequence by setting $h \gets hb$. The agent predicts subsequent bits in this manner until they have appended to the original history $h$ a sequence of bits of length corresponding to an obseration reward pair. \\
 
  
-In this manner, the MC-AIXI-CTW agent uses the CTW method to simulate paths through the future in order to plan a best course of action.  By interacting with the environment, MC-AIXI-CTW acquires the training data for CTW to learn over time how to emulate the environment, making it an increasingly good predictor of the future. 
+In this manner, the MC-AIXI-CTW agent uses the CTW method to simulate paths through the future in order to plan a best course of action.  By interacting with the environment, MC-AIXI-CTW acquires the training data for CTW to learn over time how to emulate the environment, making it an increasingly good predictor of the future. \\
 
 This convergence to the true environment works as follows.
-Let $C_D$ denote the class of all prediction suffix trees of depth up to D, which are a form of variable order Markov models. We use $C_D$ as our environment class and we assume that the "true" environment $E^*$ is contained in $C_D$. To each $E \in C_D$ we assign a code with length $CL(E)$. We can think of this code as a compressed representation of the environment; simple environments have simple (short) codes and complex environments have complex (long) codes.
+Let $C_D$ denote the class of all prediction suffix trees of depth up to D, which are a form of variable order Markov models. We use $C_D$ as our environment class and we assume that the "true" environment $E^*$ is contained in $C_D$. To each $E \in C_D$ we assign a code with length $CL(E)$. We can think of this code as a compressed representation of the environment; simple environments have simple (short) codes and complex environments have complex (long) codes. \\
 
 The mixture environment model $\xi$ from the AIXI model is approximated by 
 \begin{equation} \label{eq1}
@@ -199,8 +201,9 @@ Kuhn Poker is a simplified version of poker that was introduced in \citep{kuhn19
 
 The opponent will always play the Nash Strategy. To represent this at the start of the round the opponent chooses an $\alpha\in [0,\frac{1}{3}]$ at random. If they drew a Jack, they will bet with probability $\alpha$. If they drew a queen they will bet with probability 0. If they drew a king they will bet with probability $3\alpha$. If there is a second round of betting, they will choose to bet with probability $\alpha+\frac{1}{3}$ regardless of their card. \\
 
-If the agent wins, they get reward equal to the number of chips in play. If the agent loses they will get a reward equal to the negative of the number of chips they bet. In True Kuhn Poker, that is exactly as detailed in \citep{kuhn1950simplified} the reward for the agent is the number of chips the opponent put in.
+If the agent wins, they get reward equal to the number of chips in play. If the agent loses they will get a reward equal to the negative of the number of chips they bet. \\
 
+We suspected that the Kuhn Poker described above, which is presented as mentioned in  \citep{veness2011monte}, is not the true version of the game because it is not zero sum. We took their description of the game literally and implemented it as the domain Kuhn poker. Additionally we implemented the True Kuhn Poker domain (that is, the Kuhn Poker exactly as described in \citep{kuhn1950simplified}). In True Kuhn Poker, that is exactly as detailed in \citep{kuhn1950simplified} the reward for the agent is the number of chips the opponent put in. \\
 
 \subsection{Biased Rock Paper Scissors}
 Biased Rock Paper Scissors is very similar to regular rock paper scissors, with an exception in how the opponent chooses to play. Both the agent and the opponent will choose either Rock, Paper or Scissors. As per usual, Rock beats Scissors, Paper beats Rock, Scissors beats Paper. If the agent beats the opponent, the agent will receive a reward of 1. If the agent loses it will receive a reward of -1. If it is a draw, meaning both opponent and agent make the same choice, then the agent receives a reward of 0. The opponent repeats its choice of the previous round if it resulted in a win, and picks a random move otherwise. 
@@ -220,7 +223,7 @@ Tic Tac Toe is an adversarial fully observable deterministic game played on a 3 
 
 \section{Overview of agent program}
 
-The MC-AIXI-CTW agent program is composed of several components. Each is briefly presented in the following overview. More comprehensive documentation is provided in the source files themselves.
+The MC-AIXI-CTW agent program is composed of several components. Each is briefly presented in the following overview. More comprehensive documentation is provided in the source files themselves. \\ 
 
 % The \textbf{conf} folder contains configuration settings for each of the implemented environments, which are kept in the environments folder. 
 
@@ -242,8 +245,8 @@ The MC-AIXI-CTW agent program is composed of several components. Each is briefly
         \item \textbf{initialisation}: Initialises the agents parameters: History size, number of simulations/actions, number of observation and reward bits.
         \item \textbf{planning}: The planner from the search tree returns a planned action.
     \end{itemize}
-    \item \textbf{MCTS} \begin{itemize} \\
-    The MCTS module has three main functions:
+    \item \textbf{MCTS}     The MCTS module has three main functions:
+	\begin{itemize}
         \item \textbf{search}: Estimates the best action by simulation playouts and collecting the results in an iteratively expanding search tree.
         \item \textbf{sample}: grows the search tree by one node by simulating a playout and storing the results.
         \item \textbf{prune}: retains useful computations from the previous agent-environment interaction cycle while reclaiming memory allocated to nodes that are not necessary anymore.
@@ -256,7 +259,7 @@ The MC-AIXI-CTW agent program is composed of several components. Each is briefly
     \end{itemize}
     Detailed documentation of the other functions are given in the header file.\\
 
-    \textbf{Implementation Details}
+    \textbf{CTW Implementation Enhancements}
     \begin{itemize}
         \item \textbf{Numerical Stability:} All the probability related calculations are done in log-space to avoid under-flow issues.
         \item \textbf{Efficient Node Creation:} Nodes are created dynamically when requested. This allows for slow memory growth.
@@ -340,11 +343,11 @@ can be executed to find for more details on how to run the program.
 
 \section{Experimental Results}
 
-Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. For the environments, some are easy such as Biased Rock-Paper-Scissors, and Kuhn-Poker. The other environments TicTacToe, Pacman, Extended Tiger are harder games to learn. In each experiment in each domain we chose a CTW Depth, a Horizon, an Exploration, and Exploration Decay and a Number of Cycles. For each set of chosen parameters we run 4 experiments of our agent on the given domain with the given parameters. We indexed each parameter set by experiment ID. \\
+Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. The environments Biased Rock-Paper-Scissors and Kuhn-Poker are considered easy. The other environments TicTacToe, Pacman, Extended Tiger are harder to learn. In each experiment in each domain we chose a CTW Depth, a Horizon, an Exploration, and Exploration Decay and a Number of Cycles. For each set of chosen parameters we ran 4 experiments of our agent on the given domain with the given parameters. We indexed each parameter set by experiment ID. \\
 
 The parameters were chosen so that we had a balance between the parameters used in \citep{veness2011monte} and computational efficiency. The exploration and exploration decay were chosen so that after the number of cycles the exploration would be $10^{-5}$. For most environments we fixed the horizon and increased the CTW depth. This was done to see what influence the choice of CTW depth had on the results. \\
 
-Our experimental results for the environments are as follows, we use the following notation,
+We use the following notation:
  \begin{align*}
      D &= \text{ CTW Depth} \\
      m &= \text{ Horizon} \\
@@ -353,9 +356,8 @@ Our experimental results for the environments are as follows, we use the followi
      \text{Cycles }\times 10^3 &= \text{ Number of cycles }  \\
      \text{E\underline{ } } &= \text{ Intermediate Evaluation}
  \end{align*}
-Next are the parameters used in each environment, with the average reward of each set of parameters in the environment. For each environment we graphed each configuration value compared with each other. Additionally for each environment we graphed of the performance of our agent over time, compared with intermediate evaluation of our agent, the agent in \citep{veness2011monte} and a random agent. In each graph the shaded region is the standard deviation from the 4 experiments run for that chosen ste of parameters.
 
-
+In the following subsections, we showcase the experiments conducted for each domain. For each domain we conducted multiple experiments with different parameter values, which are presented in tables within each corresponding section. We present two graphs for each domain. The first graph compares the learning curves between the experiments conducted. The second graph compares our best experiment with the agent of Veness, an agent acting randomly, and also shows the results of an experiment in which we performed intermittent evalutation. Intermittent evaluation means that every 500 cycles, exploration is paused for 200 cycles and performance is evaluated. As such, the results from intermittent evaluation are not weighed down by exploration moves from the agent. In each graph the shaded region represents the standard deviation from the 4 experiments that were run for that chosen set of parameters.
 
 \newpage
 
@@ -368,20 +370,19 @@ BRPS-2        & 96        & 8           & 0.999       & 0.9991            & 12  
 BRPS-3        & 256       & 4           & 0.999       & 0.9991            & 13     & 0.21425        \\ \hline
 BRPS-4        & 256       & 8           & 0.999       & 0.999             & 7      & 0.246525  \\ \hline  
 E\underline{ }BRPS        & 256       & 8           & 0.999       & 0.999             & 9      & N/A  \\ \hline      
-\end{tabular} 
+\end{tabular}  \\
 
+ In biased rock-paper-scissors, we achieve optimal performance after the first 3000 training cycles. We expected this for two reasons. The CTW module is learning a $1^{st}$ order Markov process, and the agent simply has to learn the correlation in its opponent’s actions. Moreover, the observation space and action space are relatively small. This allows CTW with shallow depth to model the environment in fewer cycles. Also, due to the small branching factor, MCTS is able to plan ahead more effectively. Therefore, increased CTW depth and longer horizon did not cause significantly faster converge to optimal play. Our agent performed similarly to that of \cite{veness2011monte}, and outperformed the random agent.
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_Biased_RPS}
+    \includegraphics[width=11.1cm]{4_Biased_RPS}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
 \centering
-    \includegraphics[width=9.1cm]{Biased_RPS}
+    \includegraphics[width=11.1cm]{Biased_RPS}
 \end{figure}
-
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
 
 \newpage
 
@@ -395,20 +396,22 @@ KPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 1
 KPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 1.23595         \\ \hline
 E\underline{ }KPKR  & 96       & 4           & 0.9999       & 0.9995            & 30     & N/A         \\ \hline
 %Kuhn Poker  & 512       & 8           & 0.9999      & 0.999             & 7      &               
-\end{tabular} 
+\end{tabular}  \\
+
+Due to the simplicity of the game, the optimal policy in Kuhn Poker is easy to learn. However, since the variety in possible rewards is so high the optimal policy will perform far better then the random policy. This was demonstarted by our experiment, where our agent learnt the near optimal polciy and out performed the random agent. We did not compare with \cite{veness2011monte} since they used True Kuhn Poker.
 
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_Kuhn_Poker}
+    \includegraphics[width=11.1cm]{4_Kuhn_Poker}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Kuhn_Poker}
+    \includegraphics[width=11.1cm]{Kuhn_Poker}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. We did not compare with \citep{veness2011monte} since they used Kuhn Poker.
+
 
 \newpage
 
@@ -421,19 +424,19 @@ TKPKR-2  & 96        & 4           & 0.9999      & 0.9995            & 24     & 
 TKPKR-3  & 256       & 4           & 0.999       & 0.9991            & 13     & 0.0611         \\ \hline
 TKPKR-4  & 512       & 8           & 0.9999      & 0.999             & 7      & 0.056      \\ \hline 
 E\underline{ }TKPKR  & 96       & 4           & 0.9999      & 0.9995             & 30      & N/A      \\ \hline        
-\end{tabular} 
+\end{tabular} \\
 
- \begin{figure}[h]
+True Kuhn Poker has a small observation, action and reward space. This allows the agent to quickly learn the optimal policy. For the optimal policy the average reward per cycle is $\frac{1}{18}$. In comparison to the random agent, our agent was able to achieve a superior performance. In comparison to \cite{veness2011monte}, which is near optimal, our agent was able achieve very a similar performance.
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_True_Kuhn_Poker}
+    \includegraphics[width=12.1cm]{4_True_Kuhn_Poker}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{True_Kuhn_Poker}
+    \includegraphics[width=12.1cm]{True_Kuhn_Poker}
 \end{figure}
-
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
 
 \newpage
 
@@ -446,19 +449,20 @@ TTTE-2   & 96        & 9           & 0.9999      & 0.9995            & 24     & 
 % TicTacToe   & 256       & 9           & 0.9999      & 0.9991            & 13     &                \\
 TTTE-4   & 128       & 10          & 0.9999      & 0.9991            & 12     & -0.83726875  \\  \hline  
 E\underline{ }TTTE  & 64       & 9          & 0.9999      & 0.99991            & 180     & N/A  \\  \hline    
-\end{tabular} 
+\end{tabular} \\
 
- \begin{figure}[h]
+TicTacToe is a hard game because it involves a large observation space. It should be noted that Veness’s agent took more than 3 weeks of training to get optimal results. In experiment TTTE\_1 our final evaluation receives better a score than Veness. We think this is an anomaly because its associated training curve does not validate the result. We could not redo the same experiment again due to the large number of cycles it required, and time-constraints. Our training graph shows that we have a rising trend and a narrowing standard-deviation. Therefore we hypothesise that, given more time, we should see better results on TicTacToe. Compared to the random agent, our agent performed reasonably better. Our agent performed worse compared to \cite{veness2011monte}.
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_TicTacToe}
+    \includegraphics[width=11.1cm]{4_TicTacToe}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{TicTacToe}
+    \includegraphics[width=11.1cm]{TicTacToe}
 \end{figure}
 
-Compared to the random agent, our agent performed slightly better. Compared to \citep{veness2011monte} our agent performed worse.
 
 \newpage
 
@@ -471,19 +475,20 @@ ETGR-2 & 64        & 4           & 0.999       & 0.999             & 12     & -7
 ETGR-3 & 42        & 8           & 0.999       & 0.9991            & 13     & -10             \\ \hline
 ETGR-4 & 256       & 4           & 0.999       & 0.9991            & 13     & -7.519  \\ \hline 
 E\underline{ }ETGR & 64       & 4           & 0.999       & 0.999            & 15     & N/A  \\ \hline    
-\end{tabular} 
+\end{tabular} \\
 
- \begin{figure}[h]
+Extended Tiger is a hard game to learn because the configuration of the game (the respective location of the gold and the tiger) changes with each episode. In addition, the observations are stochastic. Since the agent gets large penalties for opening the door, it prefers not to open it at all. The agent is happy to just get rewards for doing valid actions. Given the extremely negative reward for opening the door with the tiger, our agent is relatively close to the optimal value, so our agent performed better than random. However, our agent performed worse compared to \cite{veness2011monte}.
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_Extended_Tiger}
+    \includegraphics[width=11.1cm]{4_Extended_Tiger}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Extended_Tiger}
+    \includegraphics[width=11.1cm]{Extended_Tiger}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed worse.
 
 \newpage
 
@@ -498,21 +503,22 @@ PCMN-1  & 256       & 8           & 0.999       & 0.999             & 12     & -
   E\underline{ }PCMN    & 256        & 8           & 0.999       & 0.999             & 15      &    N/A    \\  \hline     
 \end{tabular} \\
 
- \begin{figure}[h]
+There are $10^{60}$ states in Pacman, making this the most difficult game in our set of experiments. Our results suggests that the agent learns to not run into walls and ghosts. The agent of \cite{veness2011monte} trained for $250,000$ cycles and improved continuously over time. In a cycle-by-cycle comparison our agent performed better, but by the time our experiment ended our agent's performance was well below that of the fully trained agent of \cite{veness2011monte}. 
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{4_Pacman}
+    \includegraphics[width=11.1cm]{4_Pacman}
 \end{figure}
 
- \begin{figure}[h]
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Pacman}
+    \includegraphics[width=11.1cm]{Pacman}
 \end{figure}
 
-Compared to the random agent, our agent performed superiorly. Compared to \citep{veness2011monte} our agent performed similarly.
+
 
 \newpage
-
-
+\hspace{3cm}
 \subsection{Cross Domain-Kuhn Poker and BRPS }
  \begin{tabular}{|l|l|l|l|l|l|l|}
  \hline \centering
@@ -520,47 +526,51 @@ Compared to the random agent, our agent performed superiorly. Compared to \citep
 BRPS\underline{ }KPKR  & 96       & 8           & 0.9999       & 0.9991             & 12    &  10      \\ \hline    
 \end{tabular} \\
 
+We performed a cross-domain experiment on Biased Rock-Paper-Scissors (BRPS) and Kuhn Poker. We chose these domains because they are simple and because we achieved optimal performance on BRPS. The agent was first evaluated on BRPS, obtaining optimal performace as expected. Moving to Khun Poker, the agent struggled initially but later obtained the expected performance. This means that the CTW would have re-learnt the model in a short period of time. Given that the domains are entirely different, this is a remarkable result. When we moved back to BRSP our evaluation scores show that the agent performed well without any issue. This is perhaps because BRSP is really a simple game. The evidence from Khun poker might not have affected the statistics for simpler models in the CTW. Regardless, we were not able to conclude whether any information that was learned in one domain was useful in the other. \\
+
 First\underline{ }BRPS is the initial training. Second\underline{ }KPKR is the cross domain running on Kuhn poker. Third\underline{ }BRPS is the evaluation for again running on Biased Rock Paper Scissors.
 
 
- \begin{figure}[h]
+
+
+ \begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{First_BRPS}
+    \includegraphics[width=11.1cm]{First_BRPS}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Second_KPKR}
+    \includegraphics[width=11.1cm]{Second_KPKR}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
  \centering
-    \includegraphics[width=9.1cm]{Third_BRPS}
+    \includegraphics[width=11.1cm]{Third_BRPS}
 \end{figure}
 
 
 \newpage
+\hspace{3cm}
 
 \section{Discussion}
 
 
-The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} in the domains we chose. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. Although our plots did not exactly match those of \citep{veness2011monte}, especially for harder environments, after training our evaluation was comparable. \\
+The main goal of our implementation of MC-AIXI-CTW was to achieved comparable results to \citep{veness2011monte} on our chosen domains. Due to computational constraints we did not use the exact same parameters for our agents in each environment. Regardless we were able to achieve our goal, and in each domain our agent had comparable performance. \\
 
-Modularity was another one of the goals with our implementation of MC-AIXI-CTW. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. \\
+Another one of the goals with our implementation of MC-AIXI-CTW was modularity. With this in mind we managed to create a loosely coupled system in which each part can be replaced easily. For example, if we wished to use Context Tree Switching \citep{veness2012context} in the place of Context Tree Weighting then the implementation required is minimal. \\
 
-Mentioned in \citep{veness2011monte}, the set up need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$. Reducing the observation space so much would lead to a much smaller history, and ultimately a speedup for the computation. Another possible speedup could come from reward scaling.  e.g. for extended tiger, scaling rewards of 0,90,99,130 to 0,9,10,13. This would reduce the reward bits from 8 to 4, and be an improvement to computation time. \\
+As was mentioned in \citep{veness2011monte}, the agent environment interaction history need not be in base 2. In fact, if base 3 was used then the observation space $|\mathcal{O}|$ of tictactoe would be reduced from $2^{18}=262144$ to $3^9 = 19683$. Reducing the observation space so much would lead to a much smaller history, and ultimately a speedup for the computation. Another possible speedup could come from reward scaling. In the case of extended tiger, we could scale rewards from 0,90,99,130 to 0,9,10,13. This would reduce the number of reward bits from 8 to 4 and cause an improvement in computation time. \\
 
-Additionally we implements the True Kuhn Poker domain. That is the Kuhn Poker exactly as described in \citep{kuhn1950simplified}. This is different to the Kuhn Poker mentioned in  \citep{veness2011monte} in which the game is not zero sum. \\
-
-Lastly we were able to implement was our agent in the RoboCup simulation environment. However, in this environment our agent was unable to outperform a random agent. This was likely due to the large search space of the environment. One way in which we may we able to reduce the size of the state space of RoboCup simulation (and possibly other environments) is through state aggregation. State aggregation is merging or aggregating equivalent or similar states to same states. State aggregation reduces the observation (and reward) space, thereby reducing search space, thereby reducing computation time.
-
+Lastly, we were able to implement our agent in the RoboCup simulation environment. However, in this environment our agent was unable to outperform a random agent. This was likely due to the large state space of the environment. One way in which we may we able to reduce the size of the state space of RoboCup simulation (and possibly other environments) is through state aggregation. State aggregation refers to a procedure that merges or aggregates equivalent or similar states into one. State aggregation reduces the observation (and reward) space, thereby reducing search space, thereby reducing computation time.
 
 \section{Conclusion}
-We implemented and tested a version of the MC-AIXI-CTW agent presented by (Veness et al. 2011). The results of Veness and colleagues were not reproduced exactly, but our results are nonetheless similar enough to substantiate their claim that MC-AIXI-CTW can learn their domains.
+We implemented and tested a version of the MC-AIXI-CTW agent presented by (Veness et al. 2011). The results of Veness and colleagues were not reproduced exactly, but our results are nonetheless similar enough to substantiate their claim that MC-AIXI-CTW can learn their domains. \\
 
-In all the environments we tested our MC-AIXI-CTW agent was able to outperform a random agent. Near optimal to optimal solutions were achieved on on small domains. However, it runs into difficulty for larger domains, where care must be taken to manage the memory and initialize data structures as you go. This comes into play especially for TicTacToe, Pacman and Extended tiger. 
+In all the environments we tested, except for RoboCup, our MC-AIXI-CTW agent was able to outperform a random agent. Near optimal to optimal solutions were achieved on on small domains. However, our agent ran into difficulties on larger domains, where care must be taken to manage the memory and initialize data structures as you go. This came into play especially for TicTacToe, Pacman and Extended tiger. \\
 
-MC-AIXI-CTW is more than anything a proof of concept. The agent design may readily be improved by various methods. Multithreading is an obvious candidate. Future work may look into using Context Tree Switching in place of CTW, which we expect to lead to similar results with less computation time. The implementation of MCTS has been relatively bare-bones in that it failed to leverage the rich literature of improvements that has been developed since the technique's inception. Using our modular implementation of MC-AIXI-CTW as a basis, the next step would be to develop the ideas of Veness and colleagues to their full potential as a solution to the general reinforcement learning problem. 
+MC-AIXI-CTW is more than anything a proof of concept. The agent design may readily be improved by various methods. Our implementation of MCTS has been relatively bare-bones in that it failed to leverage the rich literature of improvements that has been developed since the technique's inception. Applying multithreading is another obvious candidate. As mentioned in the discussion, future work could also look into using Context Tree Switching in place of CTW, which we expect would lead to similar results with less computation time. \\
+
+Using our modular implementation of MC-AIXI-CTW as a basis, the next step would be to develop the ideas of Veness and colleagues to their full potential as a solution to the general reinforcement learning problem.  \\
 
 \printbibliography
 

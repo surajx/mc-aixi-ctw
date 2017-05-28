@@ -32,13 +32,11 @@ class Agent {
   bool isLastUpdateAPercept;
 
   /**
-  * TODO: More Documentation
   * Action sanity check
   */
   bool isActionOk(action_t action) const;
 
   /**
-  * TODO: More Documentation
   * Reward Sanity Check
   */
   bool isRewardOk(reward_t reward) const;

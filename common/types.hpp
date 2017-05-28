@@ -1,5 +1,5 @@
 /****************************************************************************************
-** A collection of types to be used throughout the MC-AIXI-CTW program.
+** All the type definitions that are used throughout the project is captured here
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/

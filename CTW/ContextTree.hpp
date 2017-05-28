@@ -1,8 +1,9 @@
-/****************************************************************************************
-** TODO: Documentation
+/******************************************************************************
+** ContextTree Class contains the various functionality that can be performed
+** by the CTW method.
 **
-** Author: Suraj Narayanan Sasikumar, Baseline code Author
-***************************************************************************************/
+** Author: Suraj Narayanan Sasikumar
+*******************************************************************************/
 
 #ifndef __CONTEXTTREE_HPP__
 #define __CONTEXTTREE_HPP__
