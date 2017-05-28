@@ -1,8 +1,8 @@
-/****************************************************************************************
-** TODO: Documentation
+/******************************************************************************
+** CTNode Class represents a node in the ContextTree for the CTW method.
 **
 ** Author: Suraj Narayanan Sasikumar
-***************************************************************************************/
+*******************************************************************************/
 
 #ifndef __CTNODE_HPP__
 #define __CTNODE_HPP__
@@ -33,38 +33,32 @@ class CTNode {
   static uint_t node_count;
 
   /**
-  * Add child to parent
-  * TODO: More Documentation
+  * Add child node to parent
   */
   void addChild(symbol_t sym, CTNode* child, CTNode* parent);
 
   /**
-  * Number of descendants of a node in the context tree
-  * TODO: More Documentation
+  * Computes the number of descendants of a node in the context tree.
   */
   uint_t descendentsCount();
 
   /**
-  * Compute the logarithm of the KT-estimator update multiplier
-  * TODO: More Documentation
+  * Computes the logarithm of the KT-estimator update multiplier
   */
   double logKTMul(const symbol_t sym);
 
   /**
   * Update the logarithm of the KT-estimator.
-  * TODO: More Documentation
   */
   void updateLogKT(const symbol_t symbol, const int node_action);
 
   /**
   * Update the node after having observed a new symbol.
-  * TODO: More Documentation
   */
   void update(const symbol_t symbol, const int node_action);
 
   /**
   * Update just the leaf node with the observed symbol.
-  * TODO: More Documentation
   */
   void updateLeaf(const symbol_t symbol, const int node_action);
 

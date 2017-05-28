@@ -1,5 +1,5 @@
 /****************************************************************************************
-** TODO: Documentation
+** Containts all the constants that are used in the project.
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/
@@ -9,9 +9,11 @@
 
 #include "types.hpp"
 
+// Placeholder to represent bit symbol
 const symbol_t SYMBOL_0 = false;
 const symbol_t SYMBOL_1 = true;
 
+// Placeholder to represent CTW Node Operation
 const int NODE_REVERT = -1;
 const int NODE_UPDATE = +1;
 

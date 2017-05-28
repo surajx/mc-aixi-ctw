@@ -1,8 +1,9 @@
 /******************************************************************************
-** TODO: Documentation
+** CTNode Class represents a node in the ContextTree for the CTW method.
+** Detailed Documentation of each functionality is given in the header file.
 **
 ** Author: Suraj Narayanan Sasikumar
-******************************************************************************/
+*******************************************************************************/
 
 #include <cmath>
 #include <cassert>
