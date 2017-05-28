@@ -305,14 +305,18 @@ The interaction between the modules is designed in such a way that each componen
 \subsubsection*{Linux/Mac OS}
 Extract the source files into a folder 
 \begin{lstlisting}[style=DOS]
- ~/mc-aixi-ctw 
+ ~/mc-aixi-ctw
 \end{lstlisting}
  and execute in the terminal:
  
 \begin{lstlisting}[style=DOS]
 cd ~/mc-aixi-ctw
 make all
-./bin/aixi -c /conf/coinflip.conf
+./bin/aixi -c conf/coinflip.conf
+\end{lstlisting}
+To print the help message:
+\begin{lstlisting}[style=DOS]
+./bin/aixi -h
 \end{lstlisting}
 
 \subsubsection*{Windows (Cygwin)}
@@ -343,7 +347,7 @@ can be executed to find for more details on how to run the program.
 
 \section{Experimental Results}
 
-Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. The environments Biased Rock-Paper-Scissors and Kuhn-Poker are considered easy. The other environments TicTacToe, Pacman, Extended Tiger are harder to learn. In each experiment in each domain we chose a CTW Depth, a Horizon, an Exploration, and Exploration Decay and a Number of Cycles. For each set of chosen parameters we ran 4 experiments of our agent on the given domain with the given parameters. We indexed each parameter set by experiment ID. \\
+Our objective is to test the agent's learning capability in an environment with no prior knowledge. The learnt policy is evaluated at the end of the training phase. The environments Biased Rock-Paper-Scissors and Kuhn-Poker are considered easy. The other environments TicTacToe, Pacman, Extended Tiger are harder to learn. In each experiment for a given domain, we chose a CTW Depth, a Horizon, an Exploration Rate, and Exploration Decay and a Number of Cycles. Each experiment was ran over 4 seeds. A table is presented for each domain where we indexed each experiment by an experiment ID. \\
 
 The parameters were chosen so that we had a balance between the parameters used in \citep{veness2011monte} and computational efficiency. The exploration and exploration decay were chosen so that after the number of cycles the exploration would be $10^{-5}$. For most environments we fixed the horizon and increased the CTW depth. This was done to see what influence the choice of CTW depth had on the results. \\
 
@@ -372,7 +376,7 @@ BRPS-4        & 256       & 8           & 0.999       & 0.999             & 7   
 E\underline{ }BRPS        & 256       & 8           & 0.999       & 0.999             & 9      & N/A  \\ \hline      
 \end{tabular}  \\
 
- In biased rock-paper-scissors, we achieve optimal performance after the first 3000 training cycles. We expected this for two reasons. The CTW module is learning a $1^{st}$ order Markov process, and the agent simply has to learn the correlation in its opponent’s actions. Moreover, the observation space and action space are relatively small. This allows CTW with shallow depth to model the environment in fewer cycles. Also, due to the small branching factor, MCTS is able to plan ahead more effectively. Therefore, increased CTW depth and longer horizon did not cause significantly faster converge to optimal play. Our agent performed similarly to that of \cite{veness2011monte}, and outperformed the random agent.
+ In biased rock-paper-scissors, we achieve optimal performance after the first 3000 training cycles. We expected this for two reasons. The CTW module is learning a $1^{st}$ order Markov process, and the agent simply has to learn the correlation in its opponent’s actions. Moreover, the observation space and action space are relatively small. This allows CTW with shallow depth to model the environment in fewer cycles. Also, due to the small branching factor, MCTS is able to plan ahead more effectively. Therefore, increased CTW depth and longer horizon did not cause significantly faster convergence to optimal play. Our agent performed similarly to that of \cite{veness2011monte}, and outperformed the random agent.
 
  \begin{figure}[!htb]
  \centering
