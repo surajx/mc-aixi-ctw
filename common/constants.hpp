@@ -1,5 +1,5 @@
 /****************************************************************************************
-** Containts all the contants that are used in the project.
+** Containts all the constants that are used in the project.
 **
 ** Author: Suraj Narayanan Sasikumar
 ***************************************************************************************/
