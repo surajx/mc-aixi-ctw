@@ -9,7 +9,14 @@ make all
 ./bin/aixi -c conf/coinflip.conf
 ```
 
-To print the help message:
+#### Usage:
 ```bash
+./bin/aixi -c domain_config_file [-x cross_domain_name] [-l log_file_prefix]
 ./bin/aixi -h
+-h : Prints the Help Message
+-c <file>: Tells AIXI which domain and configuration to use. (Mandatory)
+-x <file>: Run evaluation with a different domain. (Optional)
+-l <log file prefix>: Give a prefix to the output log file. Useful when running multiple trials. (Optional)
 ```
+
+Available Domains: coin-flip, extended-tiger, tictactoe, biased-rock-paper-scissor, kuhn-poker, pacman.
